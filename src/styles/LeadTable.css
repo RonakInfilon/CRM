@@ -1,0 +1,117 @@
+/* ===== TABLE WRAPPER ===== */
+
+.table-wrapper {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  overflow-x: auto;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== TABLE ===== */
+
+.crm-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.crm-table th,
+.crm-table td {
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.crm-table tr:hover {
+  background: #f9fafb;
+}
+
+/* ===== STATUS BADGES ===== */
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.new {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.contacted {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.qualified {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.lost {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* ===== ACTION MENU ===== */
+
+.action-wrapper {
+  position: relative;
+}
+
+.menu-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 22px;
+  font-weight: bold;
+  padding: 4px 8px;
+}
+
+.menu-btn:hover {
+  background: #f3f4f6;
+  border-radius: 6px;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  width: 120px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+}
+
+.dropdown-menu button {
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: white;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dropdown-menu button:hover {
+  background: #f3f4f6;
+}
+
+/* ===== EMPTY STATE ===== */
+
+.no-data {
+  text-align: center;
+  padding: 30px;
+  color: #6b7280;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  .crm-table {
+    min-width: 700px;
+  }
+}

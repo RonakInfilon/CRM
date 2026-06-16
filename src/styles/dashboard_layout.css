@@ -1,15 +1,40 @@
-.dashboard-layout {
+
+.dashboard-container {
   display: flex;
   min-height: 100vh;
-  background: #f5f7fa;
+  background: #f8fafc;
 }
+
 
 .main-content {
   flex: 1;
-  display: flex;
-  flex-direction: column;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
 }
 
-.page-content {
-  padding: 24px;
+
+.main-content.sidebar-closed {
+  margin-left: 70px;
+}
+
+
+.main-content.sidebar-open {
+  margin-left: 250px;
+}
+
+
+.content {
+  padding: 25px;
+}
+
+
+.dashboard-title {
+  font-size: 42px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.dashboard-subtitle {
+  color: #6b7280;
+  margin-bottom: 30px;
 }

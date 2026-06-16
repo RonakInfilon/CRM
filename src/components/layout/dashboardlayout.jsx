@@ -1,20 +1,50 @@
-import React from "react";
-import Navbar from "./navbar.jsx";
-// import AppsideBar from "../../layout/AppsideBar.js";
+import { useState } from "react";
+import { useNavigate, Outlet } from "react-router-dom";
+import AppsideBar from "../layout/Appsidebar";
+import Navbar from "../layout/navbar";
+import "../../styles/dashboard_layout.css";
 
-const Dashboardlayout = ({ children, logout }) => {
+function DashboardLayout() {
+  const navigate = useNavigate();
+
+  const [SidebarOpen, setSidebarOpen] = useState(true);
+  const [sideBarHover, setsideBarHover] = useState(false);
+
+  const sidebarExpanded = SidebarOpen || sideBarHover;
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!SidebarOpen);
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
+
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="dashboard-container">
+      <AppsideBar
+        isOpen={sidebarExpanded}
+        onMouseEnter={() => setsideBarHover(true)}
+        onMouseLeave={() => setsideBarHover(false)}
+      />
 
-      <div className="flex-1">
-        {/* <Navbar logout={logout} /> */}
-      <h1 style={{fontSize: "30px"}}>NAVBAR TEST</h1>
-        <main className="p-6">
-          {children}
-        </main>
+      <div
+        className={`main-content ${
+          sidebarExpanded ? "sidebar-open" : "sidebar-closed"
+        }`}
+      >
+        <Navbar
+          toggleSidebar={toggleSidebar}
+          logout={logout}
+        />
+
+        <div className="content">
+          <Outlet />
+        </div>
       </div>
     </div>
   );
-};
+}
 
-export default Dashboardlayout;
+export default DashboardLayout;

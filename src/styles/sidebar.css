@@ -51,5 +51,10 @@
 .sidebar li{
   height: 70px;
   display: flex;
+  align-items: center;
+  /* justify-content: space-between; */
+  gap: 50px;
+
+  padding-left: 22px;
   border: solid black 1px;
 }
