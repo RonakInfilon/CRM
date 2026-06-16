@@ -1,0 +1,55 @@
+.dashboard-title {
+  font-size: 42px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.dashboard-subtitle {
+  color: #6b7280;
+  margin-bottom: 30px;
+}
+
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  background: #1e293b;
+  color: white;
+  overflow: hidden;
+  transition: width 0.3s ease;
+}
+
+.main-content {
+  flex: 1;
+}
+
+.sidebar.open{
+  width: 250px;
+}
+.sidebar.closed {
+  width: 70px;
+}
+.main-content {
+  transition: margin-left 0.3s ease;
+  min-height: 100vh;
+  margin-left: 70px;
+}
+
+.main-content.sidebar-open {
+  margin-left: 250px;
+}
+
+.main-content.sidebar-closed {
+  margin-left: 70px;
+}
+.sidebar li{
+  height: 70px;
+  display: flex;
+  border: solid black 1px;
+}
