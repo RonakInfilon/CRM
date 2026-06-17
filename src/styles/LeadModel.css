@@ -1,18 +1,19 @@
-/* ===== OVERLAY ===== */
+/* Ensure padding doesn't break element widths globally within the modal */
+.modal-overlay,
+.modal,
+.modal * {
+  box-sizing: border-box;
+}
 
 .modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
-
   display: flex;
   justify-content: center;
   align-items: center;
-
   z-index: 1000;
 }
-
-/* ===== MODAL ===== */
 
 .modal {
   background: white;
@@ -21,66 +22,91 @@
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  max-height: 90vh; /* Keeps the modal from breaking on short screens */
+  overflow-y: auto; /* Adds a scrollbar if content is too long */
 }
 
 .modal h2 {
+  margin-top: 0;
   margin-bottom: 20px;
+  font-size: 1.5rem;
+  color: #111827;
 }
-
-/* ===== FORM ===== */
 
 .modal form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px; /* Increased slightly for a cleaner look */
+}
+
+/* Added structure to cleanly handle labels and input groupings */
+.modal form label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 6px;
 }
 
 .modal input,
 .modal textarea,
 .modal select {
   width: 100%;
-  padding: 12px;
-
+  padding: 10px 12px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
-
   font-size: 14px;
   outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .modal input:focus,
 .modal textarea:focus,
 .modal select:focus {
   border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); /* Soft glowing ring effect */
 }
 
 .modal textarea {
   resize: vertical;
-  min-height: 100px;
+  min-height: 80px;
 }
-
-/* ===== BUTTONS ===== */
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 8px;
+  border-top: 1px solid #f3f4f6; /* Subtle divider above buttons */
+  padding-top: 16px;
 }
 
 .modal-actions button {
-  padding: 10px 18px;
+  padding: 10px 20px;
   border: none;
   border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.modal-actions button:first-child {
+/* Primary/Save Button */
+.modal-actions button[type="submit"] {
   background: #2563eb;
   color: white;
 }
 
-.modal-actions button:last-child {
+.modal-actions button[type="submit"]:hover {
+  background: #1d4ed8;
+}
+
+/* Cancel Button */
+.modal-actions button[type="button"] {
   background: #e5e7eb;
+  color: #374151;
+}
+
+.modal-actions button[type="button"]:hover {
+  background: #d1d5db;
 }

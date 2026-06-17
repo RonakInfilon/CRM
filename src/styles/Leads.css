@@ -17,7 +17,59 @@
   cursor: pointer;
   font-weight: 600;
 }
+.header-dropdown {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  font-size: 14px;
+  color: #374151;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
 
+.header-dropdown:focus {
+  border-color: #2563eb;
+}
 .page-header button:hover {
   opacity: 0.9;
+}
+
+.search-input {
+  display: flex;
+  gap: 10px;
+  position: relative;
+  width: 300px;
+}
+
+.search-input i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.search-input input {
+  width: 300px;
+  /* width: 100%; */
+  padding: 10px 14px 10px 38px; /* space for icon */
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+.search-input input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.search-input input::placeholder {
+  color: #9ca3af;
 }

@@ -38,7 +38,10 @@ function AppsideBar({ isOpen, onMouseEnter,
         </li>
         <li>
           <span><GridIcon /></span>
-          {isOpen && <span>Customer</span>}
+          {isOpen && <span>Contacts</span>}
+        </li>
+        <li><GridIcon/>
+          {isOpen && <span>Companies</span>}
         </li>
       </ul>
     </div>

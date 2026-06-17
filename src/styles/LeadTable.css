@@ -1,117 +1,157 @@
-/* ===== TABLE WRAPPER ===== */
-
 .table-wrapper {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  max-height: 500px;
+
   overflow-x: auto;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  overflow-y: hidden;
+
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-/* ===== TABLE ===== */
-
 .crm-table {
-  width: 100%;
+  width: max-content;
+  min-width: 1200px;
+  height: 100%;
+  table-layout: auto; 
   border-collapse: collapse;
 }
 
 .crm-table th,
 .crm-table td {
-  padding: 14px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
+  padding: 14px 20px;
+  white-space: nowrap;
+  min-width: 150px;
 }
 
-.crm-table tr:hover {
-  background: #f9fafb;
+.crm-table tbody tr {
+  transition: all 0.2s ease;
 }
 
-/* ===== STATUS BADGES ===== */
+.crm-table tbody tr:hover {
+  background: #f8fafc;
+}
 
-.status-badge {
-  padding: 6px 12px;
-  border-radius: 20px;
+.status-badge-container {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.status-select-dropdown {
+  background: transparent;
+  border: none;
   font-size: 13px;
   font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  padding-right: 4px;
 }
 
-.new {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
+.status-badge-container.new { background-color: #eff6ff; color: #2563eb; }
+.status-badge-container.contacted { background-color: #fef3c7; color: #d97706; }
+.status-badge-container.qualified { background-color: #ecfdf5; color: #059669; }
+.status-badge-container.lost { background-color: #fef2f2; color: #dc2626; }
 
-.contacted {
-  background: #fef3c7;
-  color: #b45309;
-}
-
-.qualified {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.lost {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-/* ===== ACTION MENU ===== */
-
+/* Action Column */
 .action-wrapper {
   position: relative;
+  display: inline-block;
 }
 
 .menu-btn {
+  width: 36px;
+  height: 36px;
   border: none;
   background: transparent;
+  border-radius: 50%;
   cursor: pointer;
-  font-size: 22px;
-  font-weight: bold;
-  padding: 4px 8px;
+  font-size: 20px;
+  transition: all 0.2s ease;
 }
 
 .menu-btn:hover {
-  background: #f3f4f6;
-  border-radius: 6px;
+  background: #e2e8f0;
 }
 
 .dropdown-menu {
   position: absolute;
-  right: 0;
-  top: 100%;
-  width: 120px;
+  top: -12%;
+  left: 100%;
+
+  width: 80px;
+
+  display: flex;
+  flex-direction: column;
+
   background: white;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
-  z-index: 100;
+  overflow: hidden;
+  z-index: 9999;
 }
 
 .dropdown-menu button {
+  display: block;
   width: 100%;
-  padding: 10px 14px;
-  border: none;
-  background: white;
-  cursor: pointer;
-  text-align: left;
+  box-sizing: border-box;
 }
 
 .dropdown-menu button:hover {
-  background: #f3f4f6;
+  background: #f8fafc;
 }
 
-/* ===== EMPTY STATE ===== */
+.dropdown-menu button:last-child {
+  color: #dc2626;
+}
 
 .no-data {
   text-align: center;
-  padding: 30px;
-  color: #6b7280;
+  padding: 40px;
+  color: #94a3b8;
 }
 
-/* ===== RESPONSIVE ===== */
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 @media (max-width: 768px) {
   .crm-table {
     min-width: 700px;
   }
+}
+
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
 }

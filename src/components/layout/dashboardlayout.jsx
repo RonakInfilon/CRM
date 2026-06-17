@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { useNavigate, Outlet } from "react-router-dom";
+import { useNavigate, Outlet, useParams, useLocation } from "react-router-dom";
 import AppsideBar from "../layout/Appsidebar";
 import Navbar from "../layout/navbar";
 import "../../styles/dashboard_layout.css";
 
 function DashboardLayout() {
   const navigate = useNavigate();
-
+  const location=useLocation();
+  const pathSegment=location.pathname.split("/").filter(Boolean);
+  const name = pathSegment[pathSegment.length - 1] || "dashboard";
   const [SidebarOpen, setSidebarOpen] = useState(true);
   const [sideBarHover, setsideBarHover] = useState(false);
 
@@ -20,6 +22,8 @@ function DashboardLayout() {
     localStorage.removeItem("token");
     navigate("/");
   };
+ 
+
 
   return (
     <div className="dashboard-container">
@@ -37,6 +41,7 @@ function DashboardLayout() {
         <Navbar
           toggleSidebar={toggleSidebar}
           logout={logout}
+          name={name}
         />
 
         <div className="content">
