@@ -1,60 +1,108 @@
-.dashboard-title {
-  font-size: 42px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.dashboard-subtitle {
-  color: #6b7280;
-  margin-bottom: 30px;
-}
-
-.dashboard-container {
-  display: flex;
-  min-height: 100vh;
-}
-
+/* Sidebar Core Layout Container */
 .sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
   height: 100vh;
-  background: #1e293b;
-  color: white;
-  overflow: hidden;
-  transition: width 0.3s ease;
+  background-color: #111827; /* Deep Charcoal/Black matching the top banner in your image */
+  color: #9ca3af; /* Soft Muted Slate text */
+  display: flex;
+  flex-direction: column;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-x: hidden;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
 }
 
-.main-content {
-  flex: 1;
+/* Expansion Dimensions */
+.sidebar.open {
+  width: 240px;
 }
 
-.sidebar.open{
-  width: 250px;
-}
 .sidebar.closed {
-  width: 70px;
-}
-.main-content {
-  transition: margin-left 0.3s ease;
-  min-height: 100vh;
-  margin-left: 70px;
+  width: 64px;
 }
 
-.main-content.sidebar-open {
-  margin-left: 250px;
+/* Navigation List Wrapper */
+.sidebar ul {
+  list-style: none;
+  padding: 12px 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.main-content.sidebar-closed {
-  margin-left: 70px;
-}
-.sidebar li{
-  height: 70px;
+/* Base Style for Every Navigation Entry */
+.sidebar li {
   display: flex;
   align-items: center;
-  /* justify-content: space-between; */
-  gap: 50px;
+  padding: 12px 20px;
+  gap: 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  user-select: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  border-left: 3px solid transparent;
+}
 
-  padding-left: 22px;
-  border: solid black 1px;
+/* Hover State Interactions */
+.sidebar li:hover {
+  background-color: #1f2937; /* Slightly lighter gray highlight */
+  color: #ffffff; /* Bright crisp text */
+}
+
+/* Dedicated Treatment for the First Brand/Header Item ("CRM") */
+.sidebar ul li:first-child {
+  padding-bottom: 15px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #1f2937;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  pointer-events: none; /* Keeps brand static */
+}
+
+/* Targets Icon Sizing and Color Tints uniformly */
+.sidebar li span:first-child,
+.sidebar li svg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: #9ca3af;
+  transition: color 0.2s ease;
+}
+
+.sidebar li:hover svg {
+  color: #a855f7; /* Gives your GridIcon a subtle purple glow on hover matching Frappe's motif */
+}
+
+/* Active State Template: Apply this if you want to visually track the active route */
+.sidebar li.active {
+  background-color: #1f2937;
+  color: #ffffff;
+  border-left-color: #a855f7; /* Distinct vertical accent strip */
+}
+
+.sidebar li.active svg {
+  color: #a855f7;
+}
+
+/* Text Fade-In Transition when matching expansion hooks */
+.sidebar span {
+  animation: fadeInSidebarText 0.2s ease-out forwards;
+}
+
+@keyframes fadeInSidebarText {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }

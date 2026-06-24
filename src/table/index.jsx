@@ -26,19 +26,19 @@ const TableBody=({children,className})=>{
 }
 
 
-const TableRow=({children,className})=>{
-  return(
-    <tr className={className}>
+const TableRow = ({ children, className, ...props }) => {
+  return (
+    <tr className={className} {...props}>
       {children}
     </tr>
   )
 }
 
 
-const TableCell=({children,className,isHeader=false})=>{
-  const Celltag=isHeader?"th":"td";
-  return(
-    <Celltag className={className}>
+const TableCell = ({ children, className, isHeader = false, ...props }) => {
+  const Celltag = isHeader ? "th" : "td";
+  return (
+    <Celltag className={className} {...props}>
       {children}
     </Celltag>
   );

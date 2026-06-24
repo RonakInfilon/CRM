@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Outlet, useParams, useLocation } from "react-router-dom";
-import AppsideBar from "../layout/Appsidebar";
-import Navbar from "../layout/navbar";
-import "../../styles/dashboard_layout.css";
+import AppsideBar from "../components/Appsidebar";
+import Navbar from "./navbar";
+import "../styles/dashboard_layout.css";
 
 function DashboardLayout() {
   const navigate = useNavigate();

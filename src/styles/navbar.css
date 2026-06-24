@@ -12,7 +12,13 @@
   
   height: 64px;
   padding: 0 24px;
-  width: 100%;
+  
+  /* --- COUPLING FIX: Calculates structural widths cleanly --- */
+  width: calc(100% - var(--current-sidebar-width, 64px));
+  left: var(--current-sidebar-width, 64px);
+  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  /* ----------------------------------------------------------- */
   
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
@@ -21,7 +27,7 @@
   border-bottom: 1px solid rgba(229, 231, 235, 0.7);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
   
-  position: sticky;
+  position: fixed; /* Keeps header pinned smoothly to top right */
   top: 0;
   z-index: 999;
 }

@@ -1,0 +1,213 @@
+/* Dark Theme Variables targeting image styling colors */
+.crm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.crm-modal-container {
+  width: 90vw;
+  max-width: 1100px;
+  height: 85vh;
+  background-color: #111111; /* Sleek true dark card */
+  color: #e2e8f0;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #222222;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+/* TOP METADATA ROW HEADER */
+.crm-modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #222222;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #161616;
+}
+
+.header-breadcrumbs {
+  color: #888888;
+  font-size: 14px;
+}
+
+.highlight-title {
+  color: #ffffff;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.close-modal-btn {
+  background: none;
+  border: none;
+  color: #888888;
+  font-size: 18px;
+  cursor: pointer;
+}
+.close-modal-btn:hover { color: #ffffff; }
+
+/* PANELS ARCHITECTURE */
+.crm-modal-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* LEFT HUB */
+.crm-modal-left-panel {
+  flex: 7;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #222222;
+  background-color: #111111;
+}
+
+.crm-tabs-bar {
+  display: flex;
+  background-color: #161616;
+  padding: 0 16px;
+  border-bottom: 1px solid #222222;
+}
+
+.crm-tab-btn {
+  background: none;
+  border: none;
+  color: #888888;
+  padding: 14px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.crm-tab-btn:hover { color: #ffffff; }
+.crm-tab-btn.active {
+  color: #ffffff;
+  border-bottom-color: #2563eb;
+}
+
+.crm-tab-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* INTERACTION FORMS & FEEDS */
+.quick-comment-box {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.quick-comment-box input {
+  flex: 1;
+  background-color: #1a1a1a;
+  border: 1px solid #333333;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: white;
+  outline: none;
+}
+
+.quick-comment-box button {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+.activity-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feed-item {
+  display: flex;
+  gap: 14px;
+  background-color: #161616;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #222222;
+}
+
+.feed-icon { font-size: 16px; }
+.feed-text { margin: 0 0 4px 0; font-size: 14px; }
+.feed-time { font-size: 12px; color: #666666; }
+
+/* RIGHT PANEL FIELDS ACCORDION SIDEBAR */
+.crm-modal-right-sidebar {
+  flex: 3;
+  background-color: #161616;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 30px;
+}
+
+.avatar-circle {
+  width: 44px;
+  height: 44px;
+  background-color: #2e2e2e;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: #3b82f6;
+}
+
+.section-divider-title {
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #666666;
+  margin-bottom: 16px;
+  letter-spacing: 0.5px;
+}
+
+.detail-meta-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.meta-label { color: #888888; }
+.meta-value { color: #ffffff; font-weight: 500; }
+.financial-highlight { color: #10b981; font-weight: bold; }
+.identifier-text { font-family: monospace; color: #3b82f6; font-size: 12px; }
+
+/* REUSABLE PILL BADGES DYNAMIC STATUSES */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.status-new, .status-opportunity { background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+.status-contacted, .status-proposal-sent { background-color: rgba(168, 85, 247, 0.15); color: #a855f7; }
+.status-negotiation { background-color: rgba(249, 115, 22, 0.15); color: #f97316; }
+.status-qualified, .status-won { background-color: rgba(16, 185, 129, 0.15); color: #10b981; }
+.status-lost { background-color: rgba(100, 116, 139, 0.15); color: #64748b; }
+.empty-tab-placeholder { color: #555555; text-align: center; margin-top: 40px; }

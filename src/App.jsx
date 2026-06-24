@@ -5,7 +5,10 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtecttedRoute";
 import Leads from "./pages/Leads";
-import DashboardLayout from "./components/layout/DashboardLayout";
+import DashboardLayout from "./components/DashboardLayout";
+import Organization from "./pages/Organization";
+import Contacts from "./pages/Contacts";
+import Pipeline from "./pages/Pipeline";
 // import LeadList from "./pages/leads/LeadList";
 function App() {
   return (
@@ -31,6 +34,10 @@ function App() {
         >
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/leads" element={<Leads />} />
+          <Route path="/organization" element={<Organization/>}/>
+          <Route path="/contacts" element={<Contacts/>}/>
+          <Route path="/pipeline" element={<Pipeline/>}/>
+
         </Route>
       </Routes>
 

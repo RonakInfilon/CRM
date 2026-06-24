@@ -1,112 +1,160 @@
-/* Ensure padding doesn't break element widths globally within the modal */
-.modal-overlay,
-.modal,
-.modal * {
-  box-sizing: border-box;
-}
-
 .modal-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 
-.modal {
-  background: white;
-  width: 500px;
-  max-width: 95%;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  max-height: 90vh; /* Keeps the modal from breaking on short screens */
-  overflow-y: auto; /* Adds a scrollbar if content is too long */
-}
-
-.modal h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  font-size: 1.5rem;
-  color: #111827;
-}
-
-.modal form {
+.modal-container {
+  background: #ffffff;
+  width: 100%;
+  /* max-width: 600px; */
+  /* max-height: 85vh;
+   */
+   height: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  gap: 16px; /* Increased slightly for a cleaner look */
+  overflow: hidden;
 }
 
-/* Added structure to cleanly handle labels and input groupings */
-.modal form label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
+.modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1f2937;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #9ca3af;
+}
+
+.close-btn:hover {
   color: #4b5563;
-  margin-bottom: 6px;
 }
 
-.modal input,
-.modal textarea,
-.modal select {
-  width: 100%;
-  padding: 10px 12px;
+.modal-form {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 0.95rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 8px 12px;
   border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: #111827;
+  background-color: #f9fafb;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s ease;
 }
 
-.modal input:focus,
-.modal textarea:focus,
-.modal select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); /* Soft glowing ring effect */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #a855f7; /* Matching Frappe's primary theme tint */
+  background-color: #ffffff;
 }
 
-.modal textarea {
+.form-group textarea {
   resize: vertical;
   min-height: 80px;
+}
+
+.section-divider {
+  border: 0;
+  height: 1px;
+  background: #f3f4f6;
+  margin: 8px 0;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 8px;
-  border-top: 1px solid #f3f4f6; /* Subtle divider above buttons */
+  margin-top: 16px;
   padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
 }
 
-.modal-actions button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+.btn-cancel {
+  padding: 8px 16px;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-/* Primary/Save Button */
-.modal-actions button[type="submit"] {
-  background: #2563eb;
-  color: white;
-}
-
-.modal-actions button[type="submit"]:hover {
-  background: #1d4ed8;
-}
-
-/* Cancel Button */
-.modal-actions button[type="button"] {
-  background: #e5e7eb;
+  font-weight: 500;
   color: #374151;
 }
 
-.modal-actions button[type="button"]:hover {
-  background: #d1d5db;
+.btn-cancel:hover {
+  background-color: #f3f4f6;
+}
+
+.btn-submit {
+  padding: 8px 16px;
+  background-color: #111827; /* Dark button styling matching top navigation blocks */
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.btn-submit:hover {
+  background-color: #1f2937;
 }

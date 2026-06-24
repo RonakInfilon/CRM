@@ -1,157 +1,114 @@
 .table-wrapper {
   width: 100%;
-  max-width: 100%;
-  max-height: 500px;
-
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   overflow-x: auto;
-  overflow-y: hidden;
-
-  background: #fff;
-  border-radius: 16px;
-  padding: 20px;
-  box-sizing: border-box;
+  margin-bottom: 16px;
 }
 
 .crm-table {
-  width: max-content;
-  min-width: 1200px;
-  height: 100%;
-  table-layout: auto; 
+  width: 100%;
   border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+  color: #374151;
 }
 
+/* Header Styles */
 .crm-table th,
 .crm-table td {
-  padding: 14px 20px;
-  white-space: nowrap;
-  min-width: 150px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
 }
 
-.crm-table tbody tr {
-  transition: all 0.2s ease;
-}
-
-.crm-table tbody tr:hover {
-  background: #f8fafc;
-}
-
-.status-badge-container {
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: 6px;
-  font-weight: 500;
-}
-
-.status-select-dropdown {
-  background: transparent;
-  border: none;
-  font-size: 13px;
+.crm-table th {
+  background-color: #f9fafb;
   font-weight: 600;
-  cursor: pointer;
-  outline: none;
-  padding-right: 4px;
+  color: #4b5563;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
 }
 
-.status-badge-container.new { background-color: #eff6ff; color: #2563eb; }
-.status-badge-container.contacted { background-color: #fef3c7; color: #d97706; }
-.status-badge-container.qualified { background-color: #ecfdf5; color: #059669; }
-.status-badge-container.lost { background-color: #fef2f2; color: #dc2626; }
+/* Row Hover Interaction */
+.crm-table tbody tr:hover {
+  background-color: #fcfdfd;
+}
 
-/* Action Column */
+/* Action Dropdown Wrapper Configuration */
 .action-wrapper {
   position: relative;
   display: inline-block;
 }
 
 .menu-btn {
-  width: 36px;
-  height: 36px;
+  background: none;
   border: none;
-  background: transparent;
-  border-radius: 50%;
+  font-size: 1.25rem;
+  color: #9ca3af;
   cursor: pointer;
-  font-size: 20px;
+  padding: 4px 8px;
+  border-radius: 4px;
   transition: all 0.2s ease;
 }
 
 .menu-btn:hover {
-  background: #e2e8f0;
+  color: #1f2937;
+  background-color: #f3f4f6;
 }
 
+/* Dropdown Menu Box Styling */
 .dropdown-menu {
   position: absolute;
-  top: -12%;
-  left: 100%;
-
-  width: 80px;
-
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  min-width: 120px;
   display: flex;
   flex-direction: column;
-
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
   overflow: hidden;
-  z-index: 9999;
+  animation: fadeInDropdown 0.15s ease-out;
 }
 
 .dropdown-menu button {
-  display: block;
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  text-align: left;
+  font-size: 0.875rem;
+  color: #4b5563;
+  cursor: pointer;
   width: 100%;
-  box-sizing: border-box;
+  transition: background-color 0.15s ease;
 }
 
 .dropdown-menu button:hover {
-  background: #f8fafc;
+  background-color: #f3f4f6;
+  color: #111827;
 }
 
 .dropdown-menu button:last-child {
-  color: #dc2626;
+  color: #ef4444; /* Highlights Delete action in red */
 }
 
-.no-data {
-  text-align: center;
-  padding: 40px;
-  color: #94a3b8;
+.dropdown-menu button:last-child:hover {
+  background-color: #fef2f2;
 }
 
-@keyframes dropdownFade {
+/* Animation */
+@keyframes fadeInDropdown {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-4px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-@media (max-width: 768px) {
-  .crm-table {
-    min-width: 700px;
-  }
-}
-
-
-.pagination {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.pagination button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  background: #2563eb;
-  color: white;
-  cursor: pointer;
-}
-
-.pagination button:disabled {
-  background: #cbd5e1;
-  cursor: not-allowed;
 }

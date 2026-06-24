@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import "../../styles/navbar.css";
+import "../styles/navbar.css";
 
 function Navbar({ toggleSidebar, logout,name }) {
   return (

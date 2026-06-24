@@ -1,42 +1,43 @@
-html,
-body,
-#root {
-  margin: 0;
-  padding: 0;
-  overflow-y: hidden;
-}
+/* Core Root Layout Structure */
 .dashboard-container {
   display: flex;
-  min-height: 100vh;
-  overflow-x: hidden;
-  background: #f8fafc;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f9fafb; /* Light neutral gray base styling */
 }
 
-
+/* Main Layout wrapper that holds the Navbar + Outlet content view stack.
+  It moves left or right smoothly using identical cubic transition timing.
+*/
 .main-content {
-  flex: 1;
-  min-height: 100vh;
-  min-width: 0;
-  /* overflow-x:hidden ; */
-    width: calc(100% - 250px);
-  margin-left: 250px;
-  transition: margin-left 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  height: 100vh;
+  overflow-y: auto;
+  transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Content Frame Space Shift Configurations */
+.main-content.sidebar-closed {
+  margin-left: 64px;
+  width: calc(100vw - 64px);
+  --current-sidebar-width: 64px; /* Passes state directly inside your navbar component */
+}
 
+.main-content.sidebar-open {
+  margin-left: 240px; /* Matches Expanded Sidebar layout width rules */
+  width: calc(100vw - 240px);
+  --current-sidebar-width: 240px; /* Passes state directly inside your navbar component */
+}
 
+/* Inner Workspace Pane Container.
+  Adds 64px padding-top to keep your Outlet content from sliding underneath the fixed navbar!
+*/
 .content {
-  padding: 25px;
-}
-
-
-.dashboard-title {
-  font-size: 42px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.dashboard-subtitle {
-  color: #6b7280;
-  margin-bottom: 30px;
+  padding: 24px;
+  margin-top: 64px; 
+  flex-grow: 1;
 }

@@ -1,0 +1,223 @@
+/* ==========================================
+   PIPELINE CONTAINER & WRAPPER
+   ========================================== */
+.pipeline-wrapper {
+  padding: 30px;
+  background-color: #f8fafc; /* Light slate background */
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Header bar containing actions like adding stages */
+.pipeline-actions {
+  margin-bottom: 25px;
+  background: white;
+  padding: 16px 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.pipeline-actions input {
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  width: 280px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.pipeline-actions input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.pipeline-actions button {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.pipeline-actions button:hover {
+  background-color: #1d4ed8;
+}
+
+/* Horizontal scrolling pipeline layout */
+.pipeline-container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 15px;
+  /* Smooth scrolling for horizontal track */
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar styling for the pipeline horizontal row */
+.pipeline-container::-webkit-scrollbar {
+  height: 8px;
+}
+.pipeline-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+.pipeline-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.pipeline-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ==========================================
+   KANBAN COLUMNS
+   ========================================== */
+.pipeline-column {
+  min-width: 300px;
+  max-width: 300px;
+  background-color: #f1f5f9; /* Soft grey-blue column container */
+  border-radius: 10px;
+  padding: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+}
+
+/* Column title and counters header zone */
+.column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.column-header strong {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.item-count {
+  margin-left: 8px;
+  background-color: #e2e8f0;
+  color: #475569;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.delete-stage-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.delete-stage-btn:hover {
+  color: #ef4444;
+  background-color: #fee2e2;
+}
+
+/* Dropzone wrapper area inside a column */
+.column-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 450px;
+  padding-right: 4px;
+}
+
+/* Vertical scroll tracking inside columns */
+.column-body::-webkit-scrollbar {
+  width: 4px;
+}
+.column-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+/* ==========================================
+   DEAL CARDS
+   ========================================== */
+.deal-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  border-left: 4px solid #3b82f6; /* Modern primary indicator border */
+  cursor: grab;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  user-select: none;
+}
+
+/* Changes cursor asset appearance when holding/moving cards around */
+.deal-card:active {
+  cursor: grabbing;
+  transform: scale(1.02);
+  box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.13);
+}
+
+.deal-card h4 {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.4;
+}
+
+.deal-card p {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.deal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #f1f5f9;
+}
+
+.deal-value {
+  font-weight: 700;
+  color: #10b981; /* Success green for finances */
+  font-size: 14px;
+}
+
+.deal-contact {
+  font-size: 11px;
+  color: #64748b;
+  background-color: #f8fafc;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+/* ==========================================
+   ODOO DYNAMIC COLOR PALETTES FOR STAGES
+   ========================================== */
+/* You can map specific accent colors to custom structural board blocks */
+.pipeline-column:nth-child(1) .deal-card { border-left-color: #3b82f6; } /* Opportunity - Blue */
+.pipeline-column:nth-child(2) .deal-card { border-left-color: #a855f7; } /* Proposal Sent - Purple */
+.pipeline-column:nth-child(3) .deal-card { border-left-color: #f97316; } /* Negotiation - Orange */
+.pipeline-column:nth-child(4) .deal-card { border-left-color: #10b981; } /* Won - Emerald Green */
+.pipeline-column:nth-child(5) .deal-card { border-left-color: #64748b; } /* Lost - Slate Grey */

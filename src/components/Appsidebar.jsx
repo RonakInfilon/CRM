@@ -1,7 +1,7 @@
-import "../../styles/sidebar.css";
-import { BoxCubeIcon } from "../../icons";
-import { GridIcon } from "../../icons";
-import API from "../../api.js"
+import "../styles/sidebar.css";
+import { BoxCubeIcon } from "../icons/index.js";
+import { GridIcon } from "../icons/index.js";
+import API from "../api.js"
 import { useNavigate } from "react-router-dom";
 function AppsideBar({ isOpen, onMouseEnter,
   onMouseLeave, }) {
@@ -12,6 +12,16 @@ function AppsideBar({ isOpen, onMouseEnter,
   const handleDashboardClick = () => {
     navigate("/dashboard");
   };
+  const handleOrganizationClick=()=>{
+    navigate("/organization");
+  }
+
+  const handleContactClick=()=>{
+    navigate("/contacts");
+  }
+  const handleOpportunityClick=()=>{
+    navigate("/pipeline");
+  }
   return (
     <div
       className={`sidebar ${isOpen ? "open" : "closed"}`}
@@ -32,15 +42,15 @@ function AppsideBar({ isOpen, onMouseEnter,
           <span><GridIcon /></span> {isOpen && <span>Leads</span>}
         </li>
 
-        <li>
-          <span><GridIcon /></span>{isOpen && <span>Opporunity</span>}
+        <li onClick={handleOpportunityClick} style={{cursor:'pointer'}}>
+          <span><GridIcon /></span>{isOpen && <span>PipeLine</span>}
 
         </li>
-        <li>
+        <li onClick={handleContactClick} style={{cursor:'pointer'}}>
           <span><GridIcon /></span>
           {isOpen && <span>Contacts</span>}
         </li>
-        <li><GridIcon/>
+        <li onClick={handleOrganizationClick} style={{cursor:'pointer'}}><GridIcon/>
           {isOpen && <span>Companies</span>}
         </li>
       </ul>
