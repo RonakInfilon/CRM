@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { createLead, updateLead } from "../services/leadService";
 import "../styles/LeadModel.css";
 
@@ -17,14 +17,10 @@ const initialState = {
 };
 
 function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
-  const [formData, setFormData] = useState(initialState);
-  
-  const isEditMode = !!lead; 
-
-  useEffect(() => {
-    if (isOpen) {
-      if (isEditMode) {
-        setFormData({
+  const isEditMode = !!lead;
+  const [formData, setFormData] = useState(
+    lead
+      ? {
           firstName: lead.FirstName || "",
           lastName: lead.LastName || "",
           salutation: lead.Salutation || "",
@@ -36,12 +32,9 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
           source: lead.Source || "",
           status: lead.Status || "New",
           notes: lead.Notes || "",
-        });
-      } else {
-        setFormData(initialState);
-      }
-    }
-  }, [isOpen, lead, isEditMode]);
+        }
+      : initialState
+  );
 
   const handleChange = (e) => {
     setFormData({
@@ -60,8 +53,8 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
         await createLead(formData);
       }
 
-      onLeadSaved?.(); 
-      onClose?.();     
+      onLeadSaved?.();
+      onClose?.();
     } catch (err) {
       console.error("Failed to save lead:", err);
     }
@@ -74,11 +67,12 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
       <div className="modal-container">
         <div className="modal-header">
           <h2>{isEditMode ? "Edit Lead" : "Add New Lead"}</h2>
-          <button className="close-btn" type="button" onClick={onClose}>&times;</button>
+          <button className="close-btn" type="button" onClick={onClose}>
+            &times;
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
-          
           {/* Section 1: Person Information */}
           <div className="form-section">
             <h3>Person Details</h3>
@@ -95,7 +89,9 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
             </div>
             <div className="form-grid">
               <div className="form-group">
-                <label>First Name <span className="required">*</span></label>
+                <label>
+                  First Name <span className="required">*</span>
+                </label>
                 <input
                   name="firstName"
                   placeholder="First Name"
@@ -190,7 +186,11 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
               </div>
               <div className="form-group">
                 <label>Status</label>
-                <select name="status" value={formData.status} onChange={handleChange}>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                >
                   <option value="New">New</option>
                   <option value="Contacted">Contacted</option>
                   <option value="Qualified">Qualified</option>

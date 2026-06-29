@@ -1,6 +1,4 @@
-import { Aperture } from "lucide-react";
 import API from "../api";
-import { data } from "autoprefixer";
 
 export const getOrganization=(page,limit,status,search,sort)=>{
   let sortField="CreatedAt";

@@ -1,4 +1,4 @@
-import React from 'react';
+import "../styles/Pageheader.css";
 
 const Pageheader = ({
   searchQuery = "",

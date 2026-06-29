@@ -1,0 +1,61 @@
+.activity-container{
+  background: rgb(255, 255, 255);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  border-top: 3px solid #2563eb;
+  margin-top: 20px;
+}
+.activity-title{
+  margin-top: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 20px;
+  border-bottom: 1px dashed #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.activity-pipeline{
+  max-height: 350px;
+  overflow-y: auto;
+  padding-left: 15px;
+  position: relative;
+  border-left: 2px solid #e2e8f0; 
+  margin-left: 10px;
+}
+.activity-event-node {
+  position: relative;
+  margin-bottom: 20px;
+  padding-left: 15px;
+}
+.activity-event-node::before {
+  content: '';
+  position: absolute;
+  left: -22px; 
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  background: #cbd5e1;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+}
+.activity-event-node:first-child::before {
+  background: #2563eb;
+}
+.activity-node-timestamp {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+.activity-node-message {
+  margin: 0;
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.4;
+}
+

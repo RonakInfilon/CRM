@@ -1,4 +1,3 @@
-import React from 'react';
 import "../styles/LeadCard.css";
 
 const LeadCard = ({ lead, onClose }) => {

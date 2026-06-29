@@ -76,7 +76,7 @@ const handleSubmit = async (e) => {
 
         <p>
           Don't have an account?
-          <Link to="/auth/signup">
+          <Link to="/signup">
             Signup
           </Link>
         </p>

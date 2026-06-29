@@ -1,52 +1,109 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import Pageheader from "../components/Pageheader";
 import Pagination from "../components/Pagination";
 import CompanyCard from "../components/CompanyCard";
-// import ActionMenu from "../components/ActionMenu";
 import CompanyModal from "../components/CompanyModal";
-import { getOrganization, updateOrganization, deleteOrganization, createOrganization } from "../services/organizationService";
+import { useRole } from "../context/RoleContext";
+import {
+  getOrganization,
+  updateOrganization,
+  deleteOrganization,
+  createOrganization,
+} from "../services/organizationService";
 import "../styles/Organization.css";
 
+const defaultOrgs = [
+  {
+    org_id: 1,
+    organization_name: "Google",
+    industry: "Technology",
+    website: "google.com",
+    annual_revenue: 250000000000,
+    phone: "+1 (555) 019-2834",
+    city: "Mountain View",
+    country: "USA",
+    billing_address: "1600 Amphitheatre Parkway",
+    isPresent: 1
+  },
+  {
+    org_id: 2,
+    organization_name: "Microsoft",
+    industry: "Technology",
+    website: "microsoft.com",
+    annual_revenue: 198000000000,
+    phone: "+1 (555) 043-9821",
+    city: "Redmond",
+    country: "USA",
+    billing_address: "One Microsoft Way",
+    isPresent: 1
+  },
+  {
+    org_id: 3,
+    organization_name: "Apple",
+    industry: "Technology",
+    website: "apple.com",
+    annual_revenue: 394000000000,
+    phone: "+1 (555) 098-7654",
+    city: "Cupertino",
+    country: "USA",
+    billing_address: "One Apple Park Way",
+    isPresent: 1
+  },
+  {
+    org_id: 4,
+    organization_name: "Amazon",
+    industry: "E-Commerce",
+    website: "amazon.com",
+    annual_revenue: 514000000000,
+    phone: "+1 (555) 012-3456",
+    city: "Seattle",
+    country: "USA",
+    billing_address: "410 Terry Ave N",
+    isPresent: 1
+  }
+];
+
 const Organization = () => {
-  //its for organization container
-  const [searchQuery, setSearchQuery] = useState(""); //store whetever user type in search box
-  const [debounceSearch, setDeBounceSeach] = useState(""); // for debouncing
+  const location = useLocation();
+  const { canDelete } = useRole();
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debounceSearch, setDeBounceSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [organization, setOrganization] = useState([]); //organization list 
-  const [showAddModal, setShowAddModal] = useState(false);
-
-
-  //control modal status
-  const [modalOpen, setModalOpen] = useState(false); //control modal visibility
-  const [modalMode, setModalMode] = useState("view"); //for view of edit
-  const [selectedCompany, setSelectedCompany] = useState(null);//stored clicked company
-  //its for pagination
+  const [organization, setOrganization] = useState([]);
+  
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("view");
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const rowsPerPage = 4;
 
-  //for deboucning
+  // Initialize search query from URL parameter if available
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDeBounceSeach(searchQuery);
-    }, 500);
-    return () => clearTimeout(timer)
-  }, [searchQuery])
+    const params = new URLSearchParams(location.search);
+    const searchParam = params.get("search");
+    if (searchParam) {
+      setSearchQuery(searchParam);
+      setDeBounceSearch(searchParam);
+      setCurrentPage(1);
+    }
+  }, [location.search]);
 
-  //reset pagination
+  // Debouncing search query (only if not already set by URL)
   useEffect(() => {
-    setCurrentPage(1);
-  }, [debounceSearch, statusFilter]);
+    if (!new URLSearchParams(location.search).get("search")) {
+      const timer = setTimeout(() => {
+        setDeBounceSearch(searchQuery);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [searchQuery, location.search]);
 
-  useEffect(() => {
-    fetchOrganization();
-  }, [currentPage, debounceSearch, statusFilter]);
-
-
-
-//fetch organization function
-  const fetchOrganization = async () => {
+  // Fetch organizations from API, fallback to local storage
+  const fetchOrganization = useCallback(async () => {
     try {
       const response = await getOrganization(
         currentPage,
@@ -56,26 +113,75 @@ const Organization = () => {
       );
 
       console.log("API Response:", response.data);
-
-      setOrganization(
-        response.data?.data?.organizations || []
-      );
-
+      setOrganization(response.data?.data?.organizations || []);
       setTotalPages(
-        Math.ceil(
-          (response.data?.data?.total || 0) / rowsPerPage
-        )
+        Math.ceil((response.data?.data?.total || 0) / rowsPerPage)
       );
     } catch (error) {
-      console.error("Error fetching organizations:", error);
+      console.warn("Backend API failed. Falling back to local storage mock database.", error);
+      
+      let localOrgs = JSON.parse(localStorage.getItem("organizations"));
+      if (!localOrgs) {
+        localOrgs = defaultOrgs;
+        localStorage.setItem("organizations", JSON.stringify(defaultOrgs));
+      }
+
+      let filtered = [...localOrgs];
+      if (debounceSearch) {
+        filtered = filtered.filter(org => 
+          org.organization_name.toLowerCase().includes(debounceSearch.toLowerCase()) ||
+          org.industry.toLowerCase().includes(debounceSearch.toLowerCase())
+        );
+      }
+
+      const total = filtered.length;
+      const startIndex = (currentPage - 1) * rowsPerPage;
+      const paginated = filtered.slice(startIndex, startIndex + rowsPerPage);
+
+      setOrganization(paginated);
+      setTotalPages(Math.ceil(total / rowsPerPage));
     }
+  }, [currentPage, statusFilter, debounceSearch]);
+
+  // Trigger fetch when parameters change
+  useEffect(() => {
+    fetchOrganization();
+  }, [fetchOrganization]);
+
+  // Auto-open modal if search param matches a company name exactly
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const searchParam = params.get("search");
+    if (searchParam && organization.length > 0) {
+      const match = organization.find(
+        (org) => org.organization_name.toLowerCase() === searchParam.toLowerCase()
+      );
+      if (match && !selectedCompany && !modalOpen) {
+        setSelectedCompany(match);
+        setModalMode("view");
+        setModalOpen(true);
+      }
+    }
+  }, [organization, location.search, selectedCompany, modalOpen]);
+
+  const handleSearchQueryChange = (val) => {
+    setSearchQuery(val);
+    setCurrentPage(1);
   };
 
-
+  const handleStatusFilterChange = (val) => {
+    setStatusFilter(val);
+    setCurrentPage(1);
+  };
 
   const handleDeleteorganization = async (id) => {
-    const confirmed = window.confirm("Are you sure you want to delete this organization");
-    if (!confirmed) return
+    if (!canDelete) {
+      alert("Permission Denied: Only Super Admin can delete records.");
+      return;
+    }
+
+    const confirmed = window.confirm("Are you sure you want to delete this organization?");
+    if (!confirmed) return;
     try {
       await deleteOrganization(id);
       setOrganization((prev) => prev.filter((org) => org.org_id !== id));
@@ -85,23 +191,29 @@ const Organization = () => {
         fetchOrganization();
       }
     } catch (error) {
-      console.log("Error deleting organization");
+      console.warn("API Delete failed. Deleting from local storage.", error);
+      let localOrgs = JSON.parse(localStorage.getItem("organizations")) || defaultOrgs;
+      localOrgs = localOrgs.filter((org) => org.org_id !== id);
+      localStorage.setItem("organizations", JSON.stringify(localOrgs));
+      
+      setOrganization((prev) => prev.filter((org) => org.org_id !== id));
+      fetchOrganization();
     }
-  }
-  const editOrganization = async (comapnyData) => {
-    setSelectedCompany(comapnyData);
+  };
+
+  const editOrganization = (companyData) => {
+    setSelectedCompany(companyData);
     setModalMode("edit");
-    setModalOpen(true)
-    console.log("Opening Edit for:", comapnyData);
-  }
+    setModalOpen(true);
+  };
 
   const handleViewClick = (companyData) => {
     setSelectedCompany(companyData);
     setModalMode("view");
     setModalOpen(true);
   };
-  
-    const handleModalSave = async (formData) => {
+
+  const handleModalSave = async (formData) => {
     try {
       if (modalMode === "add") {
         await createOrganization(formData);
@@ -111,27 +223,49 @@ const Organization = () => {
       setModalOpen(false);
       fetchOrganization();
     } catch (error) {
-      console.error(`Failed saving organization in ${modalMode} mode:`, error);
+      console.warn("API Save failed. Saving to local storage.", error);
+      let localOrgs = JSON.parse(localStorage.getItem("organizations")) || defaultOrgs;
+      if (modalMode === "add") {
+        const newOrg = {
+          ...formData,
+          org_id: Date.now(),
+        };
+        localOrgs.unshift(newOrg);
+      } else {
+        localOrgs = localOrgs.map((org) =>
+          org.org_id === formData.org_id ? formData : org
+        );
+      }
+      localStorage.setItem("organizations", JSON.stringify(localOrgs));
+      setModalOpen(false);
+      fetchOrganization();
     }
   };
 
-  const handleSaveChanges = async (updatedData) => {
-    try {
-      await updateOrganization(updatedData.org_id, updatedData);
-      setModalOpen(false);
-      fetchOrganization(); 
-    } catch (error) {
-      console.error("Failed saving organization modifications:", error);
-    }
+  const handleAddClick = () => {
+    setSelectedCompany({
+      organization_name: "",
+      website: "",
+      industry: "",
+      company_size: "",
+      annual_revenue: "",
+      phone: "",
+      city: "",
+      country: "",
+      billing_address: "",
+      isPresent: 1,
+    });
+    setModalMode("add");
+    setModalOpen(true);
   };
-  console.log("search Query", searchQuery)
 
   return (
     <>
       <Pageheader
         searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onAddClick={() => setShowAddModal(true)}
+        onSearchChange={handleSearchQueryChange}
+        
+        onAddClick={handleAddClick}
         placeholder="Search organizations by name..."
         buttonText="+ Add Organization"
       />
@@ -149,9 +283,7 @@ const Organization = () => {
               />
             ))
           ) : (
-            <p className="no-data">
-              No organizations found.
-            </p>
+            <p className="no-data">No organizations found.</p>
           )}
         </div>
 
@@ -160,12 +292,14 @@ const Organization = () => {
           totalPages={totalPages}
           onPageChange={setCurrentPage}
         />
+        
         <CompanyModal
+          key={selectedCompany?.org_id || (modalOpen ? 'new' : 'none')}
           isOpen={modalOpen}
           mode={modalMode}
           company={selectedCompany}
           onClose={() => setModalOpen(false)}
-          onSave={handleSaveChanges}
+          onSave={handleModalSave}
           onDelete={handleDeleteorganization}
         />
       </div>
@@ -174,6 +308,3 @@ const Organization = () => {
 };
 
 export default Organization;
-
-
-

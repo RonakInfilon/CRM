@@ -1,33 +1,31 @@
+import { useState, useRef } from "react";
 import LeadTable from "../components/LeadTable";
 import LeadModal from "../components/LeadModel";
-import "../styles/Leads.css"
-import React, { useState, useEffect, useRef } from "react";
-import { getLeads } from "../services/leadService";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import Pageheader from "../components/Pageheader";
+import "../styles/Leads.css";
+
 function Leads() {
-  const [showAddModal, setShowAddModal] =
-    useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [searchQuery, setSeachQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [sortBy, setSortBy] = useState("CreatedAt");
+  const [sortBy] = useState("CreatedAt");
   const tableRef = useRef();
+
   const handleLeadSaved = () => {
     if (tableRef.current && tableRef.current.refreshTable) {
       tableRef.current.refreshTable();
     }
-  }
+  };
+
   return (
     <>
-
-        <Pageheader 
+      <Pageheader
         searchQuery={searchQuery}
         onSearchChange={setSeachQuery}
         statusFilter={statusFilter}
         onFilterChange={setStatusFilter}
         onAddClick={() => setShowAddModal(true)}
-        placeholder="search Leads by name,company,email..."
+        placeholder="Search leads by name, company, industry..."
         buttonText="+ Add Lead"
       />
       <LeadTable
@@ -37,16 +35,14 @@ function Leads() {
         sortBy={sortBy}
       />
       <LeadModal
+        key={showAddModal ? "add" : "none"}
         isOpen={showAddModal}
         lead={null}
-        onClose={() =>
-          setShowAddModal(false)
-        }
+        onClose={() => setShowAddModal(false)}
         onLeadSaved={handleLeadSaved}
       />
     </>
   );
 }
-
 
 export default Leads;

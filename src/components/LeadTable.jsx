@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle, useMemo } from "react";
+import { useState, forwardRef, useImperativeHandle, useMemo, useEffect, useCallback } from "react";
 import {
   Table,
   TableBody,
@@ -10,8 +10,11 @@ import {
 import LeadModal from "../components/LeadModel.jsx";
 import "../styles/LeadTable.css";
 import Pagination from "./Pagination.jsx";
-import StatusBadge from "./Statusbadges.jsx";
+import StatusBadge from "./StatusBadges.jsx";
 import LeadCard from "./LeadCard.jsx";
+import { getLeads, updateLead, deleteLead } from "../services/leadService.js";
+import { useRole } from "../context/RoleContext.jsx";
+
 const SAMPLE_LEADS = [
   { LeadID: 1, FirstName: "Ronak", LastName: "Rathwa", Salutation: "Mr.", Organization: "Infilon Technology", Website: "https://www.infilon.com", Territory: "Ahmedabad", Industry: "Computer", JobTitle: "Software Engineer", Source: "Website", Status: "New", Notes: "Hello" },
   { LeadID: 2, FirstName: "Anjali", LastName: "Sharma", Salutation: "Ms.", Organization: "Athletex", Website: "https://www.athletex.com", Territory: "Mumbai", Industry: "Apparel", JobTitle: "Procurement Manager", Source: "Cold Call", Status: "Contacted", Notes: "Interested in bulk vendor dashboard tooling." },
@@ -22,22 +25,38 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
   const [allLeads, setAllLeads] = useState(SAMPLE_LEADS);
   const [openMenu, setOpenMenu] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const { canDelete } = useRole();
   
   const [showModal, setShowModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
-  const [activePreviewLead, setActivePreviewLead] = useState(null); // Fixed typo
+  const [activePreviewLead, setActivePreviewLead] = useState(null);
 
   const rowsPerPage = 5;
 
-  // Expose reset capabilities to parent safely if needed
+  const fetchLeads = useCallback(async () => {
+    try {
+      const response = await getLeads(currentPage, rowsPerPage, statusFilter, searchQuery, sortBy);
+      if (response.data?.data?.leads) {
+        setAllLeads(response.data.data.leads);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch leads from API, using local mock data:", err);
+    }
+  }, [currentPage, statusFilter, searchQuery, sortBy]);
+
+  useEffect(() => {
+    fetchLeads();
+  }, [fetchLeads]);
+
+  // Expose reset capabilities to parent safely
   useImperativeHandle(ref, () => ({
     refreshTable() {
       setCurrentPage(1);
+      fetchLeads();
     }
   }));
 
-  // --- DERIVED STATE USING useMemo ---
-  // 1. Filter & Sort the master list
+  // Filter & Sort local fallback state
   const filteredAndSortedLeads = useMemo(() => {
     let result = [...allLeads];
 
@@ -67,33 +86,48 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
     return result;
   }, [allLeads, statusFilter, searchQuery, sortBy]);
 
-  // 2. Compute total pages dynamically
+  // Compute total pages dynamically
   const totalPages = Math.max(Math.ceil(filteredAndSortedLeads.length / rowsPerPage), 1);
 
-  // 3. Slice the current active page chunk
+  // Slice local active page chunk
   const displayedLeads = useMemo(() => {
-    // Safety check if page ends up out of bounds after filtering
     const verifiedPage = currentPage > totalPages ? 1 : currentPage; 
     const startIndex = (verifiedPage - 1) * rowsPerPage;
     return filteredAndSortedLeads.slice(startIndex, startIndex + rowsPerPage);
   }, [filteredAndSortedLeads, currentPage, totalPages]);
 
-
-  // --- HANDLERS ---
-  const handleStatusChange = (lead, newStatus) => {
+  const handleStatusChange = async (lead, newStatus) => {
     setAllLeads(prev =>
       prev.map(item =>
         item.LeadID === lead.LeadID ? { ...item, Status: newStatus } : item
       )
     );
+
+    try {
+      await updateLead(lead.LeadID, { ...lead, status: newStatus });
+    } catch (err) {
+      console.warn("Failed to update status on server:", err);
+    }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
+    if (!canDelete) {
+      alert("Permission Denied: Only Super Admin can delete records.");
+      return;
+    }
+
     const confirmed = window.confirm("Delete this lead?");
     if (!confirmed) return;
 
-    setAllLeads(prev => prev.filter(lead => lead.LeadID !== id));
-    setOpenMenu(null);
+    try {
+      await deleteLead(id);
+      setAllLeads(prev => prev.filter(lead => lead.LeadID !== id));
+      setOpenMenu(null);
+    } catch (err) {
+      console.warn("Failed to delete lead on server, deleting locally:", err);
+      setAllLeads(prev => prev.filter(lead => lead.LeadID !== id));
+      setOpenMenu(null);
+    }
   };
 
   const handleEditClick = (lead) => {
@@ -137,7 +171,6 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
                   style={{ cursor: "pointer" }}
                 >
                   {headers.map((header) => (
-                    /* FIXED: stopPropagation on the Status Cell to prevent opening drawer */
                     <TableCell 
                       key={header} 
                       onClick={(e) => header === "Status" && e.stopPropagation()}
@@ -165,7 +198,7 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
                       {openMenu === lead.LeadID && (
                         <div className="dropdown-menu">
                           <button onClick={() => handleEditClick(lead)}>Edit</button>
-                          <button onClick={() => handleDelete(lead.LeadID)}>Delete</button>
+                          {canDelete && <button onClick={() => handleDelete(lead.LeadID)}>Delete</button>}
                         </div>
                       )}
                     </div>
@@ -178,12 +211,11 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
       </div>
 
       <LeadModal
+        key={selectedLead?.LeadID || (showModal ? "new" : "none")}
         isOpen={showModal}
         lead={selectedLead}
         onClose={() => setShowModal(false)}
-        onLeadSaved={() => {
-          // Add your update logic here if required
-        }}
+        onLeadSaved={fetchLeads}
       />
 
       <Pagination
@@ -200,5 +232,7 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
     </>
   );
 });
+
+LeadTable.displayName = "LeadTable";
 
 export default LeadTable;

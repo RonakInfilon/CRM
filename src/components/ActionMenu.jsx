@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react'
-import "../styles/ActionMenu.css"
-const ActionMenu = ({ onEditService, onDeleteService,data,dataId }) => {
+import { useState, useEffect, useRef } from "react";
+import { useRole } from "../context/RoleContext";
+import "../styles/ActionMenu.css";
+
+const ActionMenu = ({ onEdit, onDelete, data, dataId }) => {
   const [openMenu, setOpenMenu] = useState(false);
+  const { canDelete } = useRole();
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -11,11 +14,15 @@ const ActionMenu = ({ onEditService, onDeleteService,data,dataId }) => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
   return (
-    <div className="action-wrapper" ref={menuRef} style={{ position: "relative", display: "inline-block" }}>
+    <div
+      className="action-wrapper"
+      ref={menuRef}
+      style={{ position: "relative", display: "inline-block" }}
+    >
       <button
         className="menu-btn"
         onClick={() => setOpenMenu(!openMenu)}
@@ -26,12 +33,30 @@ const ActionMenu = ({ onEditService, onDeleteService,data,dataId }) => {
 
       {openMenu && (
         <div className="dropdown-menu">
-          <button onClick={() => { onEditService(data); setOpenMenu(false); }}>Edit</button>
-          <button onClick={() => { onDeleteService(dataId); setOpenMenu(false); }}>Delete</button>
+          <button
+            onClick={() => {
+              onEdit(data);
+              setOpenMenu(false);
+            }}
+          >
+            Edit
+          </button>
+          
+          {canDelete && (
+            <button
+              className="delete-action-btn"
+              onClick={() => {
+                onDelete(dataId);
+                setOpenMenu(false);
+              }}
+            >
+              Delete
+            </button>
+          )}
         </div>
       )}
     </div>
   );
-}
+};
 
-export default ActionMenu
+export default ActionMenu;

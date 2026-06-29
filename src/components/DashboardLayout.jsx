@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Outlet, useParams, useLocation } from "react-router-dom";
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import AppsideBar from "../components/Appsidebar";
 import Navbar from "./navbar";
 import "../styles/dashboard_layout.css";

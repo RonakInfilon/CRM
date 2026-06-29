@@ -1,4 +1,3 @@
-import React from "react";
 
 const StatusBadge = ({ value, onChange }) => {
   const getStatusClass = (status) => {
