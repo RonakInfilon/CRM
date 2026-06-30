@@ -1,10 +1,13 @@
-const express= require("express");
+const express = require("express");
+const router = express.Router();
+const { login, signup, createUserByAdmin, getAllUsers } = require("../controllers/auth.controller.js");
 
-const router=express.Router();
+const authenticateToken = require("../middleware/auth.middleware");
+const { canCreateUser } = require("../middleware/role.middleware");
 
-const {login,signup}=require("../controllers/auth.controller.js")
+router.post("/signup", signup);
+router.post("/login", login);
+router.post("/create-user", authenticateToken, canCreateUser, createUserByAdmin);
+router.get("/users", authenticateToken, getAllUsers);
 
-router.post("/signup",signup);
-router.post("/login",login);
-
-module.exports=router;
+module.exports = router;

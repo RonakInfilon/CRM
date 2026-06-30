@@ -86,7 +86,7 @@ if (name) {
         CreatedAt,
         UpdatedAt
      FROM Leads
-     WHERE ${where}
+     WHERE isPresent=true AND  (${where})
      ORDER BY ${orderBy} ${direction}
      LIMIT ? OFFSET ?`,
     [...params, parseInt(limit), offset],
@@ -122,9 +122,10 @@ const createLead = async (lead) => {
       Source,
       Status,
       AssignedTo,
-      Notes
+      Notes,
+      isPresent
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?,true)`,
     [
       name,
       email || null,
@@ -141,7 +142,7 @@ const createLead = async (lead) => {
 };
 
 const getLeapoolyId = async (id) => {
-  const [rows] = await pool.query("SELECT * FROM Leads WHERE LeadID = ?", [id]);
+  const [rows] = await pool.query("SELECT * FROM Leads WHERE isPresent=true AND LeadID = ? ", [id]);
 
   return rows.length ? rows[0] : null;
 };
@@ -165,7 +166,7 @@ const updateLead = async (id, lead) => {
   );
 };
 const deleteLead = async (id) => {
-  await pool.query("DELETE FROM Leads WHERE LeadID = ?", [id]);
+await pool.query("UPDATE Leads SET isPresent = false WHERE LeadID = ?", [id]);
 };
 
 module.exports = {
