@@ -13,18 +13,18 @@
   height: 64px;
   padding: 0 24px;
   
-  /* --- COUPLING FIX: Calculates structural widths cleanly --- */
+
   width: calc(100% - var(--current-sidebar-width, 64px));
   left: var(--current-sidebar-width, 64px);
   transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
               width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   /* ----------------------------------------------------------- */
   
-  background: rgba(255, 255, 255, 0.85);
+  background: #FFFFFF;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   
-  border-bottom: 1px solid rgba(229, 231, 235, 0.7);
+  border-bottom: 1px solid #E5E7EB;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
   
   position: fixed; /* Keeps header pinned smoothly to top right */
@@ -53,10 +53,10 @@
 }
 
 .sidebar-toggle-btn {
-  background: transparent;
-  border: none;
+  background:#111827;
+  border-left-color: #8B5CF6;
   font-size: 22px;
-  color: #4b5563; 
+  color: #FFFFFF; 
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -69,7 +69,7 @@
 
 .sidebar-toggle-btn:hover {
   background: #f3f4f6;
-  color: #1d4ed8; 
+  color: #ffffff; 
 }
 
 .sidebar-toggle-btn:active {
@@ -83,14 +83,12 @@
 }
 
 .role-label {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 13px;
   font-weight: 600;
   color: #4b5563;
 }
 
 .role-select {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid #d1d5db;
@@ -110,7 +108,7 @@
 }
 
 .role-select:focus {
-  border-color: #4f46e5;
+  border-color: #111827;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
@@ -138,21 +136,4 @@
 
 .logout-btn:active {
   transform: scale(0.98);
-}
-
-@media (prefers-color-scheme: dark) {
-  body.dark-mode .navbar {
-    background: rgba(17, 24, 39, 0.85);
-    border-bottom: 1px solid rgba(55, 65, 81, 0.7);
-  }
-  body.dark-mode .navbar h2 {
-    color: #f9fafb;
-  }
-  body.dark-mode .navbar button:first-of-type {
-    color: #9ca3af;
-  }
-  body.dark-mode .navbar button:first-of-type:hover {
-    background: #1f2937;
-    color: #3b82f6;
-  }
 }

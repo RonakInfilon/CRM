@@ -13,6 +13,8 @@ import Notes from "./pages/Activity";
 import ActivityLog from "./components/ActivityLog";
 import { RoleProvider } from "./context/RoleContext";
 import RoleGuard from "./components/RoleGuard";
+import Permission from "./pages/Permission";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -65,6 +67,15 @@ function App() {
                 </RoleGuard>
               }
             />
+            <Route
+              path="/permission"
+              element={
+                <RoleGuard>
+                  <Permission />
+                </RoleGuard>
+              }
+            />
+            <Route path="/profile" element={<Profile />} />
 
           </Route>
         </Routes>

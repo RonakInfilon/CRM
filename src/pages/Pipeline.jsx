@@ -2,7 +2,7 @@ import { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import "../styles/PipeLine.css";
 import DealDetailView from "../components/DealDetailView";
-
+import Pageheader from "../components/Pageheader";
 // Initial stages
 const initialStages = [
   { id: "stg_opportunity", name: "Opportunity" },
@@ -47,19 +47,25 @@ const Pipeline = () => {
   const [selectedDealId, setSelectedDealId] = useState(null);
 
   // Add stage
-  const handleAddStage = (e) => {
+const handleAddStage = (e) => {
     e.preventDefault();
 
-    if (!newStageName.trim()) return;
+    console.log("Button clicked");
+    console.log("Stage:", newStageName);
+
+    if (!newStageName.trim()) {
+        console.log("Empty name");
+        return;
+    }
 
     const newStage = {
-      id: `stg_${Date.now()}`,
-      name: newStageName.trim()
+        id: `stg_${Date.now()}`,
+        name: newStageName.trim(),
     };
 
-    setStages([...stages, newStage]);
+    setStages((prev) => [...prev, newStage]);
     setNewStageName("");
-  };
+};
 
   // Delete stage
   const handleDeleteStage = (stageId) => {
@@ -149,7 +155,7 @@ const Pipeline = () => {
     <div className="pipeline-wrapper">
 
       {/* Actions */}
-      <div className="pipeline-actions">
+      {/* <div className="pipeline-actions">
         <form onSubmit={handleAddStage}>
           <input
             type="text"
@@ -161,11 +167,19 @@ const Pipeline = () => {
             className="stage-input"
           />
 
-          <button type="submit">
+          <button onClick={handleAddStage}>
             + Add Stage
           </button>
         </form>
-      </div>
+      </div> */}
+        <Pageheader
+        searchQuery={newStageName}
+        onSearchChange={setNewStageName}
+       
+        onAddClick={handleAddStage}
+        placeholder="Search contacts by name, company, email..."
+        buttonText="+ Add Pipeline"
+      />
 
       {/* Pipeline */}
       <DragDropContext onDragEnd={onDragEnd}>

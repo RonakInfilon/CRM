@@ -43,7 +43,7 @@ import UserCircleIcon from "./user-circle.svg?react";
 import TaskIcon from "./task-icon.svg?react"; 
 import ListIcon from "./list.svg?react"; 
 import TableIcon from "./table.svg?react"; 
-import PageIcon from "./page.svg?react"; 
+import { FileText as PageIcon } from "lucide-react";
 import PieChartIcon from "./pie-chart.svg?react"; 
 import BoxCubeIcon from "./box-cube.svg?react"; 
 import PlugInIcon from "./plug-in.svg?react"; 

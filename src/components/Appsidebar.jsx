@@ -7,107 +7,96 @@ import {
   GroupIcon,
   CalenderIcon,
   TaskIcon,
+  LockIcon,
 } from "../icons/index.js";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useRole } from "../context/RoleContext";
 
 function AppsideBar({ isOpen, onMouseEnter, onMouseLeave }) {
   const navigate = useNavigate();
-  const { isEmployee } = useRole();
+  const location = useLocation();
+  const { hasPageAccess } = useRole();
 
-  const handleLeadsClick = async () => {
-    navigate("/leads");
-  };
-  const handleDashboardClick = () => {
-    navigate("/dashboard");
-  };
-  const handleOrganizationClick = () => {
-    navigate("/organization");
-  };
+  const allNavItems = [
+    {
+      name: "Dashboard",
+      path: "/dashboard",
+      icon: <GridIcon />,
+    },
+    {
+      name: "Leads",
+      path: "/leads",
+      icon: <ListIcon />,
+    },
+    {
+      name: "Pipeline",
+      path: "/pipeline",
+      icon: <PieChartIcon />,
+    },
+    {
+      name: "Contacts",
+      path: "/contacts",
+      icon: <UserCircleIcon />,
+    },
+    {
+      name: "Companies",
+      path: "/organization",
+      icon: <GroupIcon />,
+    },
+    // {
+    //   name: "Activity",
+    //   path: "/activity",
+    //   icon: <CalenderIcon />,
+    // },
+    // {
+    //   name: "Drag & Drop",
+    //   path: "/drag",
+    //   icon: <TaskIcon />,
+    // },
+    {
+      name: "Permissions",
+      path: "/permission",
+      icon: <LockIcon />,
+    },
+    {
+      name: "Profile",
+      path: "/profile",
+      icon: <UserCircleIcon />,
+    },
+  ];
 
-  const handleContactClick = () => {
-    navigate("/contacts");
-  };
-  const handleOpportunityClick = () => {
-    navigate("/pipeline");
-  };
-  const handleActivityonClick = () => {
-    navigate("/activity");
-  };
-  const handleDragAnddrop = () => {
-    navigate("/drag");
-  };
+  const filteredNavItems = allNavItems.filter((item) => hasPageAccess(item.path));
+
   return (
     <div
       className={`sidebar ${isOpen ? "open" : "closed"}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
+      <div className="sidebar-logo-container">
+        <img
+          src="/crm-logo-design-inspiration-for-a-unique-identity-modern-elegance-and-creative-design-watermark-your-success-with-the-striking-this-logo-vector.jpg"
+          alt="Logo"
+        />
+        {isOpen && <span className="logo-text">CRM</span>}
+      </div>
+
       <ul>
-        <li>
-          <span>
-            <img
-              src="/crm-logo-design-inspiration-for-a-unique-identity-modern-elegance-and-creative-design-watermark-your-success-with-the-striking-this-logo-vector.jpg"
-              alt="Logo"
-            />
-          </span>
-          {isOpen && <span>CRM</span>}
-        </li>
 
-        <li onClick={handleDashboardClick} style={{ cursor: "pointer" }}>
-          <span>
-            <GridIcon />
-          </span>{" "}
-          {isOpen && <span>Dashboard</span>}
-        </li>
-
-        <li onClick={handleLeadsClick} style={{ cursor: "pointer" }}>
-          <span>
-            <ListIcon />
-          </span>{" "}
-          {isOpen && <span>Leads</span>}
-        </li>
-
-        {!isEmployee && (
-          <li onClick={handleOpportunityClick} style={{ cursor: "pointer" }}>
-            <span>
-              <PieChartIcon />
-            </span>
-            {isOpen && <span>Pipeline</span>}
-          </li>
-        )}
-
-        <li onClick={handleContactClick} style={{ cursor: "pointer" }}>
-          <span>
-            <UserCircleIcon />
-          </span>
-          {isOpen && <span>Contacts</span>}
-        </li>
-
-        {!isEmployee && (
-          <li onClick={handleOrganizationClick} style={{ cursor: "pointer" }}>
-            <span>
-              <GroupIcon />
-            </span>
-            {isOpen && <span>Companies</span>}
-          </li>
-        )}
-
-        <li onClick={handleActivityonClick} style={{ cursor: "pointer" }}>
-          <span>
-            <CalenderIcon />
-          </span>
-          {isOpen && <span>Activity</span>}
-        </li>
-
-        {!isEmployee && (
-          <li onClick={handleDragAnddrop} style={{ cursor: "pointer" }}>
-            <span>
-              <TaskIcon />
-            </span>
-            {isOpen && <span>Drag & Drop</span>}
-          </li>
-        )}
+        {filteredNavItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <li
+              key={item.name}
+              onClick={() => navigate(item.path)}
+              className={isActive ? "active" : ""}
+              style={{ cursor: "pointer" }}
+            >
+              <span>{item.icon}</span>
+              {isOpen && <span>{item.name}</span>}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
