@@ -162,6 +162,11 @@ export const RoleProvider = ({ children }) => {
       return true;
     }
 
+    // Only Super Admin and Company Admin can manage Users
+    if (path.includes("/users")) {
+      return isSuperAdmin || isCompanyAdmin;
+    }
+
     // Super Admin has access to everything
     if (isSuperAdmin) {
       return true;

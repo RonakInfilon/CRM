@@ -15,6 +15,7 @@ import { RoleProvider } from "./context/RoleContext";
 import RoleGuard from "./components/RoleGuard";
 import Permission from "./pages/Permission";
 import Profile from "./pages/Profile";
+import Users from "./pages/Users";
 
 function App() {
   return (
@@ -72,6 +73,14 @@ function App() {
               element={
                 <RoleGuard>
                   <Permission />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <RoleGuard>
+                  <Users />
                 </RoleGuard>
               }
             />

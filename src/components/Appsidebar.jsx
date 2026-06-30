@@ -54,6 +54,11 @@ function AppsideBar({ isOpen, onMouseEnter, onMouseLeave }) {
     //   icon: <TaskIcon />,
     // },
     {
+      name: "Manage Users",
+      path: "/users",
+      icon: <UserCircleIcon />,
+    },
+    {
       name: "Permissions",
       path: "/permission",
       icon: <LockIcon />,
