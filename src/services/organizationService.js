@@ -13,7 +13,7 @@ export const getOrganization=(page,limit,status,search,sort)=>{
       sortField=sort;
     }
   }
-  return API.get('/organization',{
+  return API.get('/accounts',{
     params:{
       page,
       limit,
@@ -26,14 +26,14 @@ export const getOrganization=(page,limit,status,search,sort)=>{
 };
 
 export const createOrganization=(data)=>{
-  return API.post(`/organization`,data);
+  return API.post(`/accounts`,data);
 }
 
 
 export const updateOrganization=(id,data)=>{
-  return API.put(`/organization/${id}`,data);
+  return API.put(`/accounts/${id}`,data);
 }
 
 export const deleteOrganization=(id)=>{
-  return API.delete(`/organization/${id}`);
-}
+  return API.delete(`/accounts/${id}`);
+}

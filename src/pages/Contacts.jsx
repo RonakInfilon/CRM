@@ -1,93 +1,50 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import ContactsList from "../components/ContactsList";
 import Pageheader from "../components/Pageheader";
 import ContactDetailDrawer from "../components/ContactDetailDrawer";
+import ContactModal from "../components/ContactModal";
+import { getContacts, createContact, updateContact, deleteContact } from "../services/contactService";
 import "../styles/Contacts.css";
 
 const Contacts = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
 
-  const contacts = [
-    {
-      id: 1,
-      first_name: "John",
-      last_name: "Smith",
-      role: "Sales Manager",
-      email: "john.smith@google.com",
-      phone: "+1 (555) 019-2834",
-      organization: "Google",
-    },
-    {
-      id: 2,
-      first_name: "Emma",
-      last_name: "Watson",
-      role: "Marketing Head",
-      email: "emma.watson@microsoft.com",
-      phone: "+1 (555) 043-9821",
-      organization: "Microsoft",
-    },
-    {
-      id: 3,
-      first_name: "Steve",
-      last_name: "Jobs",
-      role: "Co-founder",
-      email: "steve.jobs@apple.com",
-      phone: "+1 (555) 098-7654",
-      organization: "Apple",
-    },
-    {
-      id: 4,
-      first_name: "Jeff",
-      last_name: "Bezos",
-      role: "Founder",
-      email: "jeff.bezos@amazon.com",
-      phone: "+1 (555) 012-3456",
-      organization: "Amazon",
-    },
-    {
-      id: 5,
-      first_name: "Tim",
-      last_name: "Cook",
-      role: "CEO",
-      email: "tim.cook@apple.com",
-      phone: "+1 (555) 014-9988",
-      organization: "Apple",
-    },
-    {
-      id: 6,
-      first_name: "Satya",
-      last_name: "Nadella",
-      role: "CEO",
-      email: "satya.nadella@microsoft.com",
-      phone: "+1 (555) 016-7722",
-      organization: "Microsoft",
-    },
-    {
-      id: 7,
-      first_name: "Sundar",
-      last_name: "Pichai",
-      role: "CEO",
-      email: "sundar.pichai@google.com",
-      phone: "+1 (555) 018-6611",
-      organization: "Google",
-    },
-  ];
+  // Fetch contacts list
+  const fetchContactsList = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await getContacts(1, 100, searchQuery);
+      if (res.data && res.data.success) {
+        const mapped = res.data.data.map(c => ({
+          id: c.contact_id,
+          first_name: c.first_name,
+          last_name: c.last_name,
+          role: c.job_title || "N/A",
+          email: c.email,
+          phone: c.phone || "—",
+          organization: c.Company_name || "—",
+          org_id: c.org_id,
+          lifecycle_stage: c.lifecycle_stage || "Customer",
+          contact_status: c.contact_status || "Active"
+        }));
+        setContacts(mapped);
+      }
+    } catch (err) {
+      console.warn("Failed to load contacts from API:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchQuery]);
 
-  // Filter contacts locally
-  const filteredContacts = contacts.filter((contact) => {
-    const fullName = `${contact.first_name} ${contact.last_name}`.toLowerCase();
-    const query = searchQuery.toLowerCase().trim();
-    return (
-      fullName.includes(query) ||
-      contact.role.toLowerCase().includes(query) ||
-      contact.organization.toLowerCase().includes(query) ||
-      contact.email.toLowerCase().includes(query) ||
-      contact.phone.includes(query)
-    );
-  });
+  useEffect(() => {
+    fetchContactsList();
+  }, [fetchContactsList]);
 
   const handleContactClick = (contact) => {
     setSelectedContact(contact);
@@ -99,24 +56,63 @@ const Contacts = () => {
     setSelectedContact(null);
   };
 
+  const handleAddClick = () => {
+    setEditTarget(null);
+    setModalOpen(true);
+  };
+
+  const handleEditClick = (contact) => {
+    setDrawerOpen(false);
+    setEditTarget(contact);
+    setModalOpen(true);
+  };
+
+  const handleModalSave = async (formData) => {
+    try {
+      if (editTarget) {
+        await updateContact(editTarget.id, formData);
+      } else {
+        await createContact(formData);
+      }
+      setModalOpen(false);
+      fetchContactsList();
+    } catch (err) {
+      console.error("Failed to save contact:", err);
+      alert(err.response?.data?.message || "Error saving contact details.");
+    }
+  };
+
   return (
     <>
       <Pageheader
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-       
-        onAddClick={() => alert("Add Contact feature is currently mocked.")}
+        onAddClick={handleAddClick}
         placeholder="Search contacts by name, company, email..."
         buttonText="+ Add Contact"
       />
       <div className="crm-page-container">
-        <ContactsList contacts={filteredContacts} onContactClick={handleContactClick} />
+        {loading ? (
+          <p style={{ color: "#9ca3af", textAlign: "center", padding: 32 }}>Loading contacts directory...</p>
+        ) : contacts.length === 0 ? (
+          <p style={{ color: "#9ca3af", textAlign: "center", padding: 32 }}>No contacts found.</p>
+        ) : (
+          <ContactsList contacts={contacts} onContactClick={handleContactClick} />
+        )}
       </div>
 
       <ContactDetailDrawer
         isOpen={drawerOpen}
         contact={selectedContact}
         onClose={handleCloseDrawer}
+        onEdit={handleEditClick}
+      />
+
+      <ContactModal
+        isOpen={modalOpen}
+        contact={editTarget}
+        onClose={() => setModalOpen(false)}
+        onSave={handleModalSave}
       />
     </>
   );

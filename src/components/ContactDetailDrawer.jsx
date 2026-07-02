@@ -2,7 +2,7 @@ import { X, Mail, Phone, Building2, ExternalLink, Globe, Calendar, User } from "
 import { useNavigate } from "react-router-dom";
 import "../styles/ContactDetailDrawer.css";
 
-const ContactDetailDrawer = ({ isOpen, contact, onClose }) => {
+const ContactDetailDrawer = ({ isOpen, contact, onClose, onEdit }) => {
   const navigate = useNavigate();
 
   if (!isOpen || !contact) return null;
@@ -10,7 +10,7 @@ const ContactDetailDrawer = ({ isOpen, contact, onClose }) => {
   const handleCompanyClick = () => {
     onClose();
     // Redirect to organization page and pre-fill search with company name
-    navigate(`/organization?search=${encodeURIComponent(contact.organization)}`);
+    navigate(`/account?search=${encodeURIComponent(contact.organization)}`);
   };
 
   const avatarColor = {
@@ -38,7 +38,14 @@ const ContactDetailDrawer = ({ isOpen, contact, onClose }) => {
             </div>
             <h3>{contact.first_name} {contact.last_name}</h3>
             <p className="profile-role">{contact.role}</p>
-            <span className="status-badge active">Active</span>
+            <span className="status-badge active">{contact.contact_status || "Active"}</span>
+            <button 
+              className="redirect-company-btn" 
+              onClick={() => onEdit(contact)} 
+              style={{ marginTop: 12, background: "rgba(99, 102, 241, 0.15)", color: "#a5b4fc", border: "1px solid rgba(99, 102, 241, 0.3)", width: "100%" }}
+            >
+              Edit Details
+            </button>
           </div>
 
           <hr className="divider" />

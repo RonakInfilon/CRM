@@ -6,7 +6,6 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Leads from "./pages/Leads";
 import DashboardLayout from "./components/DashboardLayout";
-import Organization from "./pages/Organization";
 import Contacts from "./pages/Contacts";
 import Pipeline from "./pages/Pipeline";
 import Notes from "./pages/Activity";
@@ -16,6 +15,7 @@ import RoleGuard from "./components/RoleGuard";
 import Permission from "./pages/Permission";
 import Profile from "./pages/Profile";
 import Users from "./pages/Users";
+import Account from "./pages/Account"
 
 function App() {
   return (
@@ -43,10 +43,10 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/leads" element={<Leads />} />
             <Route
-              path="/organization"
+              path="/account"
               element={
                 <RoleGuard>
-                  <Organization />
+                  <Account />
                 </RoleGuard>
               }
             />

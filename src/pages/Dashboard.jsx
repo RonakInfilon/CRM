@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
 import {
   Users,
@@ -9,15 +10,64 @@ import {
   Lock,
 } from "lucide-react";
 import { useRole } from "../context/RoleContext";
+import { getLeads } from "../services/leadService";
+import { getOrganization } from "../services/organizationService";
 import "../styles/dashboard.css";
 
 function Dashboard() {
   const { isEmployee } = useRole();
 
+  const [totalLeads, setTotalLeads] = useState(0);
+  const [pipelineValue, setPipelineValue] = useState(0);
+  const [winRate, setWinRate] = useState("0.0%");
+  const [companiesCount, setCompaniesCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        // Get leads
+        const leadsRes = await getLeads(1, 1000); 
+        if (leadsRes.data?.data) {
+          const leadsList = leadsRes.data.data.leads || [];
+          const total = leadsRes.data.data.total || leadsList.length;
+          setTotalLeads(total);
+
+          // Calculate active pipeline value (Opportunity/Qualified, Proposal Sent, Negotiation)
+          const pipelineLeads = leadsList.filter(l => 
+            ["Qualified", "Proposal Sent", "Negotiation"].includes(l.Status)
+          );
+          const sumVal = pipelineLeads.reduce((acc, curr) => acc + (curr.Value || 0), 0);
+          setPipelineValue(sumVal);
+
+          // Calculate win rate
+          const totalQualified = leadsList.filter(l => 
+            ["Qualified", "Proposal Sent", "Negotiation", "Won", "Lost"].includes(l.Status)
+          ).length;
+          const wonCount = leadsList.filter(l => l.Status === "Won").length;
+          const rate = totalQualified > 0 ? ((wonCount / totalQualified) * 100).toFixed(1) : "0.0";
+          setWinRate(rate + "%");
+        }
+
+        // Get organizations
+        const orgsRes = await getOrganization(1, 1);
+        if (orgsRes.data?.data) {
+          setCompaniesCount(orgsRes.data.data.total || 0);
+        }
+      } catch (err) {
+        console.warn("Failed to fetch dashboard data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboardData();
+  }, []);
+
   const stats = [
     {
       title: "Total Leads",
-      value: "148",
+      value: loading ? "..." : String(totalLeads),
       trend: "+12.5%",
       isPositive: true,
       icon: <Users size={22} />,
@@ -25,7 +75,7 @@ function Dashboard() {
     },
     {
       title: "Active Pipeline",
-      value: isEmployee ? "Restricted" : "$182,400",
+      value: loading ? "..." : (isEmployee ? "Restricted" : `$${pipelineValue.toLocaleString()}`),
       trend: isEmployee ? "Locked" : "+8.3%",
       isPositive: !isEmployee,
       icon: isEmployee ? <Lock size={22} /> : <DollarSign size={22} />,
@@ -33,7 +83,7 @@ function Dashboard() {
     },
     {
       title: "Win Rate",
-      value: "64.2%",
+      value: loading ? "..." : winRate,
       trend: "-1.5%",
       isPositive: false,
       icon: <TrendingUp size={22} />,
@@ -41,7 +91,7 @@ function Dashboard() {
     },
     {
       title: "Companies",
-      value: "38",
+      value: loading ? "..." : String(companiesCount),
       trend: "+4 new",
       isPositive: true,
       icon: <Building size={22} />,
@@ -117,7 +167,7 @@ function Dashboard() {
                 fontFamily: "Plus Jakarta Sans",
                 fontSize: "14px",
                 color: "#64748b",
-                formatter: () => "148",
+                formatter: () => String(totalLeads),
               },
             },
           },
@@ -221,7 +271,7 @@ function Dashboard() {
             <div>
               <div className="status-line" >
                 <span>Qualified Leads</span>
-                <span>84 / 148 (56%)</span>
+                <span>{totalLeads > 0 ? `${Math.round(totalLeads * 0.56)} / ${totalLeads} (56%)` : "0 / 0 (0%)"}</span>
               </div>
               <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
                 <div style={{ width: '56%', height: '100%', background: '#4f46e5' }}></div>
@@ -230,7 +280,7 @@ function Dashboard() {
             <div>
               <div className="status-line">
                 <span>Converted Deals</span>
-                <span>24 / 84 (28%)</span>
+                <span>{totalLeads > 0 ? `${Math.round(totalLeads * 0.28)} / ${totalLeads} (28%)` : "0 / 0 (0%)"}</span>
               </div>
               <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
                 <div style={{ width: '28%', height: '100%', background: '#4f46e5' }}></div>

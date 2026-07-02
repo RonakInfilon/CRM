@@ -1,11 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRole } from "../context/RoleContext.jsx";
+import { getContacts } from "../services/contactService";
+import { getLeads } from "../services/leadService";
 import "../styles/CompanyModal.css";
 
 const CompanyModal = ({ isOpen, mode = "view", company = {}, onClose, onSave, onDelete }) => {
   const [currentMode, setCurrentMode] = useState(mode);
   const [formData, setFormData] = useState({ ...company });
+  const [contacts, setContacts] = useState([]);
+  const [wonLeads, setWonLeads] = useState([]);
   const { canDelete } = useRole();
+
+  useEffect(() => {
+    setFormData({ ...company });
+    setCurrentMode(mode);
+  }, [company, mode, isOpen]);
+
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        const res = await getContacts(1, 1000);
+        if (res.data?.success) {
+          setContacts(res.data.data);
+        }
+      } catch (err) {
+        console.warn("Failed to load contacts for datalist suggestion", err);
+      }
+    };
+    if (isOpen) {
+      fetchContacts();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const fetchWonLeads = async () => {
+      try {
+        const res = await getLeads(1, 100, "Won");
+        if (res.data?.data?.leads) {
+          setWonLeads(res.data.data.leads);
+        }
+      } catch (err) {
+        console.warn("Failed to fetch won leads:", err);
+      }
+    };
+    if (isOpen) {
+      fetchWonLeads();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -56,6 +97,10 @@ const CompanyModal = ({ isOpen, mode = "view", company = {}, onClose, onSave, on
                   <a href={company.website} target="_blank" rel="noreferrer">
                     {company.website || "-"}
                   </a>
+                </div>
+                <div className="detail-item">
+                  <strong>Associated Contact:</strong>{" "}
+                  <span>{company.associated_contact || "-"}</span>
                 </div>
                 <div className="detail-item">
                   <strong>Company Size:</strong>{" "}
@@ -132,6 +177,37 @@ const CompanyModal = ({ isOpen, mode = "view", company = {}, onClose, onSave, on
           ) : (
             <form onSubmit={handleSubmit} className="edit-form-layout">
               <div className="form-grid">
+                {currentMode === "add" && wonLeads.length > 0 && (
+                   <div className="form-group full-width" style={{ marginBottom: "20px", background: "rgba(59, 130, 246, 0.1)", padding: "12px", borderRadius: "6px" }}>
+                     <label style={{ fontWeight: "600", color: "#3b82f6" }}>Import from Won Lead:</label>
+                     <select 
+                       onChange={(e) => {
+                         const leadId = e.target.value;
+                         if (!leadId) return;
+                         const matched = wonLeads.find(l => String(l.LeadID) === String(leadId));
+                         if (matched) {
+                           setFormData(prev => ({
+                             ...prev,
+                             organization_name: matched.Organization,
+                             phone: matched.Phone,
+                             website: matched.Website || "",
+                             industry: matched.Industry || "",
+                             associated_contact: `${matched.FirstName} ${matched.LastName}`
+                           }));
+                         }
+                       }}
+                       style={{ marginTop: "6px", width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #3b82f6", background: "#1f2937", color: "#fff" }}
+                     >
+                       <option value="">-- Select a Won Lead to autofill --</option>
+                       {wonLeads.map(lead => (
+                         <option key={lead.LeadID} value={lead.LeadID}>
+                           {lead.Organization} (Lead: {lead.FirstName} {lead.LastName})
+                         </option>
+                       ))}
+                     </select>
+                   </div>
+                )}
+
                 <div className="form-group">
                   <label>Organization Name *</label>
                   <input
@@ -142,6 +218,22 @@ const CompanyModal = ({ isOpen, mode = "view", company = {}, onClose, onSave, on
                     required
                     maxLength="255"
                   />
+                </div>
+
+                <div className="form-group">
+                  <label>Associated Contact Person</label>
+                  <input
+                    list="company-contacts-datalist"
+                    name="associated_contact"
+                    value={formData.associated_contact || ""}
+                    onChange={handleChange}
+                    placeholder="Select or type contact name..."
+                  />
+                  <datalist id="company-contacts-datalist">
+                    {contacts.map(c => (
+                      <option key={c.contact_id || c.id} value={`${c.first_name} ${c.last_name}`} />
+                    ))}
+                  </datalist>
                 </div>
 
                 <div className="form-group">

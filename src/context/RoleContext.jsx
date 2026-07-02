@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import API from "../api";
 
 const RoleContext = createContext();
 
@@ -124,25 +125,85 @@ export const RoleProvider = ({ children }) => {
     window.dispatchEvent(new Event("roleChanged"));
   };
 
-  const updateProfile = (updatedDetails) => {
+  const fetchPermissionsFromAPI = async () => {
+    const token = localStorage.getItem("token");
+    if (!token || token === "mock-offline-token-12345") return;
+    try {
+      const res = await API.get("/auth/permissions");
+      if (res.data && res.data.success) {
+        const { companyModules: apiCompanyModules, rolePermissions: apiRolePermissions } = res.data;
+        setCompanyModulesState(apiCompanyModules);
+        setRolePermissionsState(apiRolePermissions);
+        localStorage.setItem("companyModules", JSON.stringify(apiCompanyModules));
+        localStorage.setItem("rolePermissions", JSON.stringify(apiRolePermissions));
+      }
+    } catch (err) {
+      console.warn("Failed to load permissions from API:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchPermissionsFromAPI();
+  }, [role, company]);
+
+  const updateProfile = async (updatedDetails) => {
     const updated = { ...profile, ...updatedDetails };
     setProfileState(updated);
     localStorage.setItem("userProfile", JSON.stringify(updated));
+
+    const token = localStorage.getItem("token");
+    if (token && token !== "mock-offline-token-12345") {
+      try {
+        await API.put("/auth/profile", {
+          name: updatedDetails.name,
+          phone: updatedDetails.phone,
+          bio: updatedDetails.bio
+        });
+      } catch (err) {
+        console.error("Failed to sync profile changes to database:", err);
+      }
+    }
   };
 
-  const updateCompanyModules = (compName, modules) => {
+  const updateCompanyModules = async (compName, modules) => {
     const updated = { ...companyModules, [compName]: modules };
     setCompanyModulesState(updated);
     localStorage.setItem("companyModules", JSON.stringify(updated));
     window.dispatchEvent(new Event("roleChanged"));
+
+    const token = localStorage.getItem("token");
+    if (token && token !== "mock-offline-token-12345") {
+      try {
+        await API.post("/auth/permissions", {
+          companyName: compName,
+          role: "company_level",
+          modules
+        });
+      } catch (err) {
+        console.error("Failed to sync company modules to API:", err);
+      }
+    }
   };
 
-  const updateRolePermissions = (compName, roleName, modules) => {
+  const updateRolePermissions = async (compName, roleName, modules) => {
     const key = `${compName}_${roleName}`;
     const updated = { ...rolePermissions, [key]: modules };
     setRolePermissionsState(updated);
     localStorage.setItem("rolePermissions", JSON.stringify(updated));
     window.dispatchEvent(new Event("roleChanged"));
+
+    const token = localStorage.getItem("token");
+    if (token && token !== "mock-offline-token-12345") {
+      try {
+        await API.post("/auth/permissions", {
+          companyName: compName,
+          role: roleName,
+          modules
+        });
+      } catch (err) {
+        console.error("Failed to sync role permissions to API:", err);
+      }
+    }
   };
 
   // Helper flags
@@ -162,22 +223,23 @@ export const RoleProvider = ({ children }) => {
       return true;
     }
 
-    // Only Super Admin and Company Admin can manage Users
-    if (path.includes("/users")) {
-      return isSuperAdmin || isCompanyAdmin;
-    }
-
     // Super Admin has access to everything
     if (isSuperAdmin) {
       return true;
     }
 
+    // Only Super Admin and Company Admin can manage Users
+    if (path.includes("/users")) {
+      return isCompanyAdmin;
+    }
+
     // All other roles must check active company module availability
     const userCompany = company || "Google";
     
-    // Only Super Admin can manage Companies (organizations)
-    if (path.includes("/organization")) {
-      return false;
+    // Only Super Admin can view all accounts across tenants;
+    // Tenant users (Company Admin, Manager, Employee) see their own accounts
+    if (path.includes("/account")) {
+      return true; // Access controlled at backend level per tenant_id
     }
 
     // Map path segments to Module Names
@@ -193,7 +255,7 @@ export const RoleProvider = ({ children }) => {
     if (!requiredModule) return true;
 
     // Check 1: Does the Company have this module enabled by Master Admin?
-    const allowedCompanyModules = companyModules[userCompany] || [];
+    const allowedCompanyModules = companyModules[userCompany] || ["Dashboard", "Leads", "Pipeline", "Contacts", "Activity", "Drag & Drop", "Permission"];
     if (!allowedCompanyModules.includes(requiredModule)) {
       return false;
     }
@@ -205,7 +267,9 @@ export const RoleProvider = ({ children }) => {
 
     // Check 3: For Manager and Employee, check the role-based settings for this company
     const roleKey = `${userCompany}_${role}`;
-    const allowedRoleModules = rolePermissions[roleKey] || [];
+    const allowedRoleModules = rolePermissions[roleKey] || (role === "Manager" 
+      ? ["Dashboard", "Leads", "Pipeline", "Contacts", "Activity", "Drag & Drop"]
+      : ["Dashboard", "Leads", "Contacts"]);
     return allowedRoleModules.includes(requiredModule);
   };
 

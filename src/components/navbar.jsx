@@ -52,8 +52,8 @@ function Navbar({ toggleSidebar, logout, name }) {
             </select>
           </div>
         )}
-
-        <div className="role-switcher-container">
+        
+        {/* <div className="role-switcher-container">
           <label htmlFor="role-select" className="role-label">
             Active Role:
           </label>
@@ -68,7 +68,7 @@ function Navbar({ toggleSidebar, logout, name }) {
             <option value="Manager">Manager</option>
             <option value="Company Employee">Employee</option>
           </select>
-        </div>
+        </div> */}
 
         <div
           className="navbar-profile-avatar"

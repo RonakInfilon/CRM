@@ -14,6 +14,8 @@ const initialState = {
   source: "",
   status: "New",
   notes: "",
+  email: "",
+  phone: "",
 };
 
 function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
@@ -32,6 +34,8 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
           source: lead.Source || "",
           status: lead.Status || "New",
           notes: lead.Notes || "",
+          email: lead.Email || "",
+          phone: lead.Phone || "",
         }
       : initialState
   );
@@ -106,6 +110,28 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
                   name="lastName"
                   placeholder="Last Name"
                   value={formData.lastName}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="name@company.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="form-group">
+                <label>Phone Number</label>
+                <input
+                  type="text"
+                  name="phone"
+                  placeholder="e.g. +1 (555) 019-0000"
+                  value={formData.phone}
                   onChange={handleChange}
                 />
               </div>

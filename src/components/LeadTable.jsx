@@ -23,6 +23,8 @@ const SAMPLE_LEADS = [
 
 const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
   const [allLeads, setAllLeads] = useState(SAMPLE_LEADS);
+  const [totalCount, setTotalCount] = useState(SAMPLE_LEADS.length);
+  const [isOffline, setIsOffline] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { canDelete } = useRole();
@@ -38,9 +40,12 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
       const response = await getLeads(currentPage, rowsPerPage, statusFilter, searchQuery, sortBy);
       if (response.data?.data?.leads) {
         setAllLeads(response.data.data.leads);
+        setTotalCount(response.data.data.total || 0);
+        setIsOffline(false);
       }
     } catch (err) {
       console.warn("Failed to fetch leads from API, using local mock data:", err);
+      setIsOffline(true);
     }
   }, [currentPage, statusFilter, searchQuery, sortBy]);
 
@@ -87,26 +92,44 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
   }, [allLeads, statusFilter, searchQuery, sortBy]);
 
   // Compute total pages dynamically
-  const totalPages = Math.max(Math.ceil(filteredAndSortedLeads.length / rowsPerPage), 1);
+  const totalPages = useMemo(() => {
+    if (isOffline) {
+      return Math.max(Math.ceil(filteredAndSortedLeads.length / rowsPerPage), 1);
+    } else {
+      return Math.max(Math.ceil(totalCount / rowsPerPage), 1);
+    }
+  }, [isOffline, filteredAndSortedLeads.length, totalCount]);
 
-  // Slice local active page chunk
+  // Slice local active page chunk only if offline
   const displayedLeads = useMemo(() => {
-    const verifiedPage = currentPage > totalPages ? 1 : currentPage; 
-    const startIndex = (verifiedPage - 1) * rowsPerPage;
-    return filteredAndSortedLeads.slice(startIndex, startIndex + rowsPerPage);
-  }, [filteredAndSortedLeads, currentPage, totalPages]);
+    if (isOffline) {
+      const verifiedPage = currentPage > totalPages ? 1 : currentPage; 
+      const startIndex = (verifiedPage - 1) * rowsPerPage;
+      return filteredAndSortedLeads.slice(startIndex, startIndex + rowsPerPage);
+    } else {
+      return allLeads;
+    }
+  }, [isOffline, allLeads, filteredAndSortedLeads, currentPage, totalPages]);
 
   const handleStatusChange = async (lead, newStatus) => {
-    setAllLeads(prev =>
-      prev.map(item =>
-        item.LeadID === lead.LeadID ? { ...item, Status: newStatus } : item
-      )
-    );
+    if (newStatus === "Qualified" || newStatus === "Won") {
+      setAllLeads(prev => prev.filter(item => item.LeadID !== lead.LeadID));
+    } else {
+      setAllLeads(prev =>
+        prev.map(item =>
+          item.LeadID === lead.LeadID ? { ...item, Status: newStatus } : item
+        )
+      );
+    }
 
     try {
       await updateLead(lead.LeadID, { ...lead, status: newStatus });
+      if (newStatus === "Qualified" || newStatus === "Won") {
+        fetchLeads();
+      }
     } catch (err) {
       console.warn("Failed to update status on server:", err);
+      fetchLeads();
     }
   };
 

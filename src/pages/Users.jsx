@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import API from "../api";
 import { useRole } from "../context/RoleContext";
 import {
@@ -16,11 +17,11 @@ import {
 import "../styles/Users.css";
 
 export default function Users() {
-  const { isSuperAdmin, company } = useRole();
+  const { isSuperAdmin, isCompanyAdmin, company } = useRole();
   
   // Lists
   const [users, setUsers] = useState([]);
-  const [organizations, setOrganizations] = useState([]);
+  const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(false);
   const [listLoading, setListLoading] = useState(false);
   
@@ -54,22 +55,22 @@ export default function Users() {
     }
   };
 
-  // Fetch Organizations (for Super Admin selection)
-  const fetchOrgs = async () => {
+  const fetchTenants = async () => {
     try {
-      const res = await API.get("/organization");
+      // /tenant returns a flat array: { success: true, data: [...] }
+      const res = await API.get("/tenant");
       if (res.data && res.data.success) {
-        setOrganizations(res.data.data.organizations);
+        setTenants(Array.isArray(res.data.data) ? res.data.data : []);
       }
     } catch (err) {
-      console.error("Failed to load organizations:", err);
+      console.error("Failed to load tenants:", err);
     }
   };
 
   useEffect(() => {
     fetchUsers();
     if (isSuperAdmin) {
-      fetchOrgs();
+      fetchTenants(); 
     }
   }, [isSuperAdmin]);
 
@@ -84,7 +85,6 @@ export default function Users() {
     setLoading(true);
 
     try {
-      // Clean up body
       const payload = {
         name: formData.name,
         email: formData.email,
@@ -95,12 +95,11 @@ export default function Users() {
         org_id: isSuperAdmin ? (formData.org_id ? Number(formData.org_id) : null) : null
       };
 
-      const res = await API.post("/auth/create-user", payload);
+      const res = await API.post("/auth/tenant", payload);
       
       if (res.status === 201) {
         setSuccessMsg("User created successfully!");
         
-        // Reset form
         setFormData({
           name: "",
           email: "",
@@ -111,7 +110,6 @@ export default function Users() {
           bio: ""
         });
         
-        // Refresh list
         fetchUsers();
       }
     } catch (err) {
@@ -121,7 +119,6 @@ export default function Users() {
     }
   };
 
-  // Helper class for role styling badges
   const getRoleClass = (roleStr) => {
     switch (roleStr) {
       case "Super Admin": return "superadmin";
@@ -130,6 +127,7 @@ export default function Users() {
       case "Company Employee": return "employee";
       default: return "";
     }
+    console.log(fetchTenants)
   };
 
   return (
@@ -161,7 +159,6 @@ export default function Users() {
 
       <div className="users-layout">
         
-        {/* User Listing Section */}
         <div className="users-list-card">
           <h2>
             <GroupIcon size={20} /> Registered Users
@@ -204,9 +201,18 @@ export default function Users() {
                         </span>
                       </td>
                       <td>
-                        <span style={{ color: "#e5e7eb", fontWeight: "500" }}>
-                          {u.role === "Super Admin" ? "Master Admin" : (u.company || "N/A")}
-                        </span>
+                        {u.role === "Super Admin" ? (
+                          <span style={{ color: "#e5e7eb", fontWeight: "500" }}>Master Admin</span>
+                        ) : u.company ? (
+                          <Link 
+                            to={`/account?search=${encodeURIComponent(u.company)}`}
+                            style={{ color: "#3b82f6", fontWeight: "500", textDecoration: "underline" }}
+                          >
+                            {u.company}
+                          </Link>
+                        ) : (
+                          <span style={{ color: "#e5e7eb", fontWeight: "500" }}>N/A</span>
+                        )}
                       </td>
                       <td style={{ color: "#9ca3af" }}>
                         {u.phone || "Not provided"}
@@ -219,7 +225,6 @@ export default function Users() {
           )}
         </div>
 
-        {/* User Creation Section */}
         <div className="user-form-card">
           <h2>
             <PlusCircle size={20} /> Add User Profile
@@ -311,13 +316,32 @@ export default function Users() {
                     required={formData.role !== "Super Admin"}
                   >
                     <option value="">-- Choose Tenant Company --</option>
-                    {organizations.map((org) => (
-                      <option key={org.org_id} value={org.org_id}>
-                        {org.organization_name}
+                    {Array.isArray(tenants) && tenants.map((t) => (
+                      <option key={t.tenant_id} value={t.tenant_id}>
+                        {t.company_name}
                       </option>
                     ))}
                   </select>
                 </div>
+              </div>
+            )}
+
+            {isCompanyAdmin && (
+              <div className="form-group">
+                <label>Company Association</label>
+                <div className="input-with-icon" style={{ opacity: 0.7 }}>
+                  <Building2 size={16} />
+                  <input
+                    type="text"
+                    value={company}
+                    readOnly
+                    style={{ cursor: "not-allowed", background: "rgba(255,255,255,0.05)" }}
+                    title="Users you create are automatically assigned to your company"
+                  />
+                </div>
+                <small style={{ color: "#6b7280", marginTop: "4px", display: "block" }}>
+                  New users are automatically assigned to <strong>{company}</strong>.
+                </small>
               </div>
             )}
 

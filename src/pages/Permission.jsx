@@ -44,32 +44,65 @@ const Permission = () => {
   //this is list of companies 
   const [companies, setCompanies] = useState([]);
   //here it store the name of company that we selected and by default it takes google 
-  const [selectedCompany, setSelectedCompany] = useState("Google");
+  const [selectedCompany, setSelectedCompany] = useState("");
   //selected role and by default it takes manager
-  const [selectedRole, setSelectedRole] = useState("Manager");
+  const [selectedRole, setSelectedRole] = useState("");
 
   // Local state for checkboxes
   const [checkedModules, setCheckedModules] = useState([]);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Sync companies from localStorage
+  // Fetch all tenant companies from backend API
   useEffect(() => {
-    let localOrgs = JSON.parse(localStorage.getItem("organizations"));
-    if (!localOrgs) {
-      localOrgs = [
-        { org_id: 1, organization_name: "Google" },
-        { org_id: 2, organization_name: "Microsoft" },
-        { org_id: 3, organization_name: "Apple" },
-        { org_id: 4, organization_name: "Amazon" }
-      ];
+    const fetchTenants = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token || token === "mock-offline-token-12345") {
+          // Fallback: use companyModules keys as company names when offline
+          const offlineCompanies = Object.keys(companyModules).map((name, i) => ({
+            org_id: i + 1,
+            organization_name: name
+          }));
+          setCompanies(offlineCompanies);
+          if (offlineCompanies.length > 0 && isSuperAdmin) {
+            setSelectedCompany(offlineCompanies[0].organization_name);
+          }
+          return;
+        }
+
+        const res = await fetch("http://localhost:3000/api/tenant", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          // Map tenant_id and company_name to match the dropdown shape
+          const tenantList = data.data.map(t => ({
+            org_id: t.tenant_id,
+            organization_name: t.company_name
+          }));
+          setCompanies(tenantList);
+          if (tenantList.length > 0 && isSuperAdmin) {
+            setSelectedCompany(tenantList[0].organization_name);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to fetch tenants for Permission page:", err);
+        // Fallback to companyModules keys
+        const fallback = Object.keys(companyModules).map((name, i) => ({
+          org_id: i + 1,
+          organization_name: name
+        }));
+        setCompanies(fallback);
+        if (fallback.length > 0 && isSuperAdmin) {
+          setSelectedCompany(fallback[0].organization_name);
+        }
+      }
+    };
+
+    if (isSuperAdmin) {
+      fetchTenants();
     }
-    setCompanies(localOrgs);
-    
-    // Set default selected company
-    if (localOrgs.length > 0 && isSuperAdmin) {
-      setSelectedCompany(localOrgs[0].organization_name);
-    }
-  }, [isSuperAdmin]);
+  }, [isSuperAdmin, companyModules]);
 
   // Load active checkboxes depending on current selections
   useEffect(() => {
