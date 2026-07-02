@@ -1,74 +1,281 @@
 const pool = require("./database");
+const bcrypt = require("bcrypt");
 
 async function migrate() {
-  console.log("Starting database migration...");
+  
+  
+  const conn = await pool.getConnection();
+  
   try {
-    // 1. Ensure organization table exists
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS \`organization\` (
-        \`org_id\` INT AUTO_INCREMENT PRIMARY KEY,
-        \`organization_name\` VARCHAR(255) NOT NULL,
-        \`website\` VARCHAR(255),
-        \`industry\` VARCHAR(100),
-        \`company_size\` VARCHAR(50),
-        \`annual_revenue\` VARCHAR(100),
-        \`phone\` VARCHAR(20),
-        \`city\` VARCHAR(100),
-        \`country\` VARCHAR(100),
-        \`billing_address\` TEXT,
-        \`isPresent\` BOOLEAN DEFAULT TRUE,
-        \`created_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB;
+    // 1. Temporarily disable foreign key checks to drop tables safely
+    await conn.query("SET FOREIGN_KEY_CHECKS = 0");
+    
+    const tablesToDrop = [
+      "deal_activities",
+      "deal_notes",
+      "deals",
+      "pipeline_stages",
+      "lead_notes",
+      "leads",
+      "contacts",
+      "client_companies",
+      "users",
+      "tenant_permissions",
+      "tenants"
+    ];
+    
+    for (const table of tablesToDrop) {
+      await conn.query(`DROP TABLE IF EXISTS \`${table}\``);
+      console.log(`- Dropped table \`${table}\` (if it existed)`);
+    }
+    
+    // We keep FOREIGN_KEY_CHECKS = 0 during creation of all tables to prevent 
+    console.log("✓ Disabled foreign key checks for table creation.");
+
+    // 2. Create tenants table
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS tenants (
+        tenant_id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        status ENUM('active', 'suspended', 'inactive') DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
-    console.log("✓ Organization table verified/created.");
+    console.log("Tenants table created.");
 
-    // 2. Ensure users table exists
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS \`users\` (
-        \`id\` INT AUTO_INCREMENT PRIMARY KEY,
-        \`name\` VARCHAR(255) NOT NULL,
-        \`email\` VARCHAR(255) NOT NULL UNIQUE,
-        \`password\` VARCHAR(255) NOT NULL,
-        \`created_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB;
+    // 3. Create tenant_permissions table
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS tenant_permissions (
+        tenant_id INT PRIMARY KEY,
+        module_dashboard BOOLEAN NOT NULL DEFAULT TRUE,
+        module_leads BOOLEAN NOT NULL DEFAULT TRUE,
+        module_pipeline BOOLEAN NOT NULL DEFAULT TRUE,
+        module_contacts BOOLEAN NOT NULL DEFAULT TRUE,
+        module_companies BOOLEAN NOT NULL DEFAULT TRUE,
+        module_user_management BOOLEAN NOT NULL DEFAULT TRUE,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (tenant_id) REFERENCES tenants(tenant_id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
-    console.log("✓ Users table verified/created.");
+    console.log("Tenant Permissions table created.");
 
-    // 3. Add missing columns to users table if they don't exist
-    const [columns] = await pool.query("SHOW COLUMNS FROM users");
-    const columnNames = columns.map(col => col.Field);
+    // 4. Create users table
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        tenant_id INT NULL,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        phone VARCHAR(50) DEFAULT NULL,
+        bio TEXT DEFAULT NULL,
+        role ENUM('Super Admin', 'Company Admin', 'Manager', 'Employee') NOT NULL,
+        default_module VARCHAR(50) DEFAULT 'Dashboard',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (tenant_id) REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+        INDEX idx_user_tenant (tenant_id),
+        INDEX idx_user_email (email)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("Users table created.");
 
-    if (!columnNames.includes("phone")) {
-      await pool.query("ALTER TABLE users ADD COLUMN phone VARCHAR(50) DEFAULT NULL AFTER password");
-      console.log("✓ Added 'phone' column to users.");
-    }
-    if (!columnNames.includes("bio")) {
-      await pool.query("ALTER TABLE users ADD COLUMN bio TEXT DEFAULT NULL AFTER phone");
-      console.log("✓ Added 'bio' column to users.");
-    }
-    if (!columnNames.includes("avatar")) {
-      await pool.query("ALTER TABLE users ADD COLUMN avatar VARCHAR(255) DEFAULT NULL AFTER bio");
-      console.log("✓ Added 'avatar' column to users.");
-    }
-    if (!columnNames.includes("role")) {
-      await pool.query(`
-        ALTER TABLE users 
-        ADD COLUMN role ENUM('Super Admin', 'Company Admin', 'Manager', 'Company Employee') 
-        NOT NULL DEFAULT 'Company Employee' AFTER avatar
-      `);
-      console.log("✓ Added 'role' column to users.");
-    }
-    if (!columnNames.includes("org_id")) {
-      await pool.query("ALTER TABLE users ADD COLUMN org_id INT DEFAULT NULL AFTER role");
-      await pool.query("ALTER TABLE users ADD CONSTRAINT fk_users_org FOREIGN KEY (org_id) REFERENCES organization(org_id) ON DELETE SET NULL");
-      console.log("✓ Added 'org_id' column and constraint to users.");
-    }
+    // 5. Create client_companies table
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS client_companies (
+        company_id INT AUTO_INCREMENT PRIMARY KEY,
+        tenant_id INT NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        website VARCHAR(255) DEFAULT NULL,
+        industry VARCHAR(100) DEFAULT NULL,
+        annual_revenue DECIMAL(18, 2) DEFAULT 0.00,
+        phone VARCHAR(50) DEFAULT NULL,
+        city VARCHAR(100) DEFAULT NULL,
+        country VARCHAR(100) DEFAULT NULL,
+        billing_address TEXT DEFAULT NULL,
+        status ENUM('Active', 'Inactive') DEFAULT 'Active',
+        linked_tenant_id INT NULL UNIQUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (tenant_id) REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+        FOREIGN KEY (linked_tenant_id) REFERENCES tenants(tenant_id) ON DELETE SET NULL,
+        UNIQUE KEY uq_tenant_company (tenant_id, name),
+        INDEX idx_client_tenant (tenant_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("Client Companies table created.");
 
-    console.log("Database migration completed successfully!");
+    // 6. Create contacts table
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS contacts (
+        contact_id INT AUTO_INCREMENT PRIMARY KEY,
+        tenant_id INT NOT NULL,
+        company_id INT NULL,
+        first_name VARCHAR(100) NOT NULL,
+        last_name VARCHAR(100) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        phone VARCHAR(50) DEFAULT NULL,
+        job_title VARCHAR(150) DEFAULT NULL,
+        role VARCHAR(100) DEFAULT NULL,
+        contact_status ENUM('Lead', 'Opportunity', 'Won Contact', 'Inactive') DEFAULT 'Lead',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (tenant_id) REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+        FOREIGN KEY (company_id) REFERENCES client_companies(company_id) ON DELETE SET NULL,
+        INDEX idx_contact_tenant (tenant_id),
+        INDEX idx_contact_company (company_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("Contacts table created.");
+
+    // 7. Create leads table
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS leads (
+        lead_id INT AUTO_INCREMENT PRIMARY KEY,
+        tenant_id INT NOT NULL,
+        contact_id INT NOT NULL UNIQUE,
+        org_name VARCHAR(255) NOT NULL,
+        website VARCHAR(255) DEFAULT NULL,
+        industry VARCHAR(100) DEFAULT NULL,
+        source VARCHAR(100) DEFAULT NULL,
+        status VARCHAR(50) NOT NULL DEFAULT 'New',
+        assigned_to_user_id INT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (tenant_id) REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+        FOREIGN KEY (contact_id) REFERENCES contacts(contact_id) ON DELETE CASCADE,
+        FOREIGN KEY (assigned_to_user_id) REFERENCES users(id) ON DELETE SET NULL,
+        INDEX idx_lead_tenant (tenant_id),
+        INDEX idx_lead_status (status)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("Leads table created.");
+
+    // 8. Create lead_notes table
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS lead_notes (
+        note_id INT AUTO_INCREMENT PRIMARY KEY,
+        lead_id INT NOT NULL,
+        note_text TEXT NOT NULL,
+        created_by_user_id INT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (lead_id) REFERENCES leads(lead_id) ON DELETE CASCADE,
+        FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL,
+        INDEX idx_note_lead (lead_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("Lead Notes table created.");
+
+    // 9. Create pipeline_stages table
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS pipeline_stages (
+        stage_id INT AUTO_INCREMENT PRIMARY KEY,
+        tenant_id INT NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        sort_order INT NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (tenant_id) REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+        UNIQUE KEY uq_tenant_stage (tenant_id, name),
+        INDEX idx_stage_tenant (tenant_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("Pipeline Stages table created.");
+
+    // 10. Create deals table
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS deals (
+        deal_id INT AUTO_INCREMENT PRIMARY KEY,
+        tenant_id INT NOT NULL,
+        stage_id INT NOT NULL,
+        contact_id INT NOT NULL,
+        deal_name VARCHAR(255) NOT NULL,
+        company_name VARCHAR(255) NOT NULL,
+        value DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+        contact_executive_id INT NULL,
+        dev_progress INT NOT NULL DEFAULT 0,
+        lost_reason VARCHAR(255) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (tenant_id) REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+        FOREIGN KEY (stage_id) REFERENCES pipeline_stages(stage_id) ON DELETE RESTRICT,
+        FOREIGN KEY (contact_id) REFERENCES contacts(contact_id) ON DELETE RESTRICT,
+        FOREIGN KEY (contact_executive_id) REFERENCES users(id) ON DELETE SET NULL,
+        INDEX idx_deal_tenant (tenant_id),
+        INDEX idx_deal_stage (stage_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("Deals table created.");
+
+    // 11. Create deal_notes table
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS deal_notes (
+        note_id INT AUTO_INCREMENT PRIMARY KEY,
+        deal_id INT NOT NULL,
+        note_text TEXT NOT NULL,
+        created_by_user_id INT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (deal_id) REFERENCES deals(deal_id) ON DELETE CASCADE,
+        FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL,
+        INDEX idx_note_deal (deal_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("Deal Notes table created.");
+
+    // 12. Create deal_activities table
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS deal_activities (
+        activity_id INT AUTO_INCREMENT PRIMARY KEY,
+        deal_id INT NOT NULL,
+        activity_text TEXT NOT NULL,
+        performed_by_user_id INT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (deal_id) REFERENCES deals(deal_id) ON DELETE CASCADE,
+        FOREIGN KEY (performed_by_user_id) REFERENCES users(id) ON DELETE SET NULL,
+        INDEX idx_activity_deal (deal_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    // Enable foreign key checks back to validate constraints during data insert
+    await conn.query("SET FOREIGN_KEY_CHECKS = 1");
+    console.log("Re-enabled foreign key checks. Validating constraints...");
+
+    // Seeding: Step 1. Insert global/default tenant for Super Admin
+    const [tenantResult] = await conn.query(
+      "INSERT INTO tenants (name, status) VALUES (?, ?)",
+      ["Global Admin Group", "active"]
+    );
+    const tenantId = tenantResult.insertId;
+    console.log(`Seeded default tenant ID: ${tenantId}`);
+
+    // Seeding: Step 2. Create the default pipeline stages for this tenant
+    const defaultStages = ["Opportunity", "Proposal Sent", "Negotiation", "Won", "Lost"];
+    for (let i = 0; i < defaultStages.length; i++) {
+      await conn.query(
+        "INSERT INTO pipeline_stages (tenant_id, name, sort_order) VALUES (?, ?, ?)",
+        [tenantId, defaultStages[i], i]
+      );
+    }
+    console.log("Seeded default pipeline stages.");
+
+    // Seeding: Step 3. Insert default Super Admin user
+    const email = "admin@crm.com";
+    const rawPass = "adminpassword123";
+    const hashedPass = await bcrypt.hash(rawPass, 10);
+    await conn.query(`
+      INSERT INTO users (tenant_id, name, email, password, role, default_module)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [tenantId, "Master Admin", email, hashedPass, "Super Admin", "Dashboard"]);
+    console.log("Super Admin Seed User created successfully!");
+    console.log(`  Email:    ${email}`);
+    console.log(`  Password: ${rawPass}`);
+    console.log("Database migration and QA validation completed successfully!");
     process.exit(0);
   } catch (error) {
-    console.error("Migration failed:", error);
+    console.error("Migration failed with error:", error);
     process.exit(1);
+  } finally {
+    conn.release();
   }
 }
 

@@ -1,13 +1,24 @@
 const db = require("../config/database");
 
 const userEmail = async (email) => {
-  const [rows] = await db.execute(`
-    SELECT u.id, u.name, u.email, u.password, u.phone, u.bio, u.avatar, u.role, o.organization_name AS company
+  const sql = `
+    SELECT
+      u.id,
+      u.name,
+      u.email,
+      u.password,
+      u.phone,
+      u.bio,
+      u.avatar,
+      u.role,
+      o.organization_name AS company
     FROM users u
-    LEFT JOIN organization o ON u.org_id = o.org_id
+    LEFT JOIN accounts o
+      ON u.tenant_id = o.tenant_id
     WHERE u.email = ?
-  `, [email]);
+  `;
 
+  const [rows] = await db.query(sql, [email]);
   return rows[0];
 };
 
