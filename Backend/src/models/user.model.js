@@ -4,17 +4,17 @@ const userEmail = async (email) => {
   const sql = `
     SELECT
       u.id,
+      u.org_id,
       u.name,
       u.email,
       u.password,
       u.phone,
       u.bio,
-      u.avatar,
       u.role,
-      o.organization_name AS company
+      o.name AS company
     FROM users u
-    LEFT JOIN accounts o
-      ON u.tenant_id = o.tenant_id
+    LEFT JOIN organizations o
+      ON u.org_id = o.org_id
     WHERE u.email = ?
   `;
 
@@ -27,58 +27,34 @@ const createUser = async (userData) => {
     name,
     email,
     password,
-    role = 'Company Employee',
+    role = 'Employee',
     org_id = null,
     phone = null,
-    bio = null,
-    avatar = null
+    bio = null
   } = userData;
 
   const [result] = await db.execute(
-    `INSERT INTO users (name, email, password, role, org_id, phone, bio, avatar)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [name, email, password, role, org_id, phone, bio, avatar]
+    `INSERT INTO users (name, email, password, role, org_id, phone, bio)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [name, email, password, role, org_id, phone, bio]
   );
   return result;
 };
 
-
-const createLead = async (leadData) => {
-  const {
-    name,
-    email,
-    phone,
-    company,
-    source,
-    status,
-    assignedTo,
-    notes,
-  } = leadData;
-
+const updateUserProfile = async (userId, profileData) => {
+  const { name, phone, bio } = profileData;
   const [result] = await db.execute(
-    `INSERT INTO Leads
-    (Name, Email, Phone, Company, Source, Status, AssignedTo, Notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      name,
-      email,
-      phone,
-      company,
-      source,
-      status,
-      assignedTo,
-      notes,
-    ]
+    `UPDATE users SET name = ?, phone = ?, bio = ? WHERE id = ?`,
+    [name, phone, bio, userId]
   );
-
-  return result;
+  return result.affectedRows > 0;
 };
 
 const getUsers = async (orgId = null) => {
   let sql = `
-    SELECT u.id, u.name, u.email, u.phone, u.bio, u.avatar, u.role, o.organization_name AS company
+    SELECT u.id, u.name, u.email, u.phone, u.bio, u.role, o.name AS company
     FROM users u
-    LEFT JOIN organization o ON u.org_id = o.org_id
+    LEFT JOIN organizations o ON u.org_id = o.org_id
   `;
   const params = [];
   if (orgId) {
@@ -92,6 +68,6 @@ const getUsers = async (orgId = null) => {
 module.exports = {
   userEmail,
   createUser,
-  createLead,
+  updateUserProfile,
   getUsers
 };
