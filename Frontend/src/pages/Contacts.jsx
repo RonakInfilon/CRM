@@ -3,7 +3,7 @@ import ContactsList from "../components/ContactsList";
 import Pageheader from "../components/Pageheader";
 import ContactDetailDrawer from "../components/ContactDetailDrawer";
 import ContactModal from "../components/ContactModal";
-import { getContacts, createContact, updateContact, deleteContact } from "../services/contactService";
+// import { getContacts, createContact, updateContact, deleteContact } from "../services/contactService";
 import "../styles/Contacts.css";
 
 const Contacts = () => {

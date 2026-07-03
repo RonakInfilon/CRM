@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createLead, updateLead } from "../services/leadService";
+// import { createLead, updateLead } from "../services/leadService";
 import "../styles/LeadModel.css";
 
 const initialState = {

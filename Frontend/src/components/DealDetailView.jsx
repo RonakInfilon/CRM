@@ -4,7 +4,16 @@ import NotesSection from './NotesSection'
 import "../styles/DealDataView.css"
 
 const DealDetailView = ({deal,stages,onBack,onSave}) => {
-  const[formData,setFormData]=useState({...deal});
+  // Normalise notes to array — backend may return a string, NotesSection needs an array
+  const normalisedDeal = {
+    ...deal,
+    notes: Array.isArray(deal.notes)
+      ? deal.notes
+      : deal.notes
+        ? [deal.notes]
+        : []
+  };
+  const[formData,setFormData]=useState({...normalisedDeal});
  const handleChange = (field, value) => {
     setFormData(prev => {
       const updated = { ...prev, [field]: value };

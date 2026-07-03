@@ -5,12 +5,12 @@ import Pagination from "../components/Pagination";
 import CompanyCard from "../components/CompanyCard";
 import CompanyModal from "../components/CompanyModal";
 import { useRole } from "../context/RoleContext";
-import {
-  getOrganization,
-  updateOrganization,
-  deleteOrganization,
-  createOrganization,
-} from "../services/organizationService";
+// import {
+//   getOrganization,
+//   updateOrganization,
+//   deleteOrganization,
+//   createOrganization,
+// } from "../services/organizationService";
 import "../styles/Organization.css";
 
 const defaultOrgs = [

@@ -12,7 +12,7 @@ import "../styles/LeadTable.css";
 import Pagination from "./Pagination.jsx";
 import StatusBadge from "./StatusBadges.jsx";
 import LeadCard from "./LeadCard.jsx";
-import { getLeads, updateLead, deleteLead } from "../services/leadService.js";
+// import { getLeads, updateLead, deleteLead } from "../services/leadService.js";
 import { useRole } from "../context/RoleContext.jsx";
 
 const SAMPLE_LEADS = [

@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import "../styles/PipeLine.css";
 import DealDetailView from "../components/DealDetailView";
 import Pageheader from "../components/Pageheader";
-import { getOpportunities, updateOpportunity } from "../services/opportunitiesService";
+// import { getOpportunities, updateOpportunity } from "../services/opportunitiesService";
 
 // Initial stages
 const initialStages = [
@@ -14,14 +14,150 @@ const initialStages = [
   { id: "stg_lost", name: "Lost" }
 ];
 
+// ─── Temporary mock data (replace once backend is ready) ───────────────────
+const MOCK_DEALS = [
+  {
+    id: "mock_1",
+    dealName: "Enterprise SaaS Rollout",
+    company: "Infosys Ltd.",
+    value: 120000,
+    contactPerson: "Arjun Mehta",
+    stageId: "stg_opportunity",
+    stage: "Opportunity",
+    lostReason: "",
+    devProgress: 0,
+    notes: ["Initial discovery call completed. Strong interest in the platform."],
+    activities: ["Lead created", "Discovery call held on 2026-06-10"]
+  },
+  {
+    id: "mock_2",
+    dealName: "Cloud Migration Contract",
+    company: "TechMahindra",
+    value: 85000,
+    contactPerson: "Priya Sharma",
+    stageId: "stg_opportunity",
+    stage: "Opportunity",
+    lostReason: "",
+    devProgress: 0,
+    notes: ["Client wants full AWS migration with 24/7 support."],
+    activities: ["Lead created", "Email intro sent"]
+  },
+  {
+    id: "mock_3",
+    dealName: "ERP Implementation",
+    company: "Wipro Infotech",
+    value: 200000,
+    contactPerson: "Rohan Desai",
+    stageId: "stg_proposal",
+    stage: "Proposal Sent",
+    lostReason: "",
+    devProgress: 0,
+    notes: ["Full proposal sent. Awaiting legal review."],
+    activities: ["Lead created", "Proposal sent on 2026-06-20"]
+  },
+  {
+    id: "mock_4",
+    dealName: "Cybersecurity Audit",
+    company: "HCL Technologies",
+    value: 55000,
+    contactPerson: "Sneha Nair",
+    stageId: "stg_proposal",
+    stage: "Proposal Sent",
+    lostReason: "",
+    devProgress: 0,
+    notes: ["Proposal includes penetration testing & compliance check."],
+    activities: ["Lead created", "Demo scheduled", "Proposal sent"]
+  },
+  {
+    id: "mock_5",
+    dealName: "AI Analytics Platform",
+    company: "Reliance Jio",
+    value: 310000,
+    contactPerson: "Karan Patel",
+    stageId: "stg_negotiation",
+    stage: "Negotiation",
+    lostReason: "",
+    devProgress: 0,
+    notes: ["Price negotiation in progress. Client wants 15% discount."],
+    activities: ["Lead created", "Proposal sent", "Counter-offer received 2026-06-28"]
+  },
+  {
+    id: "mock_6",
+    dealName: "Digital Transformation Suite",
+    company: "L&T Infotech",
+    value: 175000,
+    contactPerson: "Anjali Verma",
+    stageId: "stg_negotiation",
+    stage: "Negotiation",
+    lostReason: "",
+    devProgress: 0,
+    notes: ["Finalising SLA terms and payment schedule."],
+    activities: ["Lead created", "Proposal sent", "SLA discussion 2026-07-01"]
+  },
+  {
+    id: "mock_7",
+    dealName: "HR Management System",
+    company: "Zomato Pvt. Ltd.",
+    value: 42000,
+    contactPerson: "Vikram Singh",
+    stageId: "stg_won",
+    stage: "Won",
+    lostReason: "",
+    devProgress: 60,
+    notes: ["Contract signed. Development phase is underway."],
+    activities: ["Lead created", "Contract signed 2026-06-15", "Kickoff meeting held"]
+  },
+  {
+    id: "mock_8",
+    dealName: "Logistics Automation",
+    company: "Delhivery Corp",
+    value: 98000,
+    contactPerson: "Meera Joshi",
+    stageId: "stg_won",
+    stage: "Won",
+    lostReason: "",
+    devProgress: 30,
+    notes: ["Phase 1 delivery completed successfully."],
+    activities: ["Lead created", "PO received", "Phase 1 delivered 2026-06-25"]
+  },
+  {
+    id: "mock_9",
+    dealName: "Mobile Banking App",
+    company: "Axis Bank Ltd.",
+    value: 220000,
+    contactPerson: "Ravi Kumar",
+    stageId: "stg_lost",
+    stage: "Lost",
+    lostReason: "Client selected a competitor offering a lower price point.",
+    devProgress: 0,
+    notes: ["Lost to Infosys BPO on pricing."],
+    activities: ["Lead created", "Proposal sent", "Lost to competitor 2026-06-30"]
+  },
+  {
+    id: "mock_10",
+    dealName: "Retail POS Integration",
+    company: "D-Mart Ltd.",
+    value: 67000,
+    contactPerson: "Pooja Iyer",
+    stageId: "stg_lost",
+    stage: "Lost",
+    lostReason: "Budget cut – project postponed indefinitely by client.",
+    devProgress: 0,
+    notes: ["Deal stalled after Q2 budget review."],
+    activities: ["Lead created", "Demo done", "Budget freeze confirmed 2026-07-01"]
+  }
+];
+// ──────────────────────────────────────────────────────────────────────────
+
 const Pipeline = () => {
   const [stages, setStages] = useState(initialStages);
-  const [deals, setDeals] = useState([]);
+  const [deals, setDeals] = useState(MOCK_DEALS);
   const [loading, setLoading] = useState(false);
   const [newStageName, setNewStageName] = useState("");
   const [selectedDealId, setSelectedDealId] = useState(null);
 
   // Fetch qualified deals/opportunities from the backend
+  // Falls back to MOCK_DEALS if the API is unavailable
   const fetchDeals = useCallback(async () => {
     try {
       setLoading(true);
@@ -49,10 +185,14 @@ const Pipeline = () => {
             stageId
           };
         });
-        setDeals(mappedDeals);
+        if (mappedDeals.length > 0) {
+          setDeals(mappedDeals);
+        }
+        // If backend returns empty list, keep mock data visible
       }
     } catch (err) {
-      console.warn("Failed to load pipeline deals:", err);
+      console.warn("Backend unavailable – showing mock pipeline data.", err);
+      // Keep the current mock data in state; do not wipe it
     } finally {
       setLoading(false);
     }
@@ -118,6 +258,17 @@ const Pipeline = () => {
       }
       return d;
     }));
+
+    // Skip backend call for temporary mock deals (IDs prefixed with "mock_")
+    const isMockDeal = String(deal.id).startsWith("mock_");
+
+    if (isMockDeal) {
+      // For mock data: just handle the lost-stage prompt locally, no API call needed
+      if (targetStageId === "stg_lost" && !deal.lostReason) {
+        setSelectedDealId(deal.id);
+      }
+      return;
+    }
 
     try {
       await updateOpportunity(deal.id, {

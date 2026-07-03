@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { getOrganization } from "../services/organizationService";
-import { getLeads } from "../services/leadService";
+// import { getOrganization } from "../services/organizationService";
+// import { getLeads } from "../services/leadService";
 import "../styles/LeadModel.css"; // Reuse modal styling for premium layout consistence
 
 const ContactModal = ({ isOpen, onClose, contact, onSave }) => {

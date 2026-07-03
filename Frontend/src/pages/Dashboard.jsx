@@ -10,8 +10,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useRole } from "../context/RoleContext";
-import { getLeads } from "../services/leadService";
-import { getOrganization } from "../services/organizationService";
+
 import "../styles/dashboard.css";
 
 function Dashboard() {
