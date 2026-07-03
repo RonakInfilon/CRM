@@ -107,7 +107,7 @@ const updateLeadStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-
+    console.log("I m here");
     await Lead.updateLeadStatus(id, status);
 
     return res.status(200).json({

@@ -12,7 +12,8 @@ import "../styles/LeadTable.css";
 import Pagination from "./Pagination.jsx";
 import StatusBadge from "./StatusBadges.jsx";
 import LeadCard from "./LeadCard.jsx";
-// import { getLeads, updateLead, deleteLead } from "../services/leadService.js";
+
+import { getLeads,updateLead,deleteLead ,updateLeadStatus} from "../services/leadService.js";
 import { useRole } from "../context/RoleContext.jsx";
 
 const SAMPLE_LEADS = [
@@ -111,53 +112,63 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
     }
   }, [isOffline, allLeads, filteredAndSortedLeads, currentPage, totalPages]);
 
-  const handleStatusChange = async (lead, newStatus) => {
-    if (newStatus === "Qualified" || newStatus === "Won") {
-      setAllLeads(prev => prev.filter(item => item.LeadID !== lead.LeadID));
-    } else {
-      setAllLeads(prev =>
-        prev.map(item =>
-          item.LeadID === lead.LeadID ? { ...item, Status: newStatus } : item
-        )
-      );
-    }
+ const handleStatusChange = async (lead, newStatus) => {
+  // Optimistic UI update
+  if (newStatus === "Qualified" || newStatus === "Won") {
+    setAllLeads((prev) =>
+      prev.filter((item) => item.LeadID !== lead.LeadID)
+    );
+  } else {
+    setAllLeads((prev) =>
+      prev.map((item) =>
+        item.LeadID === lead.LeadID
+          ? { ...item, Status: newStatus }
+          : item
+      )
+    );
+  }
 
-    try {
-      await updateLead(lead.LeadID, { ...lead, status: newStatus });
-      if (newStatus === "Qualified" || newStatus === "Won") {
-        fetchLeads();
-      }
-    } catch (err) {
-      console.warn("Failed to update status on server:", err);
+  try {
+    await updateLeadStatus(lead.LeadID, newStatus);
+
+    if (newStatus === "Qualified" || newStatus === "Won") {
       fetchLeads();
     }
-  };
+  } catch (err) {
+    console.error(err);
 
-  const handleDelete = async (id) => {
-    if (!canDelete) {
-      alert("Permission Denied: Only Super Admin can delete records.");
-      return;
-    }
+    // Reload original data if API fails
+    fetchLeads();
+  }
+};
 
-    const confirmed = window.confirm("Delete this lead?");
-    if (!confirmed) return;
+ const handleDelete = async (id) => {
+  if (!canDelete) {
+    alert("Permission Denied: Only Super Admin can delete records.");
+    return;
+  }
 
-    try {
-      await deleteLead(id);
-      setAllLeads(prev => prev.filter(lead => lead.LeadID !== id));
-      setOpenMenu(null);
-    } catch (err) {
-      console.warn("Failed to delete lead on server, deleting locally:", err);
-      setAllLeads(prev => prev.filter(lead => lead.LeadID !== id));
-      setOpenMenu(null);
-    }
-  };
+  if (!window.confirm("Delete this lead?")) return;
 
-  const handleEditClick = (lead) => {
-    setSelectedLead(lead);
-    setShowModal(true);
+  try {
+    await deleteLead(id);
+
+    setAllLeads((prev) =>
+      prev.filter((lead) => lead.LeadID !== id)
+    );
+
     setOpenMenu(null);
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Failed to delete lead.");
+  }
+};
+
+ const handleEditClick = (lead) => {
+  setSelectedLead(lead);
+  setShowModal(true);
+  setOpenMenu(null);
+};
 
   const headers = ["FirstName", "LastName", "Organization", "Territory", "Industry", "Status"];
 

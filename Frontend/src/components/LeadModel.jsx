@@ -1,7 +1,7 @@
 import { useState } from "react";
 // import { createLead, updateLead } from "../services/leadService";
 import "../styles/LeadModel.css";
-
+import { createLead ,updateLead} from "../services/leadService";
 const initialState = {
   firstName: "",
   lastName: "",
@@ -49,10 +49,10 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log("Submitting")
     try {
       if (isEditMode) {
-        await updateLead(lead.LeadID, formData);
+        await updateLead(e.LeadID, formData);
       } else {
         await createLead(formData);
       }

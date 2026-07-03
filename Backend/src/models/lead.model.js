@@ -1,13 +1,18 @@
 const pool = require("../config/database");
 
 
-const createLead=async(leaData)=>{
-  const connection=await pool.getConnection();
+// l.lead_id AS LeadID,
+// c.first_name AS FirstName,
+// c.last_name AS LastName,
+// o.name AS Organization,
+// l.status AS Status,
+const createLead = async (leadData) => {
+  const connection = await pool.getConnection();
 
-  try{
+  try {
     await connection.beginTransaction();
 
-      const {
+    const {
       salutation,
       firstName,
       lastName,
@@ -26,27 +31,27 @@ const createLead=async(leaData)=>{
       companyId = null,
     } = leadData;
     //create organization
-    const[orgResult]=await connection.execute(
+    const [orgResult] = await connection.execute(
       `Insert into organizations (
       name,website,territory,industry,source) VALUES (?,?,?,?,?)`,
-      [organization,website,territory,industry,source]
+      [organization, website, territory, industry, source]
     );
 
-    const orgId=orgResult.insertId;
+    const orgId = orgResult.insertId;
 
 
     // create contact
 
-    const[contactResult]=await connection.execute(
+    const [contactResult] = await connection.execute(
       `Insert into contacts
       (
         org_id,company_id,Salutation,first_name,last_name,email,phone,job_title,contact_status
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Lead')`,
-      [orgId,companyId,salutation,firstName,lastName,email,phone,jobTitle,
+      [orgId, companyId, salutation, firstName, lastName, email, phone, jobTitle,
       ]
     )
     const contactId = contactResult.insertId;
-    
+
     //create lead
     const [leadResult] = await connection.execute(
       `
@@ -55,94 +60,104 @@ const createLead=async(leaData)=>{
         org_id,contact_id,status,assigned_to_user_id
       )
       VALUES (?, ?, ?, ?)`,
-      [orgId, contactId,status || "New",assignedToUserId,]
+      [orgId, contactId, status || "New", assignedToUserId,]
     );
 
     const leadId = leadResult.insertId;
     //create lead note
-     if (notes && notes.trim() !== "") {
+    if (notes && notes.trim() !== "") {
       await connection.execute(
         `
         INSERT INTO lead_notes
         (lead_id,note_text,created_by_user_id)
         VALUES (?, ?, ?)`,
-        [leadId,notes,createdByUserId,]
+        [leadId, notes, createdByUserId,]
       );
+    }
       await connection.commit();
       return {
-      success: true,
-      leadId,
-      message: "Lead created successfully",
-    };
-    }
+        success: true,
+        leadId,
+        message: "Lead created successfully",
+      };
+    
   }
   catch (error) {
     await connection.rollback();
-    throw error;}
-    finally{
-      connection.release();
-    }
+    throw error;
+  }
+  finally {
+    connection.release();
+  }
 }
-const getAllLeads=async({
-  page=1,
-  limit=10,
-  search="",
-  status=""
-})=>{
-  const offset=(page-1)*limit;
-  const query=
-  `
-  select l.lead_id,
-  c.Saluation,
-  c.first_name,
-  c.last_name,
-  c.email,
-  c.phone,
-  
-  o.name as OrganizatioName,
-  o.webiste,
-  o.industry,
-  o.Terriority,
-  o.Source
+const getAllLeads = async ({
+  page = 1,
+  limit = 10,
+  search = "",
+  status = ""
+}) => {
+  const offset = (page - 1) * limit;
+  let query = `
+SELECT
+    l.lead_id AS LeadID,
+    c.Salutation,
+    c.first_name AS FirstName,
+    c.last_name AS LastName,
+    c.email AS Email,
+    c.phone AS Phone,
+    c.job_title AS JobTitle,
 
-  l.status,
-  (select note_text from 
-  lead_notes ln where ln.lead_d=l.lead_id 
-  order by ln.created_at DESC limit 1) as Notes,
+    o.name AS Organization,
+    o.website AS Website,
+    o.industry AS Industry,
+    o.Territory AS Territory,
+    o.Source AS Source,
 
-  l.created_at from leads l
-  INNER JOIN organizations o
-        ON l.org_id = o.org_id
+    l.status AS Status,
 
-    INNER JOIN contacts c
-        ON l.contact_id = c.contact_id
+    (
+        SELECT note_text
+        FROM lead_notes ln
+        WHERE ln.lead_id = l.lead_id
+        ORDER BY ln.created_at DESC
+        LIMIT 1
+    ) AS Notes,
 
-    WHERE 1=1
-  )
-  `
+    l.created_at AS CreatedAt
+
+FROM leads l
+
+INNER JOIN organizations o
+    ON l.org_id = o.org_id
+
+INNER JOIN contacts c
+    ON l.contact_id = c.contact_id
+
+WHERE 1=1
+`;
 
 
-  const values=[];
+  const values = [];
 
-  if(search){
-    query+=`
+  if (search) {
+    query += `
     AND(
     c.first_name LIKE ?
     or c.last_name LIKE ?
-    or c.name LIKE ?
+    or o.name LIKE ?
     or c.email LIKE?
     )
     `
 
-    const keyword=`%${search}%`;
-    values.push(keyword,keyword,keyword,keyword);
+    const keyword = `%${search}%`;
+    values.push(keyword, keyword, keyword, keyword);
   }
   if (status) {
     query += ` AND l.status = ? `;
     values.push(status);
   }
 
-  
+
   query += `
       ORDER BY l.created_at DESC
       LIMIT ?
@@ -205,24 +220,24 @@ const getLeadById = async (leadId) => {
     `
     SELECT
 
-        l.lead_id,
+        l.lead_id as LeadID,
 
         c.contact_id,
         c.Salutation,
-        c.first_name,
-        c.last_name,
+        c.first_name as FirstName,
+        c.last_name as LastName,
         c.email,
         c.phone,
         c.job_title,
 
         o.org_id,
-        o.name AS organization,
+        o.name AS Organization,
         o.website,
         o.Territory,
         o.industry,
         o.Source,
 
-        l.status,
+        l.status as Status,
         l.assigned_to_user_id,
 
         (
@@ -342,7 +357,7 @@ const updateLead = async (leadId, leadData) => {
       ]
     );
 
-   
+
 
     await connection.execute(
       `
@@ -499,11 +514,12 @@ const updateLeadStatus = async (leadId, status) => {
 
   return result;
 };
-module.exports={
+module.exports = {
   createLead,
   getAllLeads,
   getLeadById,
   updateLead,
   deleteLead,
-  updateLead
+  updateLead,
+  updateLeadStatus
 }
