@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useRole } from "../context/RoleContext";
+import { updateProfile } from "../services/profileService";
 import {
   User,
   Mail,
@@ -74,12 +75,24 @@ const Profile = () => {
     }));
   };
 
-  const handleSaveProfile = (e) => {
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
-    updateProfile(formData);
-    setIsEditing(false);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+    try {
+      const response = await updateProfile(formData);
+      console.log(response);
+      updateProfile(formData);
+      setIsEditing(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+
+    }
+    catch (error) {
+      console.log(error);
+      alert(error.message || "failed to update profile")
+    }
+
+
+
   };
 
   const handleSwitch = (targetRole, targetCompany) => {
@@ -167,7 +180,7 @@ const Profile = () => {
               {profile?.name ? profile.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() : "U"}
             </div>
           </div>
-          
+
           <div className="user-summary">
             <div className="name-row">
               <h2>{profile?.name || "User Name"}</h2>
@@ -178,7 +191,7 @@ const Profile = () => {
               )}
             </div>
             <p className="email-label">{profile?.email}</p>
-            
+
             <div className="badges-meta-row">
               <div className={`role-badge ${getRoleBadgeClass()}`}>
                 <Shield size={12} style={{ marginRight: 4 }} />

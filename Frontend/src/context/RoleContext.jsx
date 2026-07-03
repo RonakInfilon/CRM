@@ -154,7 +154,7 @@ export const RoleProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     if (token && token !== "mock-offline-token-12345") {
       try {
-        await API.put("/auth/profile", {
+        await API.put("/users/profile", {
           name: updatedDetails.name,
           phone: updatedDetails.phone,
           bio: updatedDetails.bio

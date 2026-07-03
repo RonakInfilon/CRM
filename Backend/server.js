@@ -33,7 +33,7 @@ app.get("/test", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
-app.use("/api/tenant", tenantRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/permissions", permissionRoutes);
 app.use("/api/tenants", tenantRoutes);
 
