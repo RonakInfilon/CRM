@@ -33,33 +33,33 @@ async function migrate() {
     // We keep FOREIGN_KEY_CHECKS = 0 during creation of all tables to prevent 
     console.log("✓ Disabled foreign key checks for table creation.");
 
-    // 2. Create organizations table (replaces tenants)
-    await conn.query(`
-      CREATE TABLE IF NOT EXISTS organizations (
-        org_id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        status ENUM('active', 'suspended', 'inactive') DEFAULT 'active',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    `);
-    console.log("Organizations table created.");
+      // 2. Create organizations table (replaces tenants)
+      await conn.query(`
+        CREATE TABLE IF NOT EXISTS organizations (
+          org_id INT AUTO_INCREMENT PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          status ENUM('active', 'suspended', 'inactive') DEFAULT 'active',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+      `);
+      console.log("Organizations table created.");
 
-    // 3. Create organization_permissions table (replaces tenant_permissions)
-    await conn.query(`
-      CREATE TABLE IF NOT EXISTS organization_permissions (
-        org_id INT PRIMARY KEY,
-        module_dashboard BOOLEAN NOT NULL DEFAULT TRUE,
-        module_leads BOOLEAN NOT NULL DEFAULT TRUE,
-        module_pipeline BOOLEAN NOT NULL DEFAULT TRUE,
-        module_contacts BOOLEAN NOT NULL DEFAULT TRUE,
-        module_companies BOOLEAN NOT NULL DEFAULT TRUE,
-        module_user_management BOOLEAN NOT NULL DEFAULT TRUE,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (org_id) REFERENCES organizations(org_id) ON DELETE CASCADE
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    `);
-    console.log("Organization Permissions table created.");
+      // 3. Create organization_permissions table (replaces tenant_permissions)
+      await conn.query(`
+        CREATE TABLE IF NOT EXISTS organization_permissions (
+          org_id INT PRIMARY KEY,
+          module_dashboard BOOLEAN NOT NULL DEFAULT TRUE,
+          module_leads BOOLEAN NOT NULL DEFAULT TRUE,
+          module_pipeline BOOLEAN NOT NULL DEFAULT TRUE,
+          module_contacts BOOLEAN NOT NULL DEFAULT TRUE,
+          module_companies BOOLEAN NOT NULL DEFAULT TRUE,
+          module_user_management BOOLEAN NOT NULL DEFAULT TRUE,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          FOREIGN KEY (org_id) REFERENCES organizations(org_id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+      `);
+      console.log("Organization Permissions table created.");
 
     // 3b. Create role_permissions table
     await conn.query(`
@@ -305,4 +305,4 @@ async function migrate() {
   }
 }
 
-migrate();
+// migrate();

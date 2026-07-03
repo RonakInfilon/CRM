@@ -15,6 +15,7 @@ const authRoutes=require("./src/routes/authRoutes.js");
 const userRoutes=require("./src/routes/userRoutes.js");
 const permissionRoutes=require("./src/routes/permissionRoutes.js");
 const tenantRoutes=require("./src/routes/tenantRoutes.js");
+const leadRoutes=require("./src/routes/leadRoutes.js");
 const app = express();
 const PORT = 3000;
 
@@ -36,6 +37,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/permissions", permissionRoutes);
 app.use("/api/tenants", tenantRoutes);
+app.use("/api/leads",leadRoutes);
+
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on http://localhost:${PORT}`);

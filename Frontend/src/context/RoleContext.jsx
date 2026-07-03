@@ -129,7 +129,7 @@ export const RoleProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     if (!token || token === "mock-offline-token-12345") return;
     try {
-      const res = await API.get("/auth/permissions");
+      const res = await API.get("/permissions");
       if (res.data && res.data.success) {
         const { companyModules: apiCompanyModules, rolePermissions: apiRolePermissions } = res.data;
         setCompanyModulesState(apiCompanyModules);
