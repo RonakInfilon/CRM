@@ -10,7 +10,7 @@ const ContactDetailDrawer = ({ isOpen, contact, onClose, onEdit }) => {
   const handleCompanyClick = () => {
     onClose();
     // Redirect to organization page and pre-fill search with company name
-    navigate(`/account?search=${encodeURIComponent(contact.organization)}`);
+    navigate(`/companies?search=${encodeURIComponent(contact.organization)}`);
   };
 
   const avatarColor = {

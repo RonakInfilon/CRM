@@ -206,3 +206,77 @@
     width: 100%;
   }
 }
+
+/* ── Stage Badges ─────────────────────────────────────────── */
+.stage-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.stage-won  { background: #dcfce7; color: #166534; }
+.stage-lost { background: #fee2e2; color: #991b1b; }
+
+/* ── Form Error ───────────────────────────────────────────── */
+.form-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+/* ── Won Info ─────────────────────────────────────────────── */
+.won-info {
+  font-size: 12px;
+  color: #166534;
+  margin: 10px 0 0;
+}
+
+/* ── Note Meta Row ────────────────────────────────────────── */
+.note-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+.note-time {
+  font-size: 11px;
+  color: #94a3b8;
+}
+.note-delete-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 4px;
+  transition: color 0.15s;
+}
+.note-delete-btn:hover { color: #ef4444; }
+
+/* ── Activity event node ──────────────────────────────────── */
+.activity-event-node {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.activity-dot {
+  color: #6366f1;
+  font-size: 10px;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+.activity-content { flex: 1; }
+.activity-node-message {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: #334155;
+}
+.activity-time {
+  font-size: 11px;
+  color: #94a3b8;
+}

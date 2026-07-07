@@ -1,89 +1,174 @@
-.notes-container{
-  background: rgb(255, 255, 255);
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
-  border-top: 3px solid #0668f2;
+/* Premium, modern styling for Negotiation Notes in Deal Details */
+
+.notes-container {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
 }
 
-.notes-title{
-  margin-top: 0%;
-  font-size: 15px;
-  font-weight: 600;
-  color: #334155;
-  margin-bottom: 15px;
-  border-bottom: 1px dashed #e2e8f0;
-  padding-bottom: 8px;
+.notes-container:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 }
 
-.notes-form{
+.notes-title {
+  margin-top: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 20px;
   display: flex;
+  align-items: center;
   gap: 8px;
-  flex-direction: column;
-  margin-bottom: 15px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
 }
 
-.notes-action-input{
+/* Side-by-side premium input group */
+.notes-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.notes-action-input {
   flex: 1;
-  padding:10px 14px;
-  border-radius: 6px;
-  border: 1px solid #cbd5e1;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1.5px solid #cbd5e1;
   font-size: 14px;
-  color: rgb(43, 44, 44);
+  color: #1e293b;
   outline: none;
+  background-color: #f8fafc;
+  transition: all 0.2s ease;
 }
-.notes-action-input:focus{
-  border-color: #000000;
-  box-shadow: 0 0 0 3px rgba(67, 77, 130, 0.1);
+
+.notes-action-input::placeholder {
+  color: #94a3b8;
 }
-.notes-action-button{
-  
-  background-color: #2563eb;
-  color: white;
+
+.notes-action-input:focus {
+  background-color: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.notes-action-button {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 12px 20px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
 }
 
-.notes-action-button :hover{
-  background-color: #1d4ed8;
+.notes-action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  filter: brightness(1.1);
 }
 
-.notes-stream-viewport {
-  max-height: 220px;
+.notes-action-button:active {
+  transform: translateY(0);
+}
+
+/* Notes Feed Viewport */
+.notes-viewport {
+  max-height: 280px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-right: 4px;
+  gap: 12px;
+  padding-right: 8px;
 }
 
-.notes-message-bubble {
-  background: #f8fafc;
-  padding: 12px;
-  border-radius: 6px;
-  border-left: 3px solid #cbd5e1;
+/* Beautiful custom scrollbar */
+.notes-viewport::-webkit-scrollbar {
+  width: 6px;
 }
 
-.notes-message-bubble:hover {
+.notes-viewport::-webkit-scrollbar-track {
   background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.notes-viewport::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.notes-viewport::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Individual Note Bubble styling */
+.notes-message {
+  background: #f8fafc;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border-left: 4px solid #3b82f6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.notes-message:hover {
+  background: #f1f5f9;
+  transform: translateX(2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
 }
 
 .notes-message-text {
-  margin: 0;
-  font-size: 14px;
+  margin: 0 0 8px 0;
+  font-size: 13.5px;
   color: #334155;
-  line-height: 1.5;
+  line-height: 1.6;
+  white-space: pre-wrap;
   word-break: break-word;
 }
 
-.notes-empty-state {
+/* Metadata and Delete Controls */
+.note-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(226, 232, 240, 0.6);
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.note-time {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.note-delete-btn {
+  background: none;
+  border: none;
   color: #94a3b8;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.note-delete-btn:hover {
+  color: #ef4444;
+  background-color: #fee2e2;
+}
+
+.notes-empty-state {
+  color: #64748b;
   font-size: 13px;
   font-style: italic;
-  margin: 10px 0;
+  margin: 20px 0;
   text-align: center;
 }
