@@ -1,9 +1,9 @@
 .users-page {
-  padding: 24px;
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 5px;
+  overflow-x: hidden;
 }
 
 .users-header {
@@ -15,12 +15,12 @@
 .users-header h1 {
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--text-main, #ffffff);
+  color:  #ffffff;
 }
 
 .users-header p {
   font-size: 0.9rem;
-  color: var(--text-muted, #9ca3af);
+  color: #9ca3af;
 }
 
 .users-layout {
@@ -37,17 +37,17 @@
 
 /* User List Card */
 .users-list-card, .user-form-card {
-  background: var(--bg-card, #1f2937);
-  border: 1px solid var(--border-color, #374151);
+  background: #1a0808;
+  border: 1px solid  #374151;
   border-radius: 12px;
   padding: 24px;
-  box-shadow: var(--card-shadow, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+  box-shadow:  0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .users-list-card h2, .user-form-card h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-main, #ffffff);
+  color:  #ffffff;
   margin-bottom: 16px;
   display: flex;
   align-items: center;
@@ -58,7 +58,7 @@
 .table-wrapper {
   overflow-x: auto;
   border-radius: 8px;
-  border: 1px solid var(--border-color, #374151);
+  border: 1px solid  #374151;
 }
 
 .users-table {
@@ -73,13 +73,13 @@
   color:white;
   padding: 12px 16px;
   font-weight: 600;
-  border-bottom: 1px solid var(--border-color, #374151);
+  border-bottom: 1px solid  #374151;
 }
 
 .users-table td {
   padding: 14px 16px;
-  color: var(--text-main, #ffffff);
-  border-bottom: 1px solid var(--border-color, #374151);
+  color:  #ffffff;
+  border-bottom: 1px solid  #374151;
 }
 
 .users-table tr:last-child td {
@@ -87,7 +87,7 @@
 }
 
 .users-table tr:hover {
-  background: var(--bg-hover, #2d3748);
+  background:  #2d3748;
 }
 
 /* Avatar Badge */
@@ -120,7 +120,7 @@
 }
 
 .user-details small {
-  color: var(--text-muted, #9ca3af);
+  color:  #9ca3af;
 }
 
 /* Badges */
@@ -169,7 +169,7 @@
 .form-group label {
   font-size: 0.85rem;
   font-weight: 500;
-  color: var(--text-muted, #9ca3af);
+  color:  #9ca3af;
 }
 
 .input-with-icon {
@@ -181,16 +181,16 @@
 .input-with-icon svg {
   position: absolute;
   left: 12px;
-  color: var(--text-muted, #9ca3af);
+  color:  #9ca3af;
 }
 
 .input-with-icon input, .input-with-icon select {
   width: 100%;
   padding: 10px 12px 10px 40px;
   background: white;
-  border: 1px solid var(--border-color, #374151);
+  border: 1px solid  #374151;
   border-radius: 8px;
-  color: var(--text-main, #ffffff);
+  color:  #ffffff;
   font-size: 0.9rem;
   outline: none;
   transition: border-color 0.2s;
@@ -249,5 +249,5 @@
 .no-users {
   text-align: center;
   padding: 48px;
-  color: var(--text-muted, #9ca3af);
+  color:  #9ca3af;
 }

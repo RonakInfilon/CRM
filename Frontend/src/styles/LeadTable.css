@@ -1,114 +1,162 @@
 .table-wrapper {
   width: 100%;
+  height: 550px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  overflow-x: auto;
-  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+  margin-bottom: 24px;
+  animation: fadeInTable 0.3s ease-out;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+}
+
+@keyframes fadeInTable {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .crm-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.875rem;
-  color: #374151;
+  font-size: 0.9rem;
+  color: #000000;
+  table-layout: fixed;
 }
 
-/* Header Styles */
 .crm-table th,
 .crm-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #f3f4f6;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+.crm-table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ensure Action cell (last column) does not clip its absolute dropdown menu and fits nicely */
+.crm-table td:last-child,
+.crm-table th:last-child {
+  overflow: visible;
+  width: 80px;
+  text-align: right;
 }
 
 .crm-table th {
-  background-color: #f9fafb;
+  background-color: #111827;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: #4b5563;
-  text-transform: capitalize;
-  letter-spacing: 0.02em;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-/* Row Hover Interaction */
+.crm-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
 .crm-table tbody tr:hover {
-  background-color: #fcfdfd;
+  background-color: #f8fafc;
 }
 
-/* Action Dropdown Wrapper Configuration */
+.crm-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .action-wrapper {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .menu-btn {
   background: none;
   border: none;
   font-size: 1.25rem;
-  color: #9ca3af;
+  color: #000000;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s ease;
 }
 
 .menu-btn:hover {
-  color: #1f2937;
-  background-color: #f3f4f6;
+  color: #4f46e5;
+  background-color: #e0e7ff;
 }
 
-/* Dropdown Menu Box Styling */
 .dropdown-menu {
   position: absolute;
-  right: 0;
-  top: 100%;
-  margin-top: 4px;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 8px;
   background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
   z-index: 50;
-  min-width: 120px;
+  min-width: 130px;
   display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: fadeInDropdown 0.15s ease-out;
+  flex-direction: row;
+  padding: 4px;
+  animation: fadeInDropdown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .dropdown-menu button {
   background: none;
   border: none;
-  padding: 8px 16px;
-  text-align: left;
-  font-size: 0.875rem;
-  color: #4b5563;
+  padding: 6px 12px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
   cursor: pointer;
-  width: 100%;
-  transition: background-color 0.15s ease;
+  flex: 1;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .dropdown-menu button:hover {
-  background-color: #f3f4f6;
-  color: #111827;
+  background-color: #f1f5f9;
+  color: #0f172a;
 }
 
 .dropdown-menu button:last-child {
-  color: #ef4444; /* Highlights Delete action in red */
+  color: #ef4444; 
 }
 
 .dropdown-menu button:last-child:hover {
   background-color: #fef2f2;
+  color: #dc2626;
 }
 
 /* Animation */
 @keyframes fadeInDropdown {
   from {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: scale(0.95) translateY(-4px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
   }
 }

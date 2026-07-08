@@ -178,34 +178,34 @@ const CompanyModal = ({ isOpen, mode = "view", company = {}, onClose, onSave, on
             <form onSubmit={handleSubmit} className="edit-form-layout">
               <div className="form-grid">
                 {currentMode === "add" && wonLeads.length > 0 && (
-                   <div className="form-group full-width" style={{ marginBottom: "20px", background: "rgba(59, 130, 246, 0.1)", padding: "12px", borderRadius: "6px" }}>
-                     <label style={{ fontWeight: "600", color: "#3b82f6" }}>Import from Won Lead:</label>
-                     <select 
-                       onChange={(e) => {
-                         const leadId = e.target.value;
-                         if (!leadId) return;
-                         const matched = wonLeads.find(l => String(l.LeadID) === String(leadId));
-                         if (matched) {
-                           setFormData(prev => ({
-                             ...prev,
-                             organization_name: matched.Organization,
-                             phone: matched.Phone,
-                             website: matched.Website || "",
-                             industry: matched.Industry || "",
-                             associated_contact: `${matched.FirstName} ${matched.LastName}`
-                           }));
-                         }
-                       }}
-                       style={{ marginTop: "6px", width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #3b82f6", background: "#1f2937", color: "#fff" }}
-                     >
-                       <option value="">-- Select a Won Lead to autofill --</option>
-                       {wonLeads.map(lead => (
-                         <option key={lead.LeadID} value={lead.LeadID}>
-                           {lead.Organization} (Lead: {lead.FirstName} {lead.LastName})
-                         </option>
-                       ))}
-                     </select>
-                   </div>
+                  <div className="form-group full-width" style={{ marginBottom: "20px", background: "rgba(59, 130, 246, 0.1)", padding: "12px", borderRadius: "6px" }}>
+                    <label style={{ fontWeight: "600", color: "#3b82f6" }}>Import from Won Lead:</label>
+                    <select
+                      onChange={(e) => {
+                        const leadId = e.target.value;
+                        if (!leadId) return;
+                        const matched = wonLeads.find(l => String(l.LeadID) === String(leadId));
+                        if (matched) {
+                          setFormData(prev => ({
+                            ...prev,
+                            organization_name: matched.Organization,
+                            phone: matched.Phone,
+                            website: matched.Website || "",
+                            industry: matched.Industry || "",
+                            associated_contact: `${matched.FirstName} ${matched.LastName}`
+                          }));
+                        }
+                      }}
+                      style={{ marginTop: "6px", width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #3b82f6", background: "#1f2937", color: "#fff" }}
+                    >
+                      <option value="">-- Select a Won Lead to autofill --</option>
+                      {wonLeads.map(lead => (
+                        <option key={lead.LeadID} value={lead.LeadID}>
+                          {lead.Organization} (Lead: {lead.FirstName} {lead.LastName})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 )}
 
                 <div className="form-group">

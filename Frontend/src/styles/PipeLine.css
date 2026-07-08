@@ -1,49 +1,22 @@
+/* Premium Pipeline Page Styling */
 
 .pipeline-wrapper {
-  padding: 30px;
-  background-color: #f8fafc; /* Light slate background */
-  min-height: 100vh;
+  padding: 24px;
+  background-color: #f8fafc;
+  min-height: calc(100vh - 64px);
   box-sizing: border-box;
+  animation: fadeInPipeline 0.4s ease-out;
 }
 
-/* Header bar containing actions like adding stages */
-.pipeline-actions {
-  margin-bottom: 25px;
-  background: white;
-  padding: 16px 20px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.pipeline-actions input {
-  padding: 10px 14px;
-  font-size: 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  width: 280px;
-  transition: all 0.2s ease;
-  outline: none;
-}
-
-.pipeline-actions input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
-
-.pipeline-actions button {
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  padding: 10px 18px;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.pipeline-actions button:hover {
-  background-color: #1d4ed8;
+@keyframes fadeInPipeline {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Horizontal scrolling pipeline layout */
@@ -52,132 +25,211 @@
   gap: 20px;
   align-items: flex-start;
   overflow-x: auto;
-  padding-bottom: 15px;
-  /* Smooth scrolling for horizontal track */
+  padding: 8px 4px 20px 4px;
   scroll-behavior: smooth;
+  min-height: calc(100vh - 200px);
 }
 
-/* Custom Scrollbar styling for the pipeline horizontal row */
+/* Custom scrollbars for pipeline grid container */
 .pipeline-container::-webkit-scrollbar {
   height: 8px;
 }
 .pipeline-container::-webkit-scrollbar-track {
   background: #f1f5f9;
-  border-radius: 4px;
+  border-radius: 99px;
 }
 .pipeline-container::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 4px;
+  border-radius: 99px;
+  transition: background 0.2s ease;
 }
 .pipeline-container::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
-/* ==========================================
-   KANBAN COLUMNS
-   ========================================== */
+/* Cycling column dynamic color scheme */
+.pipeline-column:nth-child(5n+1) {
+  --column-color: #3b82f6; /* Blue - Opportunity */
+  --column-bg: #eff6ff;
+  --column-border: #bfdbfe;
+}
+.pipeline-column:nth-child(5n+2) {
+  --column-color: #a855f7; /* Purple - Proposal Sent */
+  --column-bg: #f5f3ff;
+  --column-border: #ddd6fe;
+}
+.pipeline-column:nth-child(5n+3) {
+  --column-color: #f97316; /* Orange - Negotiation */
+  --column-bg: #fff7ed;
+  --column-border: #ffedd5;
+}
+.pipeline-column:nth-child(5n+4) {
+  --column-color: #10b981; /* Green - Won */
+  --column-bg: #ecfdf5;
+  --column-border: #a7f3d0;
+}
+.pipeline-column:nth-child(5n+5) {
+  --column-color: #64748b; /* Slate - Lost */
+  --column-bg: #f8fafc;
+  --column-border: #e2e8f0;
+}
+
+/* Column Container Styling */
 .pipeline-column {
-  min-width: 300px;
-  max-width: 300px;
-  background-color: #f1f5f9; /* Soft grey-blue column container */
-  border-radius: 10px;
-  padding: 16px;
+  min-width: 290px;
+  max-width: 290px;
+  background-color: #f1f5f9; /* Modern light-gray background */
+  border-radius: 14px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  max-height: 80vh;
+  max-height: calc(100vh - 180px);
+  border-top: 4px solid var(--column-color);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Column title and counters header zone */
+.pipeline-column:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+/* Column Header Design */
 .column-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #e2e8f0;
+  padding: 16px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .column-header strong {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
 }
 
 .item-count {
   margin-left: 8px;
-  background-color: #e2e8f0;
-  color: #475569;
+  background-color: var(--column-bg);
+  color: var(--column-color);
   padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid var(--column-border);
 }
 
+/* Delete custom stage action button */
 .delete-stage-btn {
   background: none;
   border: none;
   color: #94a3b8;
   cursor: pointer;
-  font-size: 14px;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.15s ease;
+  font-size: 12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .delete-stage-btn:hover {
   color: #ef4444;
   background-color: #fee2e2;
+  transform: rotate(90deg);
 }
 
-/* Dropzone wrapper area inside a column */
+/* Droppable card body area */
 .column-body {
   flex: 1;
   overflow-y: auto;
-  min-height: 450px;
-  padding-right: 4px;
+  min-height: 480px;
+  padding: 12px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: background-color 0.25s ease, outline 0.25s ease;
 }
 
-/* Vertical scroll tracking inside columns */
+/* Vertical scrollbar styling inside column */
 .column-body::-webkit-scrollbar {
   width: 4px;
 }
 .column-body::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 2px;
+  border-radius: 99px;
 }
 
+/* Highlighting column when dragging over it */
+.column-body.dragging-over {
+  background-color: var(--column-bg);
+  outline: 2px dashed var(--column-border);
+  outline-offset: -4px;
+  border-radius: 10px;
+}
+
+/* Premium Deal Card Styling */
 .deal-card {
-  background-color: white;
-  border-radius: 8px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
   padding: 16px;
-  margin-bottom: 12px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-  border-left: 4px solid #3b82f6; /* Modern primary indicator border */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  border-left: 4px solid var(--column-color);
   cursor: grab;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
   user-select: none;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.2s ease,
+              border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Premium micro-interactions on card hover */
+.deal-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+  border-color: var(--column-border);
 }
 
 /* Changes cursor asset appearance when holding/moving cards around */
 .deal-card:active {
   cursor: grabbing;
-  transform: scale(1.02);
-  box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.13);
+}
+
+.deal-card.dragging {
+  cursor: grabbing;
+  transform: scale(1.02) rotate(2deg) !important;
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.15), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+  border-color: var(--column-color);
+  z-index: 100;
 }
 
 .deal-card h4 {
   margin: 0 0 6px 0;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   color: #0f172a;
   line-height: 1.4;
+  letter-spacing: -0.01em;
 }
 
 .deal-card p {
   margin: 0 0 12px 0;
-  font-size: 13px;
+  font-size: 12px;
   color: #64748b;
+  font-weight: 500;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -187,57 +239,27 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
-  padding-top: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px dashed #f1f5f9;
 }
 
 .deal-value {
-  font-weight: 700;
-  color: #10b981; 
+  font-weight: 800;
+  color: #10b981;
   font-size: 14px;
 }
 
 .deal-contact {
   font-size: 11px;
-  color: #64748b;
-  background-color: #f8fafc;
+  font-weight: 600;
+  color: #475569;
+  background-color: var(--column-bg);
   padding: 3px 8px;
-  border-radius: 4px;
-  border: 1px solid #e2e8f0;
-}
-
-
-.pipeline-column:nth-child(1) .deal-card { border-left-color: #3b82f6; } 
-.pipeline-column:nth-child(2) .deal-card { border-left-color: #a855f7; } 
-.pipeline-column:nth-child(3) .deal-card { border-left-color: #f97316; } 
-.pipeline-column:nth-child(4) .deal-card { border-left-color: #10b981; } 
-.pipeline-column:nth-child(5) .deal-card { border-left-color: #64748b; } 
-
-
-.add-stage-form {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.add-stage-form input {
-  flex: 1;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.add-stage-form button {
-  padding: 10px 18px;
-  background: #4f46e5;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.add-stage-form button:hover {
-  background: #4338ca;
+  border-radius: 9999px;
+  border: 1px solid var(--column-border);
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
