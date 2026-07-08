@@ -1,6 +1,4 @@
-/* ==========================================
-   PIPELINE CONTAINER & WRAPPER
-   ========================================== */
+
 .pipeline-wrapper {
   padding: 30px;
   background-color: #f8fafc; /* Light slate background */
@@ -149,9 +147,6 @@
   border-radius: 2px;
 }
 
-/* ==========================================
-   DEAL CARDS
-   ========================================== */
 .deal-card {
   background-color: white;
   border-radius: 8px;
@@ -199,7 +194,7 @@
 
 .deal-value {
   font-weight: 700;
-  color: #10b981; /* Success green for finances */
+  color: #10b981; 
   font-size: 14px;
 }
 
@@ -212,15 +207,12 @@
   border: 1px solid #e2e8f0;
 }
 
-/* ==========================================
-   ODOO DYNAMIC COLOR PALETTES FOR STAGES
-   ========================================== */
-/* You can map specific accent colors to custom structural board blocks */
-.pipeline-column:nth-child(1) .deal-card { border-left-color: #3b82f6; } /* Opportunity - Blue */
-.pipeline-column:nth-child(2) .deal-card { border-left-color: #a855f7; } /* Proposal Sent - Purple */
-.pipeline-column:nth-child(3) .deal-card { border-left-color: #f97316; } /* Negotiation - Orange */
-.pipeline-column:nth-child(4) .deal-card { border-left-color: #10b981; } /* Won - Emerald Green */
-.pipeline-column:nth-child(5) .deal-card { border-left-color: #64748b; } /* Lost - Slate Grey */
+
+.pipeline-column:nth-child(1) .deal-card { border-left-color: #3b82f6; } 
+.pipeline-column:nth-child(2) .deal-card { border-left-color: #a855f7; } 
+.pipeline-column:nth-child(3) .deal-card { border-left-color: #f97316; } 
+.pipeline-column:nth-child(4) .deal-card { border-left-color: #10b981; } 
+.pipeline-column:nth-child(5) .deal-card { border-left-color: #64748b; } 
 
 
 .add-stage-form {

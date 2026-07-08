@@ -17,7 +17,7 @@ export const getLeads = (
 };
 
 export const getLeadById = (id) => {
-  return APi.get(`/leads/${id}`);
+  return API.get(`/leads/${id}`);
 };
 
 export const createLead = (leadData) => {

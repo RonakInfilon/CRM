@@ -116,7 +116,7 @@ const Pipeline = () => {
       lostReason = window.prompt(
         `Moving "${deal.dealName}" to Lost.\nPlease enter the reason for losing this deal:`
       );
-      if (lostReason === null) return; // user cancelled
+      if (lostReason === null) return; 
       if (!lostReason.trim()) {
         alert("Lost reason cannot be empty.");
         return;

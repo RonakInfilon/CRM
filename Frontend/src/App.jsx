@@ -15,8 +15,7 @@ import RoleGuard from "./components/RoleGuard";
 import Permission from "./pages/Permission";
 import Profile from "./pages/Profile";
 import Users from "./pages/Users";
-import Account from "./pages/Account"
-
+import Company from "./pages/Company"
 function App() {
   return (
     <RoleProvider>
@@ -43,10 +42,10 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/leads" element={<Leads />} />
             <Route
-              path="/account"
+              path="/companies"
               element={
                 <RoleGuard>
-                  <Account />
+                  <Company />
                 </RoleGuard>
               }
             />

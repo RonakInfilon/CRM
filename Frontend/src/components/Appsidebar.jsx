@@ -40,7 +40,7 @@ function AppsideBar({ isOpen, onMouseEnter, onMouseLeave }) {
     },
     {
       name: "Companies",
-      path: "/account",
+      path: "/companies",
       icon: <GroupIcon />,
     },
     // {
