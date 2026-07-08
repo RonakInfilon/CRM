@@ -14,13 +14,13 @@ const getDashboardStats = async (req, res) => {
     );
     const totalLeads = leadsCountRow[0]?.total_leads || 0;
 
-    // 2. Active Pipeline Value (Sum of deal values in stages that are NOT "Won" or "Lost")
+    // 2. Active Pipeline Value (Sum of deal values in the "Won" stage)
     const [pipelineValueRow] = await pool.execute(
       `SELECT SUM(d.value) AS active_pipeline_value
        FROM deals d
        INNER JOIN pipeline_stages ps ON d.stage_id = ps.stage_id
        INNER JOIN users u ON d.created_by_user_id = u.id
-       WHERE u.org_id = ? AND ps.name NOT IN ('Won', 'Lost')`,
+       WHERE u.org_id = ? AND ps.name = 'Won'`,
       [orgId]
     );
     const pipelineValue = parseFloat(pipelineValueRow[0]?.active_pipeline_value || 0);
