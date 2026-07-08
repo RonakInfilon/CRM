@@ -13,10 +13,9 @@ const getAllContacts = async ({ orgId, search = "", page = 1, limit = 100 }) => 
       c.role,
       c.contact_status,
       c.org_id,
-      c.company_id,
       cc.name AS Company_name
     FROM contacts c
-    INNER JOIN client_companies cc ON (c.company_id = cc.company_id OR c.org_id = cc.linked_org_id)
+    INNER JOIN client_companies cc ON (c.org_id = cc.linked_org_id)
     WHERE cc.org_id = ? AND c.contact_status = 'Won Contact'
   `;
   
@@ -48,10 +47,10 @@ const getContactById = async (contactId, orgId) => {
       c.role,
       c.contact_status,
       c.org_id,
-      c.company_id,
+    
       cc.name AS Company_name
     FROM contacts c
-    INNER JOIN client_companies cc ON (c.company_id = cc.company_id OR c.org_id = cc.linked_org_id)
+    INNER JOIN client_companies cc ON ( c.org_id = cc.linked_org_id)
     WHERE c.contact_id = ? AND cc.org_id = ?
     `,
     [contactId, orgId]
@@ -70,31 +69,23 @@ const createContact = async (orgId, contactData) => {
     company_id,
     contact_status
   } = contactData;
-
-  // Find linked org_id from client_companies to populate contacts.org_id
+//here motive of targetOrgId is to find comapny for client like if deal is companted then trafetOrgid is there company
   let targetOrgId = null;
-  if (company_id) {
-    const [[cc]] = await pool.execute(
-      `SELECT linked_org_id FROM client_companies WHERE company_id = ? AND org_id = ?`,
-      [company_id, orgId]
-    );
-    if (cc) {
-      targetOrgId = cc.linked_org_id;
-    }
-  }
 
-  // If no targetOrgId found or company_id not provided, default or error
-  // If no company linked, we can either create a dummy organization or require company selection
+
+  
   if (!targetOrgId) {
     // Let's find first client_company for this org to fall back
     const [[ccFallback]] = await pool.execute(
-      `SELECT linked_org_id, company_id FROM client_companies WHERE org_id = ? LIMIT 1`,
+      //here org_id is user who logedin..if i m super admin then it my id as org_id
+      `SELECT linked_org_id FROM client_companies WHERE org_id = ? LIMIT 1`,
       [orgId]
     );
     if (ccFallback) {
       targetOrgId = ccFallback.linked_org_id;
     } else {
       // Create a default organization for orphan contacts if needed, or use orgId itself
+      
       targetOrgId = orgId; 
     }
   }
@@ -141,7 +132,7 @@ const updateContact = async (contactId, orgId, contactData) => {
     `
     SELECT c.contact_id 
     FROM contacts c
-    INNER JOIN client_companies cc ON (c.company_id = cc.company_id OR c.org_id = cc.linked_org_id)
+    INNER JOIN client_companies cc ON (c.org_id = cc.linked_org_id)
     WHERE c.contact_id = ? AND cc.org_id = ?
     `,
     [contactId, orgId]
@@ -153,15 +144,6 @@ const updateContact = async (contactId, orgId, contactData) => {
 
   // Find linked org_id if company_id changed
   let targetOrgId = null;
-  if (company_id) {
-    const [[cc]] = await pool.execute(
-      `SELECT linked_org_id FROM client_companies WHERE company_id = ? AND org_id = ?`,
-      [company_id, orgId]
-    );
-    if (cc) {
-      targetOrgId = cc.linked_org_id;
-    }
-  }
 
   await pool.execute(
     `
@@ -173,7 +155,6 @@ const updateContact = async (contactId, orgId, contactData) => {
       phone = ?, 
       job_title = ?, 
       role = ?,
-      company_id = COALESCE(?, company_id),
       org_id = COALESCE(?, org_id),
       contact_status = ?
     WHERE contact_id = ?
@@ -185,7 +166,6 @@ const updateContact = async (contactId, orgId, contactData) => {
       phone || null,
       job_title || null,
       role || null,
-      company_id || null,
       targetOrgId,
       contact_status || 'Won Contact',
       contactId
@@ -196,12 +176,11 @@ const updateContact = async (contactId, orgId, contactData) => {
 };
 
 const deleteContact = async (contactId, orgId) => {
-  // Verify ownership
   const [[existing]] = await pool.execute(
     `
     SELECT c.contact_id 
     FROM contacts c
-    INNER JOIN client_companies cc ON (c.company_id = cc.company_id OR c.org_id = cc.linked_org_id)
+    INNER JOIN client_companies cc ON (c.org_id = cc.linked_org_id)
     WHERE c.contact_id = ? AND cc.org_id = ?
     `,
     [contactId, orgId]

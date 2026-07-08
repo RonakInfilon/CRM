@@ -10,6 +10,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useRole } from "../context/RoleContext";
+import { getDashboardData } from "../services/dashboardService";
 
 import "../styles/dashboard.css";
 
@@ -21,38 +22,55 @@ function Dashboard() {
   const [winRate, setWinRate] = useState("0.0%");
   const [companiesCount, setCompaniesCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [acquisitionTrend, setAcquisitionTrend] = useState({ categories: [], data: [] });
+  const [distribution, setDistribution] = useState({ labels: [], series: [] });
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [conversion, setConversion] = useState({
+    totalBaseline: 0,
+    qualifiedLeadsCount: 0,
+    qualifiedPercentage: 0,
+    wonDealsCount: 0,
+    convertedPercentage: 0
+  });
+
+  const getRelativeTime = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHr = Math.floor(diffMin / 60);
+    const diffDays = Math.floor(diffHr / 24);
+
+    if (diffSec < 60) return "just now";
+    if (diffMin < 60) return `${diffMin}m ago`;
+    if (diffHr < 24) return `${diffHr}h ago`;
+    if (diffDays === 1) return "yesterday";
+    return `${diffDays} days ago`;
+  };
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        // Get leads
-        const leadsRes = await getLeads(1, 1000); 
-        if (leadsRes.data?.data) {
-          const leadsList = leadsRes.data.data.leads || [];
-          const total = leadsRes.data.data.total || leadsList.length;
-          setTotalLeads(total);
-
-          // Calculate active pipeline value (Opportunity/Qualified, Proposal Sent, Negotiation)
-          const pipelineLeads = leadsList.filter(l => 
-            ["Qualified", "Proposal Sent", "Negotiation"].includes(l.Status)
-          );
-          const sumVal = pipelineLeads.reduce((acc, curr) => acc + (curr.Value || 0), 0);
-          setPipelineValue(sumVal);
-
-          // Calculate win rate
-          const totalQualified = leadsList.filter(l => 
-            ["Qualified", "Proposal Sent", "Negotiation", "Won", "Lost"].includes(l.Status)
-          ).length;
-          const wonCount = leadsList.filter(l => l.Status === "Won").length;
-          const rate = totalQualified > 0 ? ((wonCount / totalQualified) * 100).toFixed(1) : "0.0";
-          setWinRate(rate + "%");
-        }
-
-        // Get organizations
-        const orgsRes = await getOrganization(1, 1);
-        if (orgsRes.data?.data) {
-          setCompaniesCount(orgsRes.data.data.total || 0);
+        const res = await getDashboardData();
+        if (res.data?.success && res.data?.data) {
+          const d = res.data.data;
+          setTotalLeads(d.totalLeads);
+          setPipelineValue(d.pipelineValue);
+          setWinRate(d.winRate);
+          setCompaniesCount(d.companiesCount);
+          setAcquisitionTrend(d.leadAcquisitionTrend || { categories: [], data: [] });
+          setDistribution(d.leadDistribution || { labels: [], series: [] });
+          setRecentActivities(d.recentActivities || []);
+          setConversion(d.lifecycleConversion || {
+            totalBaseline: 0,
+            qualifiedLeadsCount: 0,
+            qualifiedPercentage: 0,
+            wonDealsCount: 0,
+            convertedPercentage: 0
+          });
         }
       } catch (err) {
         console.warn("Failed to fetch dashboard data:", err);
@@ -102,7 +120,7 @@ function Dashboard() {
     series: [
       {
         name: "New Leads",
-        data: [35, 48, 62, 55, 78, 92],
+        data: acquisitionTrend.data.length ? acquisitionTrend.data : [0, 0, 0, 0, 0, 0],
       },
     ],
     options: {
@@ -128,7 +146,7 @@ function Dashboard() {
         strokeDashArray: 4,
       },
       xaxis: {
-        categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        categories: acquisitionTrend.categories.length ? acquisitionTrend.categories : ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
         labels: { style: { colors: "#64748b", fontFamily: "Plus Jakarta Sans" } },
       },
       yaxis: {
@@ -141,13 +159,13 @@ function Dashboard() {
   };
 
   const leadSourceConfig = {
-    series: [44, 25, 19, 12],
+    series: distribution.series.length ? distribution.series : [0, 0, 0, 0],
     options: {
       chart: {
         type: "donut",
       },
-      labels: ["Website", "LinkedIn", "Referrals", "Cold outreach"],
-      colors: ["#6366f1", "#06b6d4", "#f59e0b", "#ef4444"],
+      labels: distribution.labels.length ? distribution.labels : ["Website", "LinkedIn", "Referrals", "Cold outreach"],
+      colors: ["#6366f1", "#06b6d4", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"],
       legend: {
         position: "bottom",
         fontFamily: "Plus Jakarta Sans",
@@ -240,27 +258,23 @@ function Dashboard() {
         <div className="recent-activity-card">
           <h2>Recent Activity Feed</h2>
           <div className="activity-list-items">
-            <div className="activity-item">
-              <div className="activity-badge deal">Deal</div>
-              <div className="activity-text">
-                <p>CRM Implementation Deal stage updated to <strong>Won</strong></p>
-                <span>Google Account • By John Smith • 2 hours ago</span>
+            {recentActivities.length > 0 ? (
+              recentActivities.map((act, idx) => (
+                <div key={idx} className="activity-item">
+                  <div className={`activity-badge ${act.type === 'company' ? 'org' : act.type}`}>
+                    {act.type === 'company' ? 'Company' : act.type.charAt(0).toUpperCase() + act.type.slice(1)}
+                  </div>
+                  <div className="activity-text">
+                    <p>{act.text}</p>
+                    <span>{act.subtext} • {getRelativeTime(act.created_at)}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="activity-item" style={{ justifyContent: 'center', padding: '20px 0', color: '#64748b' }}>
+                No recent activities found
               </div>
-            </div>
-            <div className="activity-item">
-              <div className="activity-badge lead">Lead</div>
-              <div className="activity-text">
-                <p>New Lead created: <strong>Anjali Sharma</strong></p>
-                <span>Athletex Co • Inbound Cold Call • 4 hours ago</span>
-              </div>
-            </div>
-            <div className="activity-item">
-              <div className="activity-badge org">Company</div>
-              <div className="activity-text">
-                <p>New Organization added: <strong>Infilon Technology</strong></p>
-                <span>Ahmedabad branch • By Admin • 1 day ago</span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -270,19 +284,19 @@ function Dashboard() {
             <div>
               <div className="status-line" >
                 <span>Qualified Leads</span>
-                <span>{totalLeads > 0 ? `${Math.round(totalLeads * 0.56)} / ${totalLeads} (56%)` : "0 / 0 (0%)"}</span>
+                <span>{conversion.totalBaseline > 0 ? `${conversion.qualifiedLeadsCount} / ${conversion.totalBaseline} (${conversion.qualifiedPercentage}%)` : "0 / 0 (0%)"}</span>
               </div>
               <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ width: '56%', height: '100%', background: '#4f46e5' }}></div>
+                <div style={{ width: `${conversion.qualifiedPercentage}%`, height: '100%', background: '#4f46e5' }}></div>
               </div>
             </div>
             <div>
               <div className="status-line">
                 <span>Converted Deals</span>
-                <span>{totalLeads > 0 ? `${Math.round(totalLeads * 0.28)} / ${totalLeads} (28%)` : "0 / 0 (0%)"}</span>
+                <span>{conversion.totalBaseline > 0 ? `${conversion.wonDealsCount} / ${conversion.totalBaseline} (${conversion.convertedPercentage}%)` : "0 / 0 (0%)"}</span>
               </div>
               <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ width: '28%', height: '100%', background: '#4f46e5' }}></div>
+                <div style={{ width: `${conversion.convertedPercentage}%`, height: '100%', background: '#4f46e5' }}></div>
               </div>
             </div>
           </div>

@@ -205,7 +205,7 @@ export default function Users() {
                           <span style={{ color: "#e5e7eb", fontWeight: "500" }}>Master Admin</span>
                         ) : u.company ? (
                           <Link 
-                            to={`/account?search=${encodeURIComponent(u.company)}`}
+                            to={`/companies?search=${encodeURIComponent(u.company)}`}
                             style={{ color: "#3b82f6", fontWeight: "500", textDecoration: "underline" }}
                           >
                             {u.company}

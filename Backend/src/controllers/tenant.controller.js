@@ -2,7 +2,8 @@ const { getTenants } = require("../models/tenant.model");
 
 const getTenantsList = async (req, res) => {
   try {
-    const tenants = await getTenants();
+    const orgId = req.user.org_id;
+    const tenants = await getTenants(orgId);
 
     res.status(200).json({
       success: true,

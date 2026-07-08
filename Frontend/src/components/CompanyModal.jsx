@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRole } from "../context/RoleContext.jsx";
-// import { getContacts } from "../services/contactService";
-// import { getLeads } from "../services/leadService";
+import { getContacts } from "../services/contactService";
+import { getLeads } from "../services/leadService";
 import "../styles/CompanyModal.css";
 
 const CompanyModal = ({ isOpen, mode = "view", company = {}, onClose, onSave, onDelete }) => {
