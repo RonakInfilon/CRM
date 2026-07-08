@@ -2,6 +2,10 @@ const express = require("express");
 const router = express.Router();
 
 const leadController = require("../controllers/lead.controller");
+const authenticate = require("../middleware/auth.middleware");
+
+// Secure all lead routes
+router.use(authenticate);
 
 // Get all leads
 router.get("/", leadController.getAllLeads);

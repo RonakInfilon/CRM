@@ -3,6 +3,8 @@ const Lead = require("../models/lead.model");
 //get all leads
 const getAllLeads = async (req, res) => {
   try {
+    const orgId = req.user.org_id;
+    const userId = req.user.id;
     const {
       page = 1,
       limit = 10,
@@ -11,6 +13,8 @@ const getAllLeads = async (req, res) => {
     } = req.query;
 
     const leads = await Lead.getAllLeads({
+      orgId,
+      userId,
       page: Number(page),
       limit: Number(limit),
       search,
@@ -28,6 +32,7 @@ const getAllLeads = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message,
+      
     });
   }
 };
@@ -36,8 +41,9 @@ const getAllLeads = async (req, res) => {
 const getLeadById = async (req, res) => {
   try {
     const { id } = req.params;
+    const orgId = req.user.org_id;
 
-    const lead = await Lead.getLeadById(id);
+    const lead = await Lead.getLeadById(id, orgId);
 
     if (!lead) {
       return res.status(404).json({
@@ -63,7 +69,9 @@ const getLeadById = async (req, res) => {
 //create lead
 const createLead = async (req, res) => {
   try {
-    const result = await Lead.createLead(req.body);
+    const orgId = req.user.org_id;
+    const userId = req.user.id; // logged-in user's ID
+    const result = await Lead.createLead({ ...req.body, orgId, createdByUserId: userId });
 
     return res.status(201).json({
       success: true,
@@ -84,8 +92,9 @@ const createLead = async (req, res) => {
 const updateLead = async (req, res) => {
   try {
     const { id } = req.params;
+    const orgId = req.user.org_id;
 
-    const result = await Lead.updateLead(id, req.body);
+    const result = await Lead.updateLead(id, orgId, req.body);
 
     return res.status(200).json({
       success: true,
@@ -105,30 +114,44 @@ const updateLead = async (req, res) => {
 //update lead status
 const updateLeadStatus = async (req, res) => {
   try {
+    console.log("Controller reached");
+    console.log(req.body);
+    
     const { id } = req.params;
     const { status } = req.body;
-    console.log("I m here");
-    await Lead.updateLeadStatus(id, status);
+    const orgId = req.user.org_id;
+    const userId = req.user.id; // logged-in user's ID
+
+    console.log("Status =", status);
+
+    if (status === "Qualified") {
+      console.log("Calling qualifyLead...");
+      // Pass CRM user's org_id so qualifyLead uses the correct pipeline stages
+      await Lead.qualifyLead(id, orgId, userId);
+    } else {
+      await Lead.updateLeadStatus(id, status);
+    }
 
     return res.status(200).json({
       success: true,
-      message: "Lead status updated successfully",
+      message: "Lead updated successfully"
     });
-  } catch (error) {
-    console.error("Update Status Error:", error);
 
+  } catch (error) {
+    console.error(error);
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message
     });
   }
 };
-//delete leaads
+//delete lead
 const deleteLead = async (req, res) => {
   try {
     const { id } = req.params;
+    const orgId = req.user.org_id;
 
-    await Lead.deleteLead(id);
+    await Lead.deleteLead(id, orgId);
 
     return res.status(200).json({
       success: true,

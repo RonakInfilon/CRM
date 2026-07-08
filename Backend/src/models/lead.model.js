@@ -27,7 +27,8 @@ const createLead = async (leadData) => {
       status,
       notes,
       assignedToUserId = null,
-      createdByUserId = null,
+      createdByUserId = null, // logged-in user's ID — used to bifurcate by org
+      orgId: userOrgId,       // the CRM user's org_id (NOT the client's org)
       companyId = null,
     } = leadData;
     //create organization
@@ -38,6 +39,10 @@ const createLead = async (leadData) => {
     );
 
     const orgId = orgResult.insertId;
+
+    // NOTE: Pipeline stages are NOT created here.
+    // Stages belong to the CRM org (Super Admin's org), not the client org.
+    // The CRM org already has fixed 5 stages: Opportunity, Proposal Sent, Negotiation, Won, Lost.
 
 
     // create contact
@@ -52,15 +57,15 @@ const createLead = async (leadData) => {
     )
     const contactId = contactResult.insertId;
 
-    //create lead
+    //create lead — store created_by_user_id so we can filter by CRM org later
     const [leadResult] = await connection.execute(
       `
       INSERT INTO leads
       (
-        org_id,contact_id,status,assigned_to_user_id
+        org_id, contact_id, status, assigned_to_user_id, created_by_user_id
       )
-      VALUES (?, ?, ?, ?)`,
-      [orgId, contactId, status || "New", assignedToUserId,]
+      VALUES (?, ?, ?, ?, ?)`,
+      [orgId, contactId, status || "New", assignedToUserId, createdByUserId]
     );
 
     const leadId = leadResult.insertId;
@@ -74,13 +79,13 @@ const createLead = async (leadData) => {
         [leadId, notes, createdByUserId,]
       );
     }
-      await connection.commit();
-      return {
-        success: true,
-        leadId,
-        message: "Lead created successfully",
-      };
-    
+    await connection.commit();
+    return {
+      success: true,
+      leadId,
+      message: "Lead created successfully",
+    };
+
   }
   catch (error) {
     await connection.rollback();
@@ -91,12 +96,18 @@ const createLead = async (leadData) => {
   }
 }
 const getAllLeads = async ({
+  orgId,     // the logged-in user's CRM org_id
+  userId,    // the logged-in user's ID (used as fallback filter)
   page = 1,
   limit = 10,
   search = "",
   status = ""
 }) => {
   const offset = (page - 1) * limit;
+
+  // Filter leads by the CRM org: join leads -> created_by_user_id -> users -> org_id
+  // This correctly separates leads of Company A from Company B even though
+  // leads.org_id stores the *client* org (not the CRM user's org)
   let query = `
 SELECT
     l.lead_id AS LeadID,
@@ -133,22 +144,24 @@ INNER JOIN organizations o
 INNER JOIN contacts c
     ON l.contact_id = c.contact_id
 
-WHERE 1=1
+INNER JOIN users u
+    ON l.created_by_user_id = u.id
+
+WHERE l.isPresent = 1
+  AND u.org_id = ?
 `;
 
-
-  const values = [];
+  const values = [orgId];
 
   if (search) {
     query += `
-    AND(
-    c.first_name LIKE ?
-    or c.last_name LIKE ?
-    or o.name LIKE ?
-    or c.email LIKE?
+    AND (
+      c.first_name LIKE ?
+      OR c.last_name LIKE ?
+      OR o.name LIKE ?
+      OR c.email LIKE ?
     )
-    `
-
+    `;
     const keyword = `%${search}%`;
     values.push(keyword, keyword, keyword, keyword);
   }
@@ -156,7 +169,6 @@ WHERE 1=1
     query += ` AND l.status = ? `;
     values.push(status);
   }
-
 
   query += `
       ORDER BY l.created_at DESC
@@ -169,8 +181,7 @@ WHERE 1=1
 
   const [rows] = await pool.execute(query, values);
 
-  // Total Count
-
+  // Total Count — same JOIN logic
   let countQuery = `
       SELECT COUNT(*) AS total
 
@@ -182,9 +193,13 @@ WHERE 1=1
       INNER JOIN contacts c
           ON l.contact_id = c.contact_id
 
-      WHERE 1=1
+      INNER JOIN users u
+          ON l.created_by_user_id = u.id
+
+      WHERE l.isPresent = 1
+        AND u.org_id = ?
   `;
-  const countValues = [];
+  const countValues = [orgId];
 
   if (search) {
     countQuery += `
@@ -195,9 +210,7 @@ WHERE 1=1
         OR c.email LIKE ?
       )
     `;
-
     const keyword = `%${search}%`;
-
     countValues.push(keyword, keyword, keyword, keyword);
   }
 
@@ -205,6 +218,7 @@ WHERE 1=1
     countQuery += ` AND l.status = ? `;
     countValues.push(status);
   }
+
   const [[count]] = await pool.execute(countQuery, countValues);
 
   return {
@@ -271,8 +285,9 @@ const updateLead = async (leadId, leadData) => {
   const connection = await pool.getConnection();
 
   try {
-    await connection.beginTransaction();
 
+    await connection.beginTransaction();
+    console.log("Here")
     const {
       salutation,
       firstName,
@@ -431,62 +446,21 @@ const updateLead = async (leadId, leadData) => {
     connection.release();
   }
 };
-//delete lead
+//delete lead — soft delete so history (notes, activities) is preserved
 const deleteLead = async (leadId) => {
   const connection = await pool.getConnection();
 
   try {
     await connection.beginTransaction();
 
-    // Get related IDs
-    const [[lead]] = await connection.execute(
-      `
-      SELECT org_id, contact_id
-      FROM leads
-      WHERE lead_id = ?
-      `,
+    const [result] = await connection.execute(
+      `UPDATE leads SET isPresent = 0 WHERE lead_id = ?`,
       [leadId]
     );
 
-    if (!lead) {
+    if (result.affectedRows === 0) {
       throw new Error("Lead not found");
     }
-
-    // Delete notes
-    await connection.execute(
-      `
-      DELETE FROM lead_notes
-      WHERE lead_id = ?
-      `,
-      [leadId]
-    );
-
-    // Delete lead
-    await connection.execute(
-      `
-      DELETE FROM leads
-      WHERE lead_id = ?
-      `,
-      [leadId]
-    );
-
-    // Delete contact
-    await connection.execute(
-      `
-      DELETE FROM contacts
-      WHERE contact_id = ?
-      `,
-      [lead.contact_id]
-    );
-
-    // Delete organization
-    await connection.execute(
-      `
-      DELETE FROM organizations
-      WHERE org_id = ?
-      `,
-      [lead.org_id]
-    );
 
     await connection.commit();
 
@@ -514,12 +488,127 @@ const updateLeadStatus = async (leadId, status) => {
 
   return result;
 };
+
+// qualifyLead — converts a lead into a deal on the CRM pipeline
+// userOrgId: the CRM user's org (used to find pipeline stages)
+// createdByUserId: logged-in user's ID (stored on deal for filtering + activity)
+const qualifyLead = async (leadId, userOrgId, createdByUserId = null) => {
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    // 1. Get Lead Details (client org info)
+    const [leadRows] = await connection.execute(
+      `
+      SELECT
+          l.org_id,
+          l.contact_id,
+          o.name AS company_name,
+          o.website,
+          o.industry,
+          o.Source AS source
+      FROM leads l
+      INNER JOIN organizations o ON l.org_id = o.org_id
+      WHERE l.lead_id = ?
+      `,
+      [leadId]
+    );
+
+    if (leadRows.length === 0) throw new Error("Lead not found");
+    const lead = leadRows[0];
+
+    // 2. Get the FIRST pipeline stage from the CRM org's fixed stages
+    //    (NOT from the client org — client orgs don't have stages anymore)
+    const [stageRows] = await connection.execute(
+      `
+      SELECT stage_id, name
+      FROM pipeline_stages
+      WHERE org_id = ?
+      ORDER BY sort_order ASC
+      LIMIT 1
+      `,
+      [userOrgId]
+    );
+
+    if (stageRows.length === 0) {
+      throw new Error("No pipeline stages found for your organization. Please contact Super Admin.");
+    }
+    const { stage_id: stageId, name: stageName } = stageRows[0];
+
+    // 3. Check if deal already exists for this contact
+    const [existingDeal] = await connection.execute(
+      `SELECT deal_id FROM deals WHERE contact_id = ? LIMIT 1`,
+      [lead.contact_id]
+    );
+
+    let dealId;
+
+    if (existingDeal.length === 0) {
+      // 4. Create deal — link to client org (org_id) for company info
+      //    but use created_by_user_id to tie it to the CRM org for filtering
+      const [dealResult] = await connection.execute(
+        `
+        INSERT INTO deals
+        (
+            org_id,
+            stage_id,
+            contact_id,
+            deal_name,
+            company_name,
+            value,
+            dev_progress,
+            created_by_user_id,
+            assigned_to_user_id
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+        [
+          lead.org_id,       // client org (for company info linkage)
+          stageId,           // first stage of CRM org pipeline
+          lead.contact_id,
+          `${lead.company_name} Deal`,
+          lead.company_name,
+          0,
+          0,
+          createdByUserId,
+          createdByUserId
+        ]
+      );
+      dealId = dealResult.insertId;
+
+      // 5. Auto-log activity: deal created
+      await connection.execute(
+        `INSERT INTO deal_activities (deal_id, activity_text, performed_by_user_id)
+         VALUES (?, ?, ?)`,
+        [dealId, `Lead qualified — deal created and placed in "${stageName}" stage.`, createdByUserId]
+      );
+    } else {
+      dealId = existingDeal[0].deal_id;
+    }
+
+    // 6. Mark lead as Qualified and hide from leads list
+    await connection.execute(
+      `UPDATE leads SET status = 'Qualified', isPresent = FALSE WHERE lead_id = ?`,
+      [leadId]
+    );
+
+    await connection.commit();
+    return { success: true, dealId };
+
+  } catch (err) {
+    await connection.rollback();
+    throw err;
+  } finally {
+    connection.release();
+  }
+};
 module.exports = {
   createLead,
   getAllLeads,
   getLeadById,
-  updateLead,
   deleteLead,
   updateLead,
-  updateLeadStatus
+  updateLeadStatus,
+  qualifyLead
 }

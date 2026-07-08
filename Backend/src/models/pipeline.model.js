@@ -1,13 +1,13 @@
 const pool = require("../config/database");
 
-
 const getPipeline = async (orgId) => {
   const connection = await pool.getConnection();
 
   try {
     // Get ALL 5 fixed pipeline stages for the CRM org
     // (stages belong to req.user.org_id, not the client's org)
-    const [stages] = await connection.execute(`
+    const [stages] = await connection.execute(
+      `
       SELECT
         stage_id,
         org_id,
@@ -16,10 +16,13 @@ const getPipeline = async (orgId) => {
       FROM pipeline_stages
       WHERE org_id = ?
       ORDER BY sort_order ASC
-    `, [orgId]);
+    `,
+      [orgId],
+    );
 
     // Get all deals for this CRM org via created_by_user_id -> users -> org_id
-    const [deals] = await connection.execute(`
+    const [deals] = await connection.execute(
+      `
       SELECT
         d.deal_id,
         d.org_id,
@@ -54,27 +57,26 @@ const getPipeline = async (orgId) => {
 
       WHERE u.org_id = ?
       ORDER BY d.created_at DESC
-    `, [orgId]);
+    `,
+      [orgId],
+    );
 
     // Map stages — every stage is shown even if it has 0 deals
-    const pipeline = stages.map(stage => ({
+    const pipeline = stages.map((stage) => ({
       stage_id: stage.stage_id,
       org_id: stage.org_id,
       name: stage.name,
       sort_order: stage.sort_order,
-      deals: deals.filter(deal => deal.stage_id === stage.stage_id)
+      deals: deals.filter((deal) => deal.stage_id === stage.stage_id),
     }));
 
     return pipeline;
-
   } catch (error) {
     throw error;
   } finally {
     connection.release();
   }
 };
-
-
 
 const getDealById = async (dealId, orgId) => {
   const [rows] = await pool.execute(
@@ -105,13 +107,11 @@ const getDealById = async (dealId, orgId) => {
 
     WHERE d.deal_id = ? AND u.org_id = ?
     `,
-    [dealId, orgId]
+    [dealId, orgId],
   );
 
   return rows.length ? rows[0] : null;
 };
-
-
 
 const createDeal = async (dealData) => {
   const {
@@ -123,7 +123,7 @@ const createDeal = async (dealData) => {
     value,
     contact_executive_id,
     dev_progress,
-    lost_reason
+    lost_reason,
   } = dealData;
 
   const [result] = await pool.execute(
@@ -152,16 +152,15 @@ const createDeal = async (dealData) => {
       value,
       contact_executive_id,
       dev_progress,
-      lost_reason
-    ]
+      lost_reason,
+    ],
   );
 
   return {
     success: true,
-    deal_id: result.insertId
+    deal_id: result.insertId,
   };
 };
-
 
 const updateDeal = async (dealId, orgId, dealData) => {
   const connection = await pool.getConnection();
@@ -177,9 +176,9 @@ const updateDeal = async (dealId, orgId, dealData) => {
       dev_progress,
       lost_reason,
       contact_id,
-      contact_person_name
+      contact_person_name,
     } = dealData;
-    // NOTE: stage_id is NOT updated here — use moveDeal for stage changes
+    //  stage_id is NOT updated here use moveDeal for stage changes
 
     // Verify this deal belongs to the CRM org (via the user who created it)
     const [[existingDeal]] = await connection.execute(
@@ -187,7 +186,7 @@ const updateDeal = async (dealId, orgId, dealData) => {
        FROM deals d
        INNER JOIN users u ON d.created_by_user_id = u.id
        WHERE d.deal_id = ? AND u.org_id = ?`,
-      [dealId, orgId]
+      [dealId, orgId],
     );
 
     if (!existingDeal) throw new Error("Deal not found or unauthorized");
@@ -210,8 +209,8 @@ const updateDeal = async (dealId, orgId, dealData) => {
         value ?? 0,
         contact_executive_id ?? null,
         dev_progress ?? 0,
-        dealId
-      ]
+        dealId,
+      ],
     );
 
     // Update contact name if provided
@@ -221,13 +220,12 @@ const updateDeal = async (dealId, orgId, dealData) => {
       const last_name = parts.slice(1).join(" ") || "";
       await connection.execute(
         `UPDATE contacts SET first_name = ?, last_name = ? WHERE contact_id = ?`,
-        [first_name, last_name, contact_id]
+        [first_name, last_name, contact_id],
       );
     }
 
     await connection.commit();
     return { success: true, affectedRows: result.affectedRows };
-
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -236,28 +234,34 @@ const updateDeal = async (dealId, orgId, dealData) => {
   }
 };
 
-
 // moveDeal — handles Won/Lost logic, logs activity, optionally adds note
-const moveDeal = async (dealId, orgId, userId, stageId, lostReason = null, noteText = null) => {
+const moveDeal = async (
+  dealId,
+  orgId,
+  userId,
+  stageId,
+  lostReason = null,
+  noteText = null,
+) => {
   const connection = await pool.getConnection();
 
   try {
     await connection.beginTransaction();
 
-    // 1. Get the deal + target stage details
+    // Get the deal + target stage details
     const [[deal]] = await connection.execute(
       `SELECT d.deal_id, d.contact_id, d.org_id, d.company_name, d.deal_name
        FROM deals d
        INNER JOIN users u ON d.created_by_user_id = u.id
        WHERE d.deal_id = ? AND u.org_id = ?`,
-      [dealId, orgId]
+      [dealId, orgId],
     );
 
     if (!deal) throw new Error("Deal not found or unauthorized");
 
     const [[stage]] = await connection.execute(
       `SELECT stage_id, name FROM pipeline_stages WHERE stage_id = ?`,
-      [stageId]
+      [stageId],
     );
 
     if (!stage) throw new Error("Stage not found");
@@ -265,24 +269,24 @@ const moveDeal = async (dealId, orgId, userId, stageId, lostReason = null, noteT
     const stageName = stage.name;
 
     // 2. Update deal stage (and lost_reason if applicable)
-    if (stageName === 'Lost') {
+    if (stageName === "Lost") {
       await connection.execute(
         `UPDATE deals SET stage_id = ?, lost_reason = ? WHERE deal_id = ?`,
-        [stageId, lostReason || 'Not specified', dealId]
+        [stageId, lostReason || "Not specified", dealId],
       );
     } else {
       await connection.execute(
         `UPDATE deals SET stage_id = ?, lost_reason = NULL WHERE deal_id = ?`,
-        [stageId, dealId]
+        [stageId, dealId],
       );
     }
 
     // 3. Won-specific logic
-    if (stageName === 'Won') {
+    if (stageName === "Won") {
       // a. Update contact status to 'Won Contact'
       await connection.execute(
         `UPDATE contacts SET contact_status = 'Won Contact' WHERE contact_id = ?`,
-        [deal.contact_id]
+        [deal.contact_id],
       );
 
       // b. Upsert client_companies record so the company can be onboarded
@@ -299,23 +303,31 @@ const moveDeal = async (dealId, orgId, userId, stageId, lostReason = null, noteT
           website = VALUES(website),
           industry = VALUES(industry)
         `,
-        [orgId, dealId]
+        [orgId, dealId],
       );
 
       // c. Log activity
       await connection.execute(
         `INSERT INTO deal_activities (deal_id, activity_text, performed_by_user_id)
          VALUES (?, ?, ?)`,
-        [dealId, `🏆 Deal marked as WON. Client company record created/updated for onboarding.`, userId]
+        [
+          dealId,
+          ` Deal marked as WON. Client company record created/updated for onboarding.`,
+          userId,
+        ],
       );
     }
 
     // 4. Lost-specific activity
-    else if (stageName === 'Lost') {
+    else if (stageName === "Lost") {
       await connection.execute(
         `INSERT INTO deal_activities (deal_id, activity_text, performed_by_user_id)
          VALUES (?, ?, ?)`,
-        [dealId, `❌ Deal marked as LOST. Reason: ${lostReason || 'Not specified'}`, userId]
+        [
+          dealId,
+          `Deal marked as LOST. Reason: ${lostReason || "Not specified"}`,
+          userId,
+        ],
       );
     }
 
@@ -324,22 +336,21 @@ const moveDeal = async (dealId, orgId, userId, stageId, lostReason = null, noteT
       await connection.execute(
         `INSERT INTO deal_activities (deal_id, activity_text, performed_by_user_id)
          VALUES (?, ?, ?)`,
-        [dealId, `Deal moved to "${stageName}" stage.`, userId]
+        [dealId, `Deal moved to "${stageName}" stage.`, userId],
       );
     }
 
     // 6. Add note if provided
-    if (noteText && noteText.trim() !== '') {
+    if (noteText && noteText.trim() !== "") {
       await connection.execute(
         `INSERT INTO deal_notes (deal_id, note_text, created_by_user_id)
          VALUES (?, ?, ?)`,
-        [dealId, noteText.trim(), userId]
+        [dealId, noteText.trim(), userId],
       );
     }
 
     await connection.commit();
     return { success: true, stage: stageName, dealId };
-
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -347,8 +358,6 @@ const moveDeal = async (dealId, orgId, userId, stageId, lostReason = null, noteT
     connection.release();
   }
 };
-
-
 
 const deleteDeal = async (dealId, orgId) => {
   const connection = await pool.getConnection();
@@ -361,7 +370,7 @@ const deleteDeal = async (dealId, orgId) => {
       `SELECT d.deal_id FROM deals d
        INNER JOIN users u ON d.created_by_user_id = u.id
        WHERE d.deal_id = ? AND u.org_id = ?`,
-      [dealId, orgId]
+      [dealId, orgId],
     );
 
     if (dealRows.length === 0) {
@@ -374,7 +383,7 @@ const deleteDeal = async (dealId, orgId) => {
       DELETE FROM deal_notes
       WHERE deal_id = ?
       `,
-      [dealId]
+      [dealId],
     );
 
     // Delete Activities
@@ -383,7 +392,7 @@ const deleteDeal = async (dealId, orgId) => {
       DELETE FROM deal_activities
       WHERE deal_id = ?
       `,
-      [dealId]
+      [dealId],
     );
 
     // Delete Deal
@@ -392,12 +401,11 @@ const deleteDeal = async (dealId, orgId) => {
       DELETE FROM deals
       WHERE deal_id = ?
       `,
-      [dealId]
+      [dealId],
     );
 
     await connection.commit();
     return result;
-
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -405,7 +413,6 @@ const deleteDeal = async (dealId, orgId) => {
     connection.release();
   }
 };
-
 
 const getDealNotes = async (dealId, orgId) => {
   // Filter by CRM org via created_by_user_id join (deals.org_id = client's org)
@@ -418,12 +425,11 @@ const getDealNotes = async (dealId, orgId) => {
     WHERE dn.deal_id = ? AND u.org_id = ?
     ORDER BY dn.created_at ASC
     `,
-    [dealId, orgId]
+    [dealId, orgId],
   );
 
   return rows;
 };
-
 
 const addDealNote = async (dealId, orgId, noteData) => {
   const { note_text, created_by_user_id } = noteData;
@@ -433,27 +439,30 @@ const addDealNote = async (dealId, orgId, noteData) => {
     `SELECT d.deal_id FROM deals d
      INNER JOIN users u ON d.created_by_user_id = u.id
      WHERE d.deal_id = ? AND u.org_id = ?`,
-    [dealId, orgId]
+    [dealId, orgId],
   );
 
   if (dealRows.length === 0) throw new Error("Deal not found or unauthorized");
 
   const [result] = await pool.execute(
     `INSERT INTO deal_notes (deal_id, note_text, created_by_user_id) VALUES (?, ?, ?)`,
-    [dealId, note_text, created_by_user_id]
+    [dealId, note_text, created_by_user_id],
   );
 
   return result;
 };
-
-
+//noteId = 8 and orgaization id =1 and deal_id=17 d.created_by_user_id=1 
 const deleteDealNote = async (noteId, orgId) => {
   const [noteRows] = await pool.execute(
     `
     SELECT dn.note_id
     FROM deal_notes dn
-    INNER JOIN deals d ON dn.deal_id = d.deal_id
-    WHERE dn.note_id = ? AND d.org_id = ?
+    INNER JOIN deals d
+      ON dn.deal_id = d.deal_id
+    INNER JOIN users u
+      ON d.created_by_user_id = u.id
+    WHERE dn.note_id = ?
+      AND u.org_id = ?
     `,
     [noteId, orgId]
   );
@@ -473,7 +482,6 @@ const deleteDealNote = async (noteId, orgId) => {
   return result;
 };
 
-
 const getDealActivities = async (dealId, orgId) => {
   const [rows] = await pool.execute(
     `
@@ -484,13 +492,11 @@ const getDealActivities = async (dealId, orgId) => {
     WHERE da.deal_id = ? AND u.org_id = ?
     ORDER BY da.created_at ASC
     `,
-    [dealId, orgId]
+    [dealId, orgId],
   );
 
   return rows;
 };
-
-
 
 const addDealActivity = async (dealId, orgId, activityData) => {
   const { activity_text, performed_by_user_id } = activityData;
@@ -498,21 +504,20 @@ const addDealActivity = async (dealId, orgId, activityData) => {
   // Verify deal belongs to CRM org
   const [dealRows] = await pool.execute(
     `SELECT d.deal_id FROM deals d
-     INNER JOIN users u ON d.created_by_user_id = u.id
-     WHERE d.deal_id = ? AND u.org_id = ?`,
-    [dealId, orgId]
+    INNER JOIN users u ON d.created_by_user_id = u.id
+    WHERE d.deal_id = ? AND u.org_id = ?`,
+    [dealId, orgId],
   );
 
   if (dealRows.length === 0) throw new Error("Deal not found or unauthorized");
 
   const [result] = await pool.execute(
     `INSERT INTO deal_activities (deal_id, activity_text, performed_by_user_id) VALUES (?, ?, ?)`,
-    [dealId, activity_text, performed_by_user_id]
+    [dealId, activity_text, performed_by_user_id],
   );
 
   return result;
 };
-
 
 const createStage = async (orgId, stageData) => {
   const { name, sort_order } = stageData;
@@ -522,17 +527,15 @@ const createStage = async (orgId, stageData) => {
     (org_id, name, sort_order)
     VALUES (?, ?, ?)
     `,
-    [orgId, name, sort_order]
+    [orgId, name, sort_order],
   );
   return {
     success: true,
-    stage_id: result.insertId
+    stage_id: result.insertId,
   };
 };
 
-// =========================================
-// Delete Pipeline Stage
-// =========================================
+
 const deleteStage = async (stageId, orgId) => {
   const connection = await pool.getConnection();
 
@@ -547,11 +550,13 @@ const deleteStage = async (stageId, orgId) => {
       WHERE org_id = ? AND stage_id != ?
       LIMIT 1
       `,
-      [orgId, stageId]
+      [orgId, stageId],
     );
 
     if (fallbackRows.length === 0) {
-      throw new Error("Cannot delete the last remaining stage of the pipeline.");
+      throw new Error(
+        "Cannot delete the last remaining stage of the pipeline.",
+      );
     }
 
     const fallbackStageId = fallbackRows[0].stage_id;
@@ -563,7 +568,7 @@ const deleteStage = async (stageId, orgId) => {
       SET stage_id = ?
       WHERE stage_id = ? AND org_id = ?
       `,
-      [fallbackStageId, stageId, orgId]
+      [fallbackStageId, stageId, orgId],
     );
 
     // Delete the stage
@@ -572,12 +577,11 @@ const deleteStage = async (stageId, orgId) => {
       DELETE FROM pipeline_stages
       WHERE stage_id = ? AND org_id = ?
       `,
-      [stageId, orgId]
+      [stageId, orgId],
     );
 
     await connection.commit();
     return result;
-
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -585,7 +589,6 @@ const deleteStage = async (stageId, orgId) => {
     connection.release();
   }
 };
-
 
 const getAllDeals = async (orgId) => {
   const [rows] = await pool.execute(
@@ -603,7 +606,6 @@ const getAllDeals = async (orgId) => {
       d.lost_reason,
       d.created_at,
       d.updated_at,
-
       c.first_name,
       c.last_name,
       c.email,
@@ -621,7 +623,7 @@ const getAllDeals = async (orgId) => {
     WHERE u.org_id = ?
     ORDER BY d.created_at DESC
     `,
-    [orgId]
+    [orgId],
   );
   return rows;
 };
@@ -640,5 +642,5 @@ module.exports = {
   addDealActivity,
   createStage,
   deleteStage,
-  getAllDeals
+  getAllDeals,
 };
