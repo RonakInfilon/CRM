@@ -37,6 +37,7 @@ function DashboardLayout() {
         className={`main-content ${
           sidebarExpanded ? "sidebar-open" : "sidebar-closed"
         }`}
+        data-page={name}
       >
         <Navbar
           toggleSidebar={toggleSidebar}

@@ -55,7 +55,6 @@ const createUserByAdmin = async (req, res) => {
 const getAllUsers = async (req, res) => {
   try {
     let users;
-
     if (req.user.role === "Company Admin") {
       users = await getUsers(req.user.org_id);
     } else if (req.user.role === "Super Admin") {
@@ -66,15 +65,12 @@ const getAllUsers = async (req, res) => {
         message: "Unauthorized access to user directory",
       });
     }
-
     res.status(200).json({
       success: true,
       data: users,
     });
-
   } catch (err) {
     console.error(err);
-
     res.status(500).json({
       success: false,
       message: err.message,
