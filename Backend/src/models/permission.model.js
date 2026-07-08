@@ -41,6 +41,7 @@ const saveOrganizationPermission = async (
   pipeline,
   contacts,
   companies,
+  dragDrop,
   userManagement
 ) => {
 
@@ -53,15 +54,17 @@ const saveOrganizationPermission = async (
       module_pipeline,
       module_contacts,
       module_companies,
+      module_drag_drop,
       module_user_management
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ON DUPLICATE KEY UPDATE
       module_dashboard=VALUES(module_dashboard),
       module_leads=VALUES(module_leads),
       module_pipeline=VALUES(module_pipeline),
       module_contacts=VALUES(module_contacts),
       module_companies=VALUES(module_companies),
+      module_drag_drop=VALUES(module_drag_drop),
       module_user_management=VALUES(module_user_management)`,
 
     [
@@ -71,6 +74,7 @@ const saveOrganizationPermission = async (
       pipeline,
       contacts,
       companies,
+      dragDrop,
       userManagement
     ]
   );
@@ -84,6 +88,7 @@ const saveRolePermission = async (
   pipeline,
   contacts,
   companies,
+  dragDrop,
   userManagement
 ) => {
 
@@ -97,15 +102,17 @@ const saveRolePermission = async (
       module_pipeline,
       module_contacts,
       module_companies,
+      module_drag_drop,
       module_user_management
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON DUPLICATE KEY UPDATE
       module_dashboard=VALUES(module_dashboard),
       module_leads=VALUES(module_leads),
       module_pipeline=VALUES(module_pipeline),
       module_contacts=VALUES(module_contacts),
       module_companies=VALUES(module_companies),
+      module_drag_drop=VALUES(module_drag_drop),
       module_user_management=VALUES(module_user_management)`,
 
     [
@@ -116,6 +123,7 @@ const saveRolePermission = async (
       pipeline,
       contacts,
       companies,
+      dragDrop,
       userManagement
     ]
   );

@@ -11,5 +11,6 @@ const authenticate = require("../middleware/auth.middleware");
 // Protected Routes
 router.get("/", authenticate, getPermissions);
 router.put("/", authenticate, updatePermissions);
+router.post("/", authenticate, updatePermissions);
 
 module.exports = router;
