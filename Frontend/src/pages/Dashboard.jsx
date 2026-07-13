@@ -184,7 +184,10 @@ function Dashboard() {
                 fontFamily: "Plus Jakarta Sans",
                 fontSize: "14px",
                 color: "#64748b",
-                formatter: () => String(totalLeads),
+                formatter: (w) => {
+                  const sum = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                  return String(sum > 0 ? sum : totalLeads);
+                },
               },
             },
           },

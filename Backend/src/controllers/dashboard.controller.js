@@ -4,12 +4,12 @@ const getDashboardStats = async (req, res) => {
   try {
     const orgId = req.user.org_id;
 
-    // 1. Total Leads count (isPresent = 1)
+    // 1. Total Leads count (active + converted/qualified)
     const [leadsCountRow] = await pool.execute(
       `SELECT COUNT(*) AS total_leads
        FROM leads l
        INNER JOIN users u ON l.created_by_user_id = u.id
-       WHERE u.org_id = ? AND l.isPresent = 1`,
+       WHERE u.org_id = ? AND (l.isPresent = 1 OR l.status = 'Qualified')`,
       [orgId]
     );
     const totalLeads = leadsCountRow[0]?.total_leads || 0;
@@ -92,13 +92,13 @@ const getDashboardStats = async (req, res) => {
     // 6. Lead Distribution by Source
     const [sourceRows] = await pool.execute(
       `SELECT
-         COALESCE(o.source, 'Unknown') AS source,
+         COALESCE(o.Source, 'Unknown') AS source,
          COUNT(l.lead_id) AS count
        FROM leads l
        INNER JOIN organizations o ON l.org_id = o.org_id
        INNER JOIN users u ON l.created_by_user_id = u.id
-       WHERE u.org_id = ? AND l.isPresent = 1
-       GROUP BY o.source`,
+       WHERE u.org_id = ? AND (l.isPresent = 1 OR l.status = 'Qualified')
+       GROUP BY o.Source`,
       [orgId]
     );
 
@@ -108,8 +108,37 @@ const getDashboardStats = async (req, res) => {
       "Referrals": 0,
       "Cold outreach": 0
     };
+
     sourceRows.forEach(row => {
-      sourceMap[row.source] = row.count;
+      let src = (row.source || "").trim();
+      if (!src) {
+        src = "Unknown";
+      }
+      
+      const lowerSrc = src.toLowerCase();
+      
+      // Normalize common sources to standard display formats
+      if (lowerSrc === "website" || lowerSrc === "web" || lowerSrc === "site" || lowerSrc === "website.com") {
+        sourceMap["Website"] = (sourceMap["Website"] || 0) + row.count;
+      } else if (lowerSrc === "linkedin" || lowerSrc === "linkdin" || lowerSrc === "linked in" || lowerSrc === "linkedin.com") {
+        sourceMap["LinkedIn"] = (sourceMap["LinkedIn"] || 0) + row.count;
+      } else if (lowerSrc === "referral" || lowerSrc === "referrals") {
+        sourceMap["Referrals"] = (sourceMap["Referrals"] || 0) + row.count;
+      } else if (
+        lowerSrc === "cold outreach" || 
+        lowerSrc === "coldoutreach" || 
+        lowerSrc === "cold call" || 
+        lowerSrc === "cold email"
+      ) {
+        sourceMap["Cold outreach"] = (sourceMap["Cold outreach"] || 0) + row.count;
+      } else {
+        // Capitalize each word for other custom sources
+        const capitalizedSrc = src
+          .split(" ")
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(" ");
+        sourceMap[capitalizedSrc] = (sourceMap[capitalizedSrc] || 0) + row.count;
+      }
     });
 
     const leadDistribution = {
