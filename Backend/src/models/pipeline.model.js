@@ -335,6 +335,17 @@ const moveDeal = async (
         [orgId, dealId],
       );
 
+      const [[comp]] = await connection.execute(
+        `SELECT company_id FROM client_companies WHERE linked_org_id = ? AND org_id = ?`,
+        [deal.org_id, orgId]
+      );
+      if (comp) {
+        await connection.execute(
+          `UPDATE contacts SET company_id = ? WHERE contact_id = ?`,
+          [comp.company_id, deal.contact_id]
+        );
+      }
+
       // c. Log activity
       await connection.execute(
         `INSERT INTO deal_activities (deal_id, activity_text, performed_by_user_id)

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-// import { getOrganization } from "../services/organizationService";
+import { getOrganization } from "../services/organizationService";
 import { getLeads } from "../services/leadService";
 import "../styles/LeadModel.css"; // Reuse modal styling for premium layout consistence
 
@@ -15,7 +15,7 @@ const ContactModal = ({ isOpen, onClose, contact, onSave }) => {
     phone: "",
     job_title: "",
     organization: "",
-    org_id: "",
+    company_id: "",
     lifecycle_stage: "Customer",
     contact_status: "Active"
   });
@@ -29,7 +29,7 @@ const ContactModal = ({ isOpen, onClose, contact, onSave }) => {
         phone: contact.phone || "",
         job_title: contact.role || contact.job_title || "",
         organization: contact.organization || "",
-        org_id: contact.org_id || "",
+        company_id: contact.company_id || "",
         lifecycle_stage: contact.lifecycle_stage || "Customer",
         contact_status: contact.contact_status || "Active"
       });
@@ -41,7 +41,7 @@ const ContactModal = ({ isOpen, onClose, contact, onSave }) => {
         phone: "",
         job_title: "",
         organization: "",
-        org_id: "",
+        company_id: "",
         lifecycle_stage: "Customer",
         contact_status: "Active"
       });
@@ -91,7 +91,7 @@ const ContactModal = ({ isOpen, onClose, contact, onSave }) => {
     setFormData(prev => ({
       ...prev,
       organization: val,
-      org_id: matched ? matched.org_id : ""
+      company_id: matched ? matched.org_id : ""
     }));
   };
 

@@ -29,6 +29,7 @@ const Contacts = () => {
           email: c.email,
           phone: c.phone || "—",
           organization: c.Company_name || "—",
+          company_id: c.company_id,
           org_id: c.org_id,
           lifecycle_stage: c.lifecycle_stage || "Customer",
           contact_status: c.contact_status || "Active"
