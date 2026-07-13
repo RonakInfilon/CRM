@@ -54,6 +54,7 @@ async function migrate() {
           module_pipeline BOOLEAN NOT NULL DEFAULT TRUE,
           module_contacts BOOLEAN NOT NULL DEFAULT TRUE,
           module_companies BOOLEAN NOT NULL DEFAULT TRUE,
+          module_drag_drop BOOLEAN NOT NULL DEFAULT TRUE,
           module_user_management BOOLEAN NOT NULL DEFAULT TRUE,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           FOREIGN KEY (org_id) REFERENCES organizations(org_id) ON DELETE CASCADE
@@ -71,6 +72,7 @@ async function migrate() {
         module_pipeline BOOLEAN NOT NULL DEFAULT TRUE,
         module_contacts BOOLEAN NOT NULL DEFAULT TRUE,
         module_companies BOOLEAN NOT NULL DEFAULT TRUE,
+        module_drag_drop BOOLEAN NOT NULL DEFAULT TRUE,
         module_user_management BOOLEAN NOT NULL DEFAULT TRUE,
         PRIMARY KEY (org_id, role),
         FOREIGN KEY (org_id) REFERENCES organizations(org_id) ON DELETE CASCADE
@@ -107,6 +109,7 @@ async function migrate() {
         name VARCHAR(255) NOT NULL,
         website VARCHAR(255) DEFAULT NULL,
         industry VARCHAR(100) DEFAULT NULL,
+        company_size VARCHAR(50) DEFAULT NULL,
         annual_revenue DECIMAL(18, 2) DEFAULT 0.00,
         phone VARCHAR(50) DEFAULT NULL,
         city VARCHAR(100) DEFAULT NULL,
@@ -153,19 +156,19 @@ async function migrate() {
         lead_id INT AUTO_INCREMENT PRIMARY KEY,
         org_id INT NOT NULL,
         contact_id INT NOT NULL UNIQUE,
-        org_name VARCHAR(255) NOT NULL,
-        website VARCHAR(255) DEFAULT NULL,
-        industry VARCHAR(100) DEFAULT NULL,
-        source VARCHAR(100) DEFAULT NULL,
         status VARCHAR(50) NOT NULL DEFAULT 'New',
         assigned_to_user_id INT NULL,
+        created_by_user_id INT NULL,
+        isPresent TINYINT(1) NOT NULL DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (org_id) REFERENCES organizations(org_id) ON DELETE CASCADE,
         FOREIGN KEY (contact_id) REFERENCES contacts(contact_id) ON DELETE CASCADE,
         FOREIGN KEY (assigned_to_user_id) REFERENCES users(id) ON DELETE SET NULL,
+        FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL,
         INDEX idx_lead_org (org_id),
-        INDEX idx_lead_status (status)
+        INDEX idx_lead_status (status),
+        INDEX idx_lead_creator (created_by_user_id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
     console.log("Leads table created.");
@@ -214,14 +217,19 @@ async function migrate() {
         contact_executive_id INT NULL,
         dev_progress INT NOT NULL DEFAULT 0,
         lost_reason VARCHAR(255) DEFAULT NULL,
+        created_by_user_id INT NULL,
+        assigned_to_user_id INT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (org_id) REFERENCES organizations(org_id) ON DELETE CASCADE,
         FOREIGN KEY (stage_id) REFERENCES pipeline_stages(stage_id) ON DELETE RESTRICT,
         FOREIGN KEY (contact_id) REFERENCES contacts(contact_id) ON DELETE RESTRICT,
         FOREIGN KEY (contact_executive_id) REFERENCES users(id) ON DELETE SET NULL,
+        FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL,
+        FOREIGN KEY (assigned_to_user_id) REFERENCES users(id) ON DELETE SET NULL,
         INDEX idx_deal_org (org_id),
-        INDEX idx_deal_stage (stage_id)
+        INDEX idx_deal_stage (stage_id),
+        INDEX idx_deal_creator (created_by_user_id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
     console.log("Deals table created.");
@@ -290,8 +298,8 @@ async function migrate() {
 
     // Seeding: Step 4. Create default organization permissions for orgId = 1
     await conn.query(`
-      INSERT INTO organization_permissions (org_id, module_dashboard, module_leads, module_pipeline, module_contacts, module_companies, module_user_management)
-      VALUES (?, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
+      INSERT INTO organization_permissions (org_id, module_dashboard, module_leads, module_pipeline, module_contacts, module_companies, module_drag_drop, module_user_management)
+      VALUES (?, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
     `, [orgId]);
     console.log("Default Organization Permissions seeded successfully!");
 
