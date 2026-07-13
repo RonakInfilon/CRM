@@ -1,7 +1,7 @@
 import { useState } from "react";
 // import { createLead, updateLead } from "../services/leadService";
 import "../styles/LeadModel.css";
-import { createLead ,updateLead} from "../services/leadService";
+import { createLead, updateLead } from "../services/leadService";
 import { CirclePoundSterling } from "lucide-react";
 const initialState = {
   firstName: "",
@@ -22,26 +22,26 @@ const initialState = {
 function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
   // console.log(isOpen);
   // console.log(onClose);
-  console.log(lead);
+  console.log("here i m checkinh lead is present or not" + lead);
   // console.log(onLeadSaved);
   const isEditMode = !!lead;
   const [formData, setFormData] = useState(
     lead
       ? {
-          firstName: lead.FirstName || "",
-          lastName: lead.LastName || "",
-          salutation: lead.Salutation || "",
-          organization: lead.Organization || "",
-          website: lead.Website || "",
-          territory: lead.Territory || "",
-          industry: lead.Industry || "",
-          jobTitle: lead.JobTitle || "",
-          source: lead.Source || "",
-          status: lead.Status || "New",
-          notes: lead.Notes || "",
-          email: lead.Email || "",
-          phone: lead.Phone || "",
-        }
+        firstName: lead.FirstName || "",
+        lastName: lead.LastName || "",
+        salutation: lead.Salutation || "",
+        organization: lead.Organization || "",
+        website: lead.Website || "",
+        territory: lead.Territory || "",
+        industry: lead.Industry || "",
+        jobTitle: lead.JobTitle || "",
+        source: lead.Source || "",
+        status: lead.Status || "New",
+        notes: lead.Notes || "",
+        email: lead.Email || "",
+        phone: lead.Phone || "",
+      }
       : initialState
   );
 
@@ -52,26 +52,26 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
     });
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  console.log("Submitting");
-  console.log("Lead:", lead);
+    console.log("Submitting");
+    console.log("Lead:", lead);
 
-  try {
-    if (isEditMode) {
-      await updateLead(lead.lead_id, formData);
-    } else {
-      await createLead(formData);
+    try {
+      if (isEditMode) {
+        await updateLead(lead.LeadID || lead.lead_id, formData);
+      } else {
+        await createLead(formData);
+      }
+
+      onLeadSaved?.();
+      onClose?.();
+
+    } catch (err) {
+      console.error("Failed to save lead:", err);
     }
-
-    onLeadSaved?.();
-    onClose?.();
-
-  } catch (err) {
-    console.error("Failed to save lead:", err);
-  }
-};
+  };
 
   if (!isOpen) return null;
 

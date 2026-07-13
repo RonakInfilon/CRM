@@ -4,25 +4,25 @@ import API from "../api";
 const RoleContext = createContext();
 
 const defaultCompanyModules = {
-  "Google": ["Dashboard", "Leads", "Pipeline", "Contacts", "Activity", "Drag & Drop", "Permission"],
-  "Microsoft": ["Dashboard", "Leads", "Contacts", "Permission"],
-  "Apple": ["Dashboard", "Leads", "Pipeline", "Contacts", "Activity"],
-  "Amazon": ["Dashboard", "Leads", "Contacts"]
+  "Google": ["Dashboard", "Leads", "Pipeline", "Contacts", "Companies", "Activity", "Drag & Drop", "Permission"],
+  "Microsoft": ["Dashboard", "Leads", "Contacts", "Companies", "Permission"],
+  "Apple": ["Dashboard", "Leads", "Pipeline", "Contacts", "Companies", "Activity"],
+  "Amazon": ["Dashboard", "Leads", "Contacts", "Companies"]
 };
 
 const defaultRolePermissions = {
   // Google
-  "Google_Manager": ["Dashboard", "Leads", "Pipeline", "Contacts", "Activity", "Drag & Drop"],
-  "Google_Company Employee": ["Dashboard", "Leads", "Contacts"],
+  "Google_Manager": ["Dashboard", "Leads", "Pipeline", "Contacts", "Companies", "Activity", "Drag & Drop"],
+  "Google_Company Employee": ["Dashboard", "Leads", "Contacts", "Companies"],
   // Microsoft
-  "Microsoft_Manager": ["Dashboard", "Leads", "Contacts"],
-  "Microsoft_Company Employee": ["Dashboard", "Contacts"],
+  "Microsoft_Manager": ["Dashboard", "Leads", "Contacts", "Companies"],
+  "Microsoft_Company Employee": ["Dashboard", "Contacts", "Companies"],
   // Apple
-  "Apple_Manager": ["Dashboard", "Leads", "Pipeline", "Contacts", "Activity"],
-  "Apple_Company Employee": ["Dashboard", "Leads"],
+  "Apple_Manager": ["Dashboard", "Leads", "Pipeline", "Contacts", "Companies", "Activity"],
+  "Apple_Company Employee": ["Dashboard", "Leads", "Companies"],
   // Amazon
-  "Amazon_Manager": ["Dashboard", "Leads", "Contacts"],
-  "Amazon_Company Employee": ["Dashboard"]
+  "Amazon_Manager": ["Dashboard", "Leads", "Contacts", "Companies"],
+  "Amazon_Company Employee": ["Dashboard", "Companies"]
 };
 
 export const RoleProvider = ({ children }) => {
@@ -248,6 +248,7 @@ export const RoleProvider = ({ children }) => {
     else if (path.includes("/leads")) requiredModule = "Leads";
     else if (path.includes("/pipeline")) requiredModule = "Pipeline";
     else if (path.includes("/contacts")) requiredModule = "Contacts";
+    else if (path.includes("/companies")) requiredModule = "Companies";
     else if (path.includes("/activity")) requiredModule = "Activity";
     else if (path.includes("/drag")) requiredModule = "Drag & Drop";
     else if (path.includes("/permission")) requiredModule = "Permission";
@@ -255,7 +256,7 @@ export const RoleProvider = ({ children }) => {
     if (!requiredModule) return true;
 
     // Check 1: Does the Company have this module enabled by Master Admin?
-    const allowedCompanyModules = companyModules[userCompany] || ["Dashboard", "Leads", "Pipeline", "Contacts", "Activity", "Drag & Drop", "Permission"];
+    const allowedCompanyModules = companyModules[userCompany] || ["Dashboard", "Leads", "Pipeline", "Contacts", "Companies", "Activity", "Drag & Drop", "Permission"];
     if (!allowedCompanyModules.includes(requiredModule)) {
       return false;
     }
@@ -268,8 +269,8 @@ export const RoleProvider = ({ children }) => {
     // Check 3: For Manager and Employee, check the role-based settings for this company
     const roleKey = `${userCompany}_${role}`;
     const allowedRoleModules = rolePermissions[roleKey] || (role === "Manager" 
-      ? ["Dashboard", "Leads", "Pipeline", "Contacts", "Activity", "Drag & Drop"]
-      : ["Dashboard", "Leads", "Contacts"]);
+      ? ["Dashboard", "Leads", "Pipeline", "Contacts", "Companies", "Activity", "Drag & Drop"]
+      : ["Dashboard", "Leads", "Contacts", "Companies"]);
     return allowedRoleModules.includes(requiredModule);
   };
 

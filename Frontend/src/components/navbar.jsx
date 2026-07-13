@@ -36,10 +36,10 @@ function Navbar({ toggleSidebar, logout, name }) {
       <div className="navbar-right">
         {role !== "Super Admin" && (
           <div className="role-switcher-container">
-            <label htmlFor="company-select" className="role-label">
+            {/* <label htmlFor="company-select" className="role-label">
               Company:
-            </label>
-            <select
+            </label> */}
+            {/* <select
               id="company-select"
               value={company}
               onChange={handleCompanyChange}
@@ -49,7 +49,7 @@ function Navbar({ toggleSidebar, logout, name }) {
               <option value="Microsoft">Microsoft</option>
               <option value="Apple">Apple</option>
               <option value="Amazon">Amazon</option>
-            </select>
+            </select> */}
           </div>
         )}
         

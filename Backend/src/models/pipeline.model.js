@@ -4,9 +4,7 @@ const getPipeline = async (orgId) => {
   const connection = await pool.getConnection();
 
   try {
-    // Get ALL 5 fixed pipeline stages for the CRM org
-    // (stages belong to req.user.org_id, not the client's org)
-    const [stages] = await connection.execute(
+    let [stages] = await connection.execute(
       `
       SELECT
         stage_id,
@@ -19,6 +17,37 @@ const getPipeline = async (orgId) => {
     `,
       [orgId],
     );
+
+    if (stages.length === 0) {
+      const DEFAULT_STAGES = [
+        "Opportunity",
+        "Proposal Sent",
+        "Negotiation",
+        "Won",
+        "Lost",
+      ];
+      for (let i = 0; i < DEFAULT_STAGES.length; i++) {
+        await connection.execute(
+          `INSERT INTO pipeline_stages (org_id, name, sort_order) VALUES (?, ?, ?)`,
+          [orgId, DEFAULT_STAGES[i], i]
+        );
+      }
+
+      // Re-fetch
+      [stages] = await connection.execute(
+        `
+        SELECT
+          stage_id,
+          org_id,
+          name,
+          sort_order
+        FROM pipeline_stages
+        WHERE org_id = ?
+        ORDER BY sort_order ASC
+      `,
+        [orgId],
+      );
+    }
 
     // Get all deals for this CRM org via created_by_user_id -> users -> org_id
     const [deals] = await connection.execute(

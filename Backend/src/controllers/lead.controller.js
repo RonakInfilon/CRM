@@ -94,7 +94,7 @@ const updateLead = async (req, res) => {
     const { id } = req.params;
     const orgId = req.user.org_id;
 
-    const result = await Lead.updateLead(id, orgId, req.body);
+    const result = await Lead.updateLead(id, req.body);
 
     return res.status(200).json({
       success: true,

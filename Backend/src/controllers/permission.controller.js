@@ -24,7 +24,7 @@ const getPermissions = async (req, res) => {
         if (perm.module_leads) modules.push("Leads");
         if (perm.module_pipeline) modules.push("Pipeline");
         if (perm.module_contacts) modules.push("Contacts");
-        if (perm.module_companies) modules.push("Activity");
+        if (perm.module_companies) modules.push("Companies");
         if (perm.module_drag_drop) modules.push("Drag & Drop");
         if (perm.module_user_management) modules.push("Permission");
       }
@@ -45,7 +45,7 @@ const getPermissions = async (req, res) => {
       if (row.module_leads) modules.push("Leads");
       if (row.module_pipeline) modules.push("Pipeline");
       if (row.module_contacts) modules.push("Contacts");
-      if (row.module_companies) modules.push("Activity");
+      if (row.module_companies) modules.push("Companies");
       if (row.module_drag_drop) modules.push("Drag & Drop");
       if (row.module_user_management) modules.push("Permission");
 
@@ -94,7 +94,7 @@ const updatePermissions = async (req, res) => {
     const leads = modules.includes("Leads") ? 1 : 0;
     const pipeline = modules.includes("Pipeline") ? 1 : 0;
     const contacts = modules.includes("Contacts") ? 1 : 0;
-    const companies = modules.includes("Activity") ? 1 : 0;
+    const companies = modules.includes("Companies") ? 1 : 0;
     const dragDrop = modules.includes("Drag & Drop") ? 1 : 0;
     const userMgmt = modules.includes("Permission") ? 1 : 0;
 

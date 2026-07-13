@@ -19,8 +19,8 @@ function DashboardLayout() {
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
+    localStorage.clear();
+    window.location.href = "/";
   };
  
 

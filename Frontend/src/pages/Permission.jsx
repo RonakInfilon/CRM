@@ -22,6 +22,7 @@ const ALL_MODULES = [
   { id: "Leads", label: "Leads", description: "Leads creation, details, and status updates.", icon: <Users size={20} /> },
   { id: "Pipeline", label: "Pipeline", description: "Kanban board pipeline for managing sales opportunities.", icon: <GitBranch size={20} /> },
   { id: "Contacts", label: "Contacts", description: "Contact management directory and details drawer.", icon: <Contact size={20} /> },
+  { id: "Companies", label: "Companies", description: "Client organization directory and account management.", icon: <Building2 size={20} /> },
   { id: "Activity", label: "Activity", description: "Notes, schedule records, and task history logging.", icon: <Calendar size={20} /> },
   { id: "Drag & Drop", label: "Drag & Drop", description: "Interactive activity log with draggable components.", icon: <Layers size={20} /> },
   { id: "Permission", label: "Permission", description: "Configure system modules and role permissions.", icon: <Lock size={20} /> }

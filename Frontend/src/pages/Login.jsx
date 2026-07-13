@@ -46,7 +46,7 @@ export default function Login() {
         localStorage.setItem("userProfile", JSON.stringify(response.data.user));
       }
 
-      navigate("/dashboard");
+      window.location.href = "/dashboard";
 
 
     } catch (error) {
@@ -74,7 +74,7 @@ export default function Login() {
           }));
         }
 
-        navigate("/dashboard");
+        window.location.href = "/dashboard";
       }
     } finally {
       setLoading(false);
