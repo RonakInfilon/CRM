@@ -86,7 +86,7 @@ const login = async (req, res) => {
                 role: user.role,
                 org_id: user.org_id
             },
-            process.env.SecreatKey,
+            process.env.SECRET_KEY,
             { expiresIn: "1d" }
         );
 

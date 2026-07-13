@@ -112,14 +112,14 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
     }
   }, [isOffline, allLeads, filteredAndSortedLeads, currentPage, totalPages]);
 
- const handleStatusChange = async (lead, newStatus) => {
+  const handleStatusChange = async (lead, newStatus) => {
   if (newStatus === "Contacted") {
     setSelectedLead({ ...lead, Status: "Contacted" });
     setShowModal(true);
     return;
   }
 
- 
+
   if ((newStatus === "Qualified" || newStatus === "Won") && statusFilter !== "Qualified") {
     setAllLeads((prev) =>
       prev.filter((item) => item.LeadID !== lead.LeadID)
@@ -146,7 +146,7 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
   }
 };
 
- const handleDelete = async (id) => {
+const handleDelete = async (id) => {
   if (!canDelete) {
     alert("Permission Denied: Only Super Admin can delete records.");
     return;
@@ -168,7 +168,7 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
   }
 };
 
- const handleEditClick = (lead) => {
+  const handleEditClick = (lead) => {
   setSelectedLead(lead);
   setShowModal(true);
   setOpenMenu(null);
@@ -183,7 +183,7 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
           <span className="qualified-banner-icon"></span>
           <div className="qualified-banner-text">
             <strong>Viewing Qualified Leads</strong>
-            <span>These leads have been moved to the pipeline. You can still edit their details using the action menu.</span>
+
           </div>
         </div>
       )}

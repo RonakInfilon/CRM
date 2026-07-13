@@ -127,7 +127,7 @@ export const RoleProvider = ({ children }) => {
 
   const fetchPermissionsFromAPI = async () => {
     const token = localStorage.getItem("token");
-    if (!token || token === "mock-offline-token-12345") return;
+    if (!token) return;
     try {
       const res = await API.get("/permissions");
       if (res.data && res.data.success) {
@@ -152,7 +152,7 @@ export const RoleProvider = ({ children }) => {
     localStorage.setItem("userProfile", JSON.stringify(updated));
 
     const token = localStorage.getItem("token");
-    if (token && token !== "mock-offline-token-12345") {
+    if (token) {
       try {
         await API.put("/users/profile", {
           name: updatedDetails.name,
@@ -172,9 +172,9 @@ export const RoleProvider = ({ children }) => {
     window.dispatchEvent(new Event("roleChanged"));
 
     const token = localStorage.getItem("token");
-    if (token && token !== "mock-offline-token-12345") {
+    if (token) {
       try {
-        await API.post("/auth/permissions", {
+        await API.post("/permissions", {
           companyName: compName,
           role: "company_level",
           modules
@@ -193,9 +193,9 @@ export const RoleProvider = ({ children }) => {
     window.dispatchEvent(new Event("roleChanged"));
 
     const token = localStorage.getItem("token");
-    if (token && token !== "mock-offline-token-12345") {
+    if (token) {
       try {
-        await API.post("/auth/permissions", {
+        await API.post("/permissions", {
           companyName: compName,
           role: roleName,
           modules

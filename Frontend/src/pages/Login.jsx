@@ -51,30 +51,11 @@ export default function Login() {
 
     } catch (error) {
       if (error.response) {
-        // Backend is online but auth failed
+        // Backend responded with an error (wrong credentials, etc.)
         alert(error.response.data?.message || "Invalid email or password");
       } else {
-        // Backend is offline (network error)
-        console.warn("Backend API offline. Proceeding with offline demo mock token.", error);
-
-        // Seed default credentials / mock session
-        localStorage.setItem("token", "mock-offline-token-12345");
-
-        // Also default userRole to Super Admin if not already set, so they can test immediately
-        if (!localStorage.getItem("userRole")) {
-          localStorage.setItem("userRole", "Super Admin");
-          localStorage.setItem("userCompany", "Google");
-          localStorage.setItem("userProfile", JSON.stringify({
-            name: "Master Admin",
-            email: "admin@crm.com",
-            phone: "+1 (555) 019-0000",
-            avatar: "",
-            role: "Super Admin",
-            company: "All"
-          }));
-        }
-
-        window.location.href = "/dashboard";
+        // Backend is unreachable — do NOT grant access
+        alert("Cannot connect to the server. Please check your connection and try again.");
       }
     } finally {
       setLoading(false);

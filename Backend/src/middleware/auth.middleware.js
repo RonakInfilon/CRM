@@ -10,7 +10,7 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ message: "Access token is required" });
   }
   //it will verify the token by inbuilt method 
-  jwt.verify(token, process.env.SecreatKey, (err, user) => {
+  jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
     if (err) {
       return res.status(403).json({ message: "Invalid or expired token" });
     }

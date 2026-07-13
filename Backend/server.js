@@ -23,9 +23,11 @@ const dashboardRoutes=require("./src/routes/dashboardRoutes.js");
 const app = express();
 const PORT = 3000;
 
-const JWT_SECRET = process.env.SECRET_KEY;
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  credentials: true
+}));
 app.use(express.json());
 // app.use(loggerMiddleware);
 app.get("/", (req, res) => {
@@ -38,15 +40,13 @@ app.get("/test", (req, res) => {
 });
 //this routes is used for authentication
 app.use("/api/auth", authRoutes);
-app.use("/api/auth/permissions", permissionRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/permissions", permissionRoutes);
-app.use("/api/tenants", tenantRoutes);
+app.use("/api/tenant", tenantRoutes);
 app.use("/api/leads",leadRoutes);
 app.use("/api/pipeline",pipelineRoutes);
 app.use("/api/contacts", contactRoutes);
 app.use("/api/companies", companyRoutes);
-app.use("/api/tenant", tenantRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 
