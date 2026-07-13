@@ -214,3 +214,33 @@
   background-color: #4338ca;
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
+
+/* Contacted-status hint banner */
+.contacted-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #93c5fd;
+  border-left: 4px solid #3b82f6;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.84rem;
+  color: #1e40af;
+  animation: fadeInOverlay 0.2s ease-out;
+}
+
+.contacted-hint-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.contacted-hint strong {
+  font-weight: 700;
+}
+
+/* Highlight required fields with a soft red border when Contacted */
+.form-group input:required:not(:focus):placeholder-shown {
+  border-color: #fca5a5;
+  background-color: #fff7f7;
+}

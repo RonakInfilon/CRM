@@ -113,8 +113,14 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
   }, [isOffline, allLeads, filteredAndSortedLeads, currentPage, totalPages]);
 
  const handleStatusChange = async (lead, newStatus) => {
-  // Optimistic UI update
-  if (newStatus === "Qualified" || newStatus === "Won") {
+  if (newStatus === "Contacted") {
+    setSelectedLead({ ...lead, Status: "Contacted" });
+    setShowModal(true);
+    return;
+  }
+
+ 
+  if ((newStatus === "Qualified" || newStatus === "Won") && statusFilter !== "Qualified") {
     setAllLeads((prev) =>
       prev.filter((item) => item.LeadID !== lead.LeadID)
     );
@@ -131,13 +137,11 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
   try {
     await updateLeadStatus(lead.LeadID, newStatus);
 
-    if (newStatus === "Qualified" || newStatus === "Won") {
+    if ((newStatus === "Qualified" || newStatus === "Won") && statusFilter !== "Qualified") {
       fetchLeads();
     }
   } catch (err) {
     console.error(err);
-
-    // Reload original data if API fails
     fetchLeads();
   }
 };
@@ -169,12 +173,20 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
   setShowModal(true);
   setOpenMenu(null);
 };
-console.log(selectedLead);
 
   const headers = ["FirstName", "LastName", "Organization", "Territory", "Industry", "Status"];
 
   return (
     <>
+      {statusFilter === "Qualified" && (
+        <div className="qualified-banner">
+          <span className="qualified-banner-icon"></span>
+          <div className="qualified-banner-text">
+            <strong>Viewing Qualified Leads</strong>
+            <span>These leads have been moved to the pipeline. You can still edit their details using the action menu.</span>
+          </div>
+        </div>
+      )}
       <div className="table-wrapper">
         <Table className="crm-table">
           <TableHeader>

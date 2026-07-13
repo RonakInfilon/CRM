@@ -104,6 +104,7 @@ const getAllLeads = async ({
   status = ""
 }) => {
   const offset = (page - 1) * limit;
+  const isQualifiedFilter = status === 'Qualified';
 
   // Filter leads by the CRM org: join leads -> created_by_user_id -> users -> org_id
   // This correctly separates leads of Company A from Company B even though
@@ -147,9 +148,13 @@ INNER JOIN contacts c
 INNER JOIN users u
     ON l.created_by_user_id = u.id
 
-WHERE l.isPresent = 1
-  AND u.org_id = ?
+WHERE u.org_id = ?
 `;
+
+  // Only restrict to active leads when NOT filtering by Qualified
+  if (!isQualifiedFilter) {
+    query += ` AND l.isPresent = 1 `;
+  }
 
   const values = [orgId];
 
@@ -196,9 +201,13 @@ WHERE l.isPresent = 1
       INNER JOIN users u
           ON l.created_by_user_id = u.id
 
-      WHERE l.isPresent = 1
-        AND u.org_id = ?
+      WHERE u.org_id = ?
   `;
+
+  if (!isQualifiedFilter) {
+    countQuery += ` AND l.isPresent = 1 `;
+  }
+
   const countValues = [orgId];
 
   if (search) {
@@ -376,6 +385,10 @@ const updateLead = async (leadId, leadData) => {
 
 
 
+    // If status is changed away from 'Qualified', restore the lead to the active list.
+    // If it stays Qualified, keep isPresent=0 (only visible via the Qualified filter).
+    const isPresent = status === 'Qualified' ? 0 : 1;
+
     await connection.execute(
       `
       UPDATE leads
@@ -383,13 +396,15 @@ const updateLead = async (leadId, leadData) => {
       SET
 
       status=?,
-      assigned_to_user_id=?
+      assigned_to_user_id=?,
+      isPresent=?
 
       WHERE lead_id=?
       `,
       [
         status,
         assignedToUserId,
+        isPresent,
         leadId,
       ]
     );

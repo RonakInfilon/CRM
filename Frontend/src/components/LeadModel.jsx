@@ -1,8 +1,6 @@
 import { useState } from "react";
-// import { createLead, updateLead } from "../services/leadService";
 import "../styles/LeadModel.css";
 import { createLead, updateLead } from "../services/leadService";
-import { CirclePoundSterling } from "lucide-react";
 const initialState = {
   firstName: "",
   lastName: "",
@@ -20,10 +18,6 @@ const initialState = {
 };
 
 function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
-  // console.log(isOpen);
-  // console.log(onClose);
-  console.log("here i m checkinh lead is present or not" + lead);
-  // console.log(onLeadSaved);
   const isEditMode = !!lead;
   const [formData, setFormData] = useState(
     lead
@@ -44,6 +38,9 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
       }
       : initialState
   );
+
+  // When status is 'Contacted', contact details + org details are required
+  const isContacted = formData.status === "Contacted";
 
   const handleChange = (e) => {
     setFormData({
@@ -86,6 +83,13 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
+          {/* Contacted-mode hint */}
+          {isContacted && (
+            <div className="contacted-hint">
+              <span className="contacted-hint-icon"></span>
+              <span>Status is <strong>Contacted</strong> — Email, Phone &amp; Organization details are now required.</span>
+            </div>
+          )}
           {/* Section 1: Person Information */}
           <div className="form-section">
             <h3>Person Details</h3>
@@ -125,23 +129,31 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
             </div>
             <div className="form-grid">
               <div className="form-group">
-                <label>Email Address</label>
+                <label>
+                  Email Address
+                  {isContacted && <span className="required"> *</span>}
+                </label>
                 <input
                   type="email"
                   name="email"
                   placeholder="name@company.com"
                   value={formData.email}
                   onChange={handleChange}
+                  required={isContacted}
                 />
               </div>
               <div className="form-group">
-                <label>Phone Number</label>
+                <label>
+                  Phone Number
+                  {isContacted && <span className="required"> *</span>}
+                </label>
                 <input
                   type="text"
                   name="phone"
                   placeholder="e.g. +1 (555) 019-0000"
                   value={formData.phone}
                   onChange={handleChange}
+                  required={isContacted}
                 />
               </div>
             </div>
@@ -163,12 +175,16 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
             <h3>Organization Details</h3>
             <div className="form-grid">
               <div className="form-group">
-                <label>Organization</label>
+                <label>
+                  Organization
+                  {isContacted && <span className="required"> *</span>}
+                </label>
                 <input
                   name="organization"
                   placeholder="Infilon Technology"
                   value={formData.organization}
                   onChange={handleChange}
+                  required={isContacted}
                 />
               </div>
               <div className="form-group">
@@ -184,21 +200,29 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
 
             <div className="form-grid">
               <div className="form-group">
-                <label>Territory</label>
+                <label>
+                  Territory
+                  {isContacted && <span className="required"> *</span>}
+                </label>
                 <input
                   name="territory"
                   placeholder="Ahmedabad"
                   value={formData.territory}
                   onChange={handleChange}
+                  required={isContacted}
                 />
               </div>
               <div className="form-group">
-                <label>Industry</label>
+                <label>
+                  Industry
+                  {isContacted && <span className="required"> *</span>}
+                </label>
                 <input
                   name="industry"
                   placeholder="Computer"
                   value={formData.industry}
                   onChange={handleChange}
+                  required={isContacted}
                 />
               </div>
             </div>

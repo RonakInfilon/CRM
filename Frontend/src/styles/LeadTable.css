@@ -162,3 +162,39 @@
     transform: scale(1) translateY(0);
   }
 }
+
+/* Qualified leads info banner */
+.qualified-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #f59e0b;
+  border-left: 4px solid #f59e0b;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  animation: fadeInTable 0.3s ease-out;
+}
+
+.qualified-banner-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.qualified-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.qualified-banner-text strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #92400e;
+}
+
+.qualified-banner-text span {
+  font-size: 0.82rem;
+  color: #b45309;
+}
