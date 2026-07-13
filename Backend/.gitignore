@@ -1,6 +1,7 @@
-node_modules
-package-lock.json
-package.json
-.gitignore
+# Dependencies
+node_modules/
+
+# Environment variables — NEVER commit secrets
 .env
-.env
+.env.local
+.env.*.local
