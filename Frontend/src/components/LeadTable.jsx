@@ -169,6 +169,7 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
   setShowModal(true);
   setOpenMenu(null);
 };
+console.log(selectedLead);
 
   const headers = ["FirstName", "LastName", "Organization", "Territory", "Industry", "Status"];
 

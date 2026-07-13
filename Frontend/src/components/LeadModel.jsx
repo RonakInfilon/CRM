@@ -2,6 +2,7 @@ import { useState } from "react";
 // import { createLead, updateLead } from "../services/leadService";
 import "../styles/LeadModel.css";
 import { createLead ,updateLead} from "../services/leadService";
+import { CirclePoundSterling } from "lucide-react";
 const initialState = {
   firstName: "",
   lastName: "",
@@ -19,6 +20,10 @@ const initialState = {
 };
 
 function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
+  // console.log(isOpen);
+  // console.log(onClose);
+  console.log(lead);
+  // console.log(onLeadSaved);
   const isEditMode = !!lead;
   const [formData, setFormData] = useState(
     lead
@@ -47,22 +52,26 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log("Submitting")
-    try {
-      if (isEditMode) {
-        await updateLead(e.LeadID, formData);
-      } else {
-        await createLead(formData);
-      }
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-      onLeadSaved?.();
-      onClose?.();
-    } catch (err) {
-      console.error("Failed to save lead:", err);
+  console.log("Submitting");
+  console.log("Lead:", lead);
+
+  try {
+    if (isEditMode) {
+      await updateLead(lead.lead_id, formData);
+    } else {
+      await createLead(formData);
     }
-  };
+
+    onLeadSaved?.();
+    onClose?.();
+
+  } catch (err) {
+    console.error("Failed to save lead:", err);
+  }
+};
 
   if (!isOpen) return null;
 

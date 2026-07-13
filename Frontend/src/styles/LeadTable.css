@@ -8,7 +8,7 @@
 
   margin-bottom: 24px;
   animation: fadeInTable 0.3s ease-out;
-  overflow-x: hidden;
+  overflow-x: auto;
   overflow-y: auto;
   position: relative;
 }
@@ -26,6 +26,7 @@
 
 .crm-table {
   width: 100%;
+  min-width: 900px;
   border-collapse: collapse;
   text-align: left;
   font-size: 0.9rem;

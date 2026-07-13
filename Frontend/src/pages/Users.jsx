@@ -235,7 +235,7 @@ export default function Users() {
             <div className="form-group">
               <label>Full Name</label>
               <div className="input-with-icon">
-                <User size={16} />
+                
                 <input
                   type="text"
                   name="name"
@@ -250,7 +250,7 @@ export default function Users() {
             <div className="form-group">
               <label>Email Address</label>
               <div className="input-with-icon">
-                <Mail size={16} />
+             
                 <input
                   type="email"
                   name="email"
@@ -265,7 +265,7 @@ export default function Users() {
             <div className="form-group">
               <label>Initial Password</label>
               <div className="input-with-icon">
-                <Key size={16} />
+                
                 <input
                   type="password"
                   name="password"
@@ -280,7 +280,7 @@ export default function Users() {
             <div className="form-group">
               <label>Phone Number (Optional)</label>
               <div className="input-with-icon">
-                <Phone size={16} />
+            
                 <input
                   type="text"
                   name="phone"

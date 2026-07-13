@@ -304,7 +304,7 @@ const updateLead = async (leadId, leadData) => {
       notes,
       assignedToUserId = null,
     } = leadData;
-
+    console.log("here")
 
 
     const [[lead]] = await connection.execute(
@@ -315,8 +315,10 @@ const updateLead = async (leadId, leadData) => {
       `,
       [leadId]
     );
-
+    console.log(lead);
+    console.log("Here3")
     if (!lead) {
+
       throw new Error("Lead not found");
     }
 

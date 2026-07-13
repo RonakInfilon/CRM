@@ -1,107 +1,178 @@
+/* Premium User Management Dashboard Styling */
+
 .users-page {
   width: 100%;
+  height: calc(100vh - 120px); /* Fits cleanly in viewport */
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  overflow-x: hidden;
+  gap: 16px;
+  box-sizing: border-box;
+  animation: fadeInUsers 0.4s ease-out;
 }
 
+@keyframes fadeInUsers {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hide scrollbars completely inside Users Page */
+.users-page *::-webkit-scrollbar,
+.users-page::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+}
+
+.users-page *,
+.users-page {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* Header Styling */
 .users-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0 4px;
 }
 
 .users-header h1 {
   font-size: 1.8rem;
-  font-weight: 700;
-  color:  #ffffff;
+  font-weight: 800;
+  color: #0f172a; /* Professional dark gray instead of white */
+  letter-spacing: -0.02em;
 }
 
 .users-header p {
   font-size: 0.9rem;
-  color: #9ca3af;
+  color: #64748b; /* Slate gray */
+  margin-top: 4px;
 }
 
+/* 2-Column Dashboard Layout */
 .users-layout {
   display: grid;
-  grid-template-columns: 2fr 1.2fr;
-  gap: 24px;
+  grid-template-columns: 1.65fr 1fr;
+  gap: 20px;
+  flex: 1;
+  min-height: 0; /* Critical for inner scrolling */
+  height: auto;
 }
 
 @media (max-width: 1024px) {
   .users-layout {
     grid-template-columns: 1fr;
+    height: auto;
+    overflow-y: auto;
   }
 }
 
-/* User List Card */
-.users-list-card, .user-form-card {
-  background: #1a0808;
-  border: 1px solid  #374151;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow:  0 4px 6px -1px rgba(0, 0, 0, 0.1);
+/* Premium Dashboard Cards */
+.users-list-card, 
+.user-form-card {
+  background: #ffffff; /* Clean white dashboard card */
+  border: 1px solid #e2e8f0; /* Soft gray border */
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+  box-sizing: border-box;
 }
 
-.users-list-card h2, .user-form-card h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color:  #ffffff;
+.users-list-card h2, 
+.user-form-card h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 0;
   margin-bottom: 16px;
   display: flex;
   align-items: center;
   gap: 8px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
 }
 
-/* User Table */
+.users-list-card h2 svg, 
+.user-form-card h2 svg {
+  color: #4f46e5; /* Accent color */
+}
+
+/* Table Wrapper for internal scrolling */
 .table-wrapper {
+  flex: 1;
   overflow-x: auto;
-  border-radius: 8px;
-  border: 1px solid  #374151;
+  overflow-y: auto;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  min-height: 0;
 }
 
 .users-table {
   width: 100%;
+  min-width: 600px;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 .users-table th {
-  background:  #111827;
-  color:white;
+  background: #111827; /* Dark slate table header matching Leads page */
+  color: #ffffff;
   padding: 12px 16px;
   font-weight: 600;
-  border-bottom: 1px solid  #374151;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .users-table td {
-  padding: 14px 16px;
-  color:  #ffffff;
-  border-bottom: 1px solid  #374151;
+  padding: 12px 16px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+  white-space: nowrap;
 }
 
 .users-table tr:last-child td {
   border-bottom: none;
 }
 
-.users-table tr:hover {
-  background:  #2d3748;
+.users-table tr {
+  transition: background-color 0.2s ease;
 }
 
-/* Avatar Badge */
+.users-table tr:hover {
+  background-color: #f8fafc;
+}
+
+/* User Avatar and Cell details */
 .user-avatar-circle {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: linear-gradient(135deg, #4f46e5, #818cf8);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
 }
 
 .user-name-cell {
@@ -116,48 +187,58 @@
 }
 
 .user-details span {
-  font-weight: 500;
+  font-weight: 600;
+  color: #0f172a;
 }
 
 .user-details small {
-  color:  #9ca3af;
+  color: #64748b;
+  font-size: 0.75rem;
 }
 
-/* Badges */
+/* Role Badges */
 .badge-role {
   display: inline-flex;
   align-items: center;
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
+  text-transform: capitalize;
 }
 
 .badge-role.superadmin {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
 }
 
 .badge-role.compadmin {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
 }
 
 .badge-role.manager {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
 }
 
 .badge-role.employee {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
+  background: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
 }
 
 /* Form Styles */
 .user-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 2px;
 }
 
 .form-group {
@@ -167,9 +248,9 @@
 }
 
 .form-group label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color:  #9ca3af;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
 }
 
 .input-with-icon {
@@ -181,73 +262,99 @@
 .input-with-icon svg {
   position: absolute;
   left: 12px;
-  color:  #9ca3af;
+  color: #94a3b8;
+  pointer-events: none;
 }
 
-.input-with-icon input, .input-with-icon select {
+/* Redesigned clean light-themed inputs with readable black text */
+.input-with-icon input, 
+.input-with-icon select {
   width: 100%;
   padding: 10px 12px 10px 40px;
-  background: white;
-  border: 1px solid  #374151;
+  background: #f8fafc; /* Subtle off-white background */
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  color:  #ffffff;
-  font-size: 0.9rem;
+  color: #0f172a; /* Dark text for perfect readability */
+  font-size: 0.875rem;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
-.input-with-icon input:focus, .input-with-icon select:focus {
-  border-color: #111827;
+.input-with-icon input:focus, 
+.input-with-icon select:focus {
+  border-color: #4f46e5;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
+.input-with-icon input::placeholder {
+  color: #94a3b8;
+}
+
+/* Accent Submit Button */
 .submit-btn {
-  background: #3b82f6;
+  background: #4f46e5; /* Indigo accent color matching app buttons */
   color: #ffffff;
   padding: 12px;
   border-radius: 8px;
   font-weight: 600;
+  font-size: 0.9rem;
   border: none;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
-  transition: background 0.2s;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+  margin-top: 6px;
 }
 
 .submit-btn:hover {
-  background: #2563eb;
+  background: #4338ca;
+  box-shadow: 0 6px 14px rgba(79, 70, 229, 0.3);
+  transform: translateY(-1px);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
 }
 
 .submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-/* Notifications */
+/* Alert Notification Banners */
 .alert-banner {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
 }
 
 .alert-banner.success {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
 }
 
 .alert-banner.error {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fca5a5;
 }
 
 .no-users {
   text-align: center;
   padding: 48px;
-  color:  #9ca3af;
+  color: #64748b;
 }
