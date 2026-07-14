@@ -65,9 +65,31 @@ const getUsers = async (orgId = null) => {
   return rows;
 };
 
+const getUserById = async (userId) => {
+  const sql = `
+    SELECT
+      u.id,
+      u.org_id,
+      u.name,
+      u.email,
+      u.phone,
+      u.bio,
+      u.role,
+      o.name AS company
+    FROM users u
+    LEFT JOIN organizations o
+      ON u.org_id = o.org_id
+    WHERE u.id = ?
+  `;
+  const [rows] = await db.query(sql, [userId]);
+  return rows[0];
+};
+
 module.exports = {
   userEmail,
   createUser,
   updateUserProfile,
-  getUsers
+  getUsers,
+  getUserById
 };
+

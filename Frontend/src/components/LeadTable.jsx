@@ -192,7 +192,7 @@ const handleDelete = async (id) => {
         </div>
       )}
       <div className="table-wrapper">
-        <Table className="crm-table">
+        <Table className={`crm-table ${statusFilter === "Qualified" ? "qualified-table" : ""}`}>
           <TableHeader>
             <TableRow>
               {headers.map((header) => (

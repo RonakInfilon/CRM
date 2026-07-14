@@ -5,6 +5,7 @@ const getAllLeads = async (req, res) => {
   try {
     const orgId = req.user.org_id;
     const userId = req.user.id;
+    const role = req.user.role;
     const {
       page = 1,
       limit = 10,
@@ -15,6 +16,7 @@ const getAllLeads = async (req, res) => {
     const leads = await Lead.getAllLeads({
       orgId,
       userId,
+      role,
       page: Number(page),
       limit: Number(limit),
       search,
@@ -42,8 +44,10 @@ const getLeadById = async (req, res) => {
   try {
     const { id } = req.params;
     const orgId = req.user.org_id;
+    const userId = req.user.id;
+    const role = req.user.role;
 
-    const lead = await Lead.getLeadById(id, orgId);
+    const lead = await Lead.getLeadById(id, orgId, userId, role);
 
     if (!lead) {
       return res.status(404).json({
@@ -93,6 +97,16 @@ const updateLead = async (req, res) => {
   try {
     const { id } = req.params;
     const orgId = req.user.org_id;
+    const userId = req.user.id;
+    const role = req.user.role;
+
+    const existingLead = await Lead.getLeadById(id, orgId, userId, role);
+    if (!existingLead) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized or Lead not found"
+      });
+    }
 
     const result = await Lead.updateLead(id, req.body);
 
@@ -121,8 +135,17 @@ const updateLeadStatus = async (req, res) => {
     const { status } = req.body;
     const orgId = req.user.org_id;
     const userId = req.user.id; // logged-in user's ID
+    const role = req.user.role;
 
     console.log("Status =", status);
+
+    const existingLead = await Lead.getLeadById(id, orgId, userId, role);
+    if (!existingLead) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized or Lead not found"
+      });
+    }
 
     if (status === "Qualified") {
       console.log("Calling qualifyLead...");
@@ -150,6 +173,16 @@ const deleteLead = async (req, res) => {
   try {
     const { id } = req.params;
     const orgId = req.user.org_id;
+    const userId = req.user.id;
+    const role = req.user.role;
+
+    const existingLead = await Lead.getLeadById(id, orgId, userId, role);
+    if (!existingLead) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized or Lead not found"
+      });
+    }
 
     await Lead.deleteLead(id, orgId);
 

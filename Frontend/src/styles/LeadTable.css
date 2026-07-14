@@ -36,7 +36,7 @@
 .crm-table th,
 .crm-table td {
   padding: 14px 16px;
-  border-bottom: 1px solid #f1f5f9;
+  border: 1px solid #e2e8f0;
   text-align: left;
 }
 
@@ -61,6 +61,7 @@
   color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  border: 1px solid #374151;
 }
 
 .crm-table tbody tr {
@@ -196,4 +197,19 @@
 .qualified-banner-text span {
   font-size: 0.82rem;
   color: #b45309;
+}
+
+/* Color match for Qualified leads table */
+.crm-table.qualified-table th {
+  background-color: #f59e0b;
+  color: #78350f;
+  border: 1px solid #d97706;
+}
+
+.crm-table.qualified-table td {
+  border-color: #fef3c7;
+}
+
+.crm-table.qualified-table tbody tr:hover {
+  background-color: #fffdf5;
 }

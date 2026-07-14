@@ -68,7 +68,66 @@ export const RoleProvider = ({ children }) => {
   });
 
   // Sync role and profile updates
-  const setRole = (newRole) => {
+  // Helper to sync persona changes with backend
+  const syncPersonaToDB = async (newRole, newCompany) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await API.post("/users/switch-persona", {
+        role: newRole,
+        company: newCompany
+      });
+      if (res.data && res.data.success) {
+        localStorage.setItem("token", res.data.token);
+        if (res.data.user) {
+          const updatedProfile = {
+            name: res.data.user.name,
+            email: res.data.user.email,
+            phone: res.data.user.phone || "",
+            bio: res.data.user.bio || "",
+            avatar: "",
+            role: res.data.user.role,
+            company: res.data.user.company
+          };
+          setProfileState(updatedProfile);
+          localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+        }
+      }
+    } catch (err) {
+      console.error("Failed to sync persona switcher with database:", err);
+    }
+  };
+
+  const fetchProfileFromAPI = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await API.get("/users/profile");
+      if (res.data && res.data.success) {
+        const userData = res.data.data;
+        setRoleState(userData.role);
+        setCompanyState(userData.company);
+        const updatedProfile = {
+          name: userData.name,
+          email: userData.email,
+          phone: userData.phone || "",
+          bio: userData.bio || "",
+          avatar: "",
+          role: userData.role,
+          company: userData.company
+        };
+        setProfileState(updatedProfile);
+        localStorage.setItem("userRole", userData.role);
+        localStorage.setItem("userCompany", userData.company);
+        localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+      }
+    } catch (err) {
+      console.warn("Failed to load profile from API:", err);
+    }
+  };
+
+  // Sync role and profile updates
+  const setRole = async (newRole) => {
     setRoleState(newRole);
     localStorage.setItem("userRole", newRole);
     
@@ -86,9 +145,10 @@ export const RoleProvider = ({ children }) => {
     localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
     
     window.dispatchEvent(new Event("roleChanged"));
+    await syncPersonaToDB(newRole, company);
   };
 
-  const setCompany = (newCompany) => {
+  const setCompany = async (newCompany) => {
     setCompanyState(newCompany);
     localStorage.setItem("userCompany", newCompany);
     
@@ -104,9 +164,10 @@ export const RoleProvider = ({ children }) => {
     }
     
     window.dispatchEvent(new Event("roleChanged"));
+    await syncPersonaToDB(role, newCompany);
   };
 
-  const switchPersona = (newRole, newCompany) => {
+  const switchPersona = async (newRole, newCompany) => {
     setRoleState(newRole);
     setCompanyState(newCompany);
     localStorage.setItem("userRole", newRole);
@@ -123,6 +184,7 @@ export const RoleProvider = ({ children }) => {
     localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
     
     window.dispatchEvent(new Event("roleChanged"));
+    await syncPersonaToDB(newRole, newCompany);
   };
 
   const fetchPermissionsFromAPI = async () => {
@@ -141,6 +203,10 @@ export const RoleProvider = ({ children }) => {
       console.warn("Failed to load permissions from API:", err);
     }
   };
+
+  useEffect(() => {
+    fetchProfileFromAPI();
+  }, []);
 
   useEffect(() => {
     fetchPermissionsFromAPI();

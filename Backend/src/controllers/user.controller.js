@@ -1,10 +1,13 @@
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const db = require("../config/database");
 
 const {
   userEmail,
   createUser,
   getUsers,
   updateUserProfile,
+  getUserById,
 } = require("../models/user.model.js");
 
 // Create User by Admin
@@ -112,8 +115,105 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// Get Profile Details
+const getProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await getUserById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || "",
+        bio: user.bio || "",
+        role: user.role,
+        company: user.company || "All",
+      },
+    });
+  } catch (err) {
+    console.error("Get Profile Error:", err);
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// Switch Persona & Re-sign Token
+const switchPersona = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { role, company } = req.body;
+
+    let org_id = null;
+    if (role === "Super Admin") {
+      const [orgs] = await db.query("SELECT org_id FROM organizations ORDER BY org_id ASC LIMIT 1");
+      if (orgs.length > 0) {
+        org_id = orgs[0].org_id;
+      }
+    } else {
+      const [orgs] = await db.query("SELECT org_id FROM organizations WHERE name = ?", [company]);
+      if (orgs.length > 0) {
+        org_id = orgs[0].org_id;
+      }
+    }
+
+    await db.execute(
+      `UPDATE users SET role = ?, org_id = ? WHERE id = ?`,
+      [role, org_id, userId]
+    );
+
+    // Fetch the updated user details to sign the new token
+    const user = await getUserById(userId);
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        org_id: user.org_id
+      },
+      process.env.SECRET_KEY,
+      { expiresIn: "1d" }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Persona updated in database successfully",
+      token,
+      user: {
+        name: user.name,
+        email: user.email,
+        phone: user.phone || "",
+        bio: user.bio || "",
+        avatar: "",
+        role: user.role,
+        company: user.company || "All"
+      }
+    });
+  } catch (err) {
+    console.error("Switch Persona Error:", err);
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   createUserByAdmin,
   getAllUsers,
   updateProfile,
+  getProfile,
+  switchPersona,
 };
