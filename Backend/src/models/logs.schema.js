@@ -1,18 +1,14 @@
-const mongoose=require('mongoose');
+const mongoose = require("mongoose");
 
-const logschema=new mongoose.Schema({
-  // method:String,
-  endPoint:String,
-  userId:Number,
-  IpAddeess:String,
-  statusBody:Number,
-  requestBody:Object,
-  responsemessage:String,
-  timeStamp:{
-    type:Date,
-    default:Date.now
-  }
-})
+const logschema = new mongoose.Schema({
+  action: String,
+  name: String,
+  email: String,
+  time: {
+    type: Date,
+    default: Date.now
+  },
+  org_id: Number
+});
 
-
-module.exports=mongoose.model("ApiLog",logschema);
+module.exports = mongoose.model("ApiLog", logschema);

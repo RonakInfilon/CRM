@@ -59,6 +59,16 @@
   border-color: #cbd5e1;
 }
 
+.metric-card.clickable {
+  cursor: pointer;
+}
+
+.metric-card.clickable:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px -3px rgba(99, 102, 241, 0.15);
+  border-color: #6366f1;
+}
+
 .metric-card-info h3 {
   font-size: 0.85rem;
   font-weight: 600;

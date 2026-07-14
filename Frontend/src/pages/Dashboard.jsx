@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Chart from "react-apexcharts";
 import {
   Users,
@@ -14,7 +15,27 @@ import { getDashboardData } from "../services/dashboardService";
 
 import "../styles/dashboard.css";
 
+const formatCompactNumber = (number) => {
+  if (number === null || number === undefined || isNaN(number)) return "$0";
+  
+  const absNum = Math.abs(number);
+  if (absNum >= 1.0e9) {
+    const formatted = (number / 1.0e9).toFixed(1);
+    return `$${formatted.endsWith(".0") ? formatted.slice(0, -2) : formatted}B`;
+  }
+  if (absNum >= 1.0e6) {
+    const formatted = (number / 1.0e6).toFixed(1);
+    return `$${formatted.endsWith(".0") ? formatted.slice(0, -2) : formatted}M`;
+  }
+  if (absNum >= 1.0e3) {
+    const formatted = (number / 1.0e3).toFixed(1);
+    return `$${formatted.endsWith(".0") ? formatted.slice(0, -2) : formatted}K`;
+  }
+  return `$${number.toLocaleString()}`;
+};
+
 function Dashboard() {
+  const navigate = useNavigate();
   const { isEmployee } = useRole();
 
   const [totalLeads, setTotalLeads] = useState(0);
@@ -89,14 +110,16 @@ function Dashboard() {
       isPositive: true,
       icon: <Users size={22} />,
       type: "leads",
+      path: "/leads",
     },
     {
       title: "Active Pipeline",
-      value: loading ? "..." : (isEmployee ? "Restricted" : `$${pipelineValue.toLocaleString()}`),
+      value: loading ? "..." : (isEmployee ? "Restricted" : formatCompactNumber(pipelineValue)),
       trend: isEmployee ? "Locked" : "+8.3%",
       isPositive: !isEmployee,
       icon: isEmployee ? <Lock size={22} /> : <DollarSign size={22} />,
       type: "pipeline",
+      path: isEmployee ? null : "/pipeline",
     },
     {
       title: "Win Rate",
@@ -105,6 +128,7 @@ function Dashboard() {
       isPositive: false,
       icon: <TrendingUp size={22} />,
       type: "winrate",
+      path: null,
     },
     {
       title: "Companies",
@@ -113,6 +137,7 @@ function Dashboard() {
       isPositive: true,
       icon: <Building size={22} />,
       type: "companies",
+      path: "/companies",
     },
   ];
 
@@ -208,7 +233,11 @@ function Dashboard() {
 
       <div className="metrics-grid">
         {stats.map((stat, i) => (
-          <div key={i} className="metric-card">
+          <div
+            key={i}
+            className={`metric-card ${stat.path ? "clickable" : ""}`}
+            onClick={() => stat.path && navigate(stat.path)}
+          >
             <div className="metric-card-info">
               <h3>{stat.title}</h3>
               <div className="value">{stat.value}</div>

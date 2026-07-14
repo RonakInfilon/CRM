@@ -1,16 +1,18 @@
+const dotenv = require("dotenv");
+dotenv.config();
+
 const express = require("express");
 const DatabaseConfig = require("./src/config/database");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv");
 const connectMongo = require("./src/config/mongodb")
 const loggerMiddleware = require("./src/middleware/logger.middleware");
+const logRoutes = require("./src/routes/logRoutes");
 
 const authenticateToken = require("./src/middleware/auth.middleware");
 const { getTenantsList } = require("./src/controllers/auth.controller");
 connectMongo();
-dotenv.config();
 const authRoutes=require("./src/routes/authRoutes.js");
 const userRoutes=require("./src/routes/userRoutes.js");
 const permissionRoutes=require("./src/routes/permissionRoutes.js");
@@ -29,7 +31,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-// app.use(loggerMiddleware);
+app.use(loggerMiddleware);
 app.get("/", (req, res) => {
   res.send("Express server is responding");
 });
@@ -48,6 +50,7 @@ app.use("/api/pipeline",pipelineRoutes);
 app.use("/api/contacts", contactRoutes);
 app.use("/api/companies", companyRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/logs", logRoutes);
 
 
 app.listen(PORT, "0.0.0.0", () => {

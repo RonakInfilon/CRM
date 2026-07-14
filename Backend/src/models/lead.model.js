@@ -151,11 +151,6 @@ INNER JOIN users u
 WHERE u.org_id = ?
 `;
 
-  // Only restrict to active leads when NOT filtering by Qualified
-  if (!isQualifiedFilter) {
-    query += ` AND l.isPresent = 1 `;
-  }
-
   const values = [orgId];
 
   if (search) {
@@ -170,9 +165,16 @@ WHERE u.org_id = ?
     const keyword = `%${search}%`;
     values.push(keyword, keyword, keyword, keyword);
   }
+
   if (status) {
-    query += ` AND l.status = ? `;
-    values.push(status);
+    if (status === 'Qualified') {
+      query += ` AND l.status = 'Qualified' `;
+    } else {
+      query += ` AND l.status = ? AND l.isPresent = 1 `;
+      values.push(status);
+    }
+  } else {
+    query += ` AND (l.isPresent = 1 OR l.status = 'Qualified') `;
   }
 
   query += `
@@ -204,10 +206,6 @@ WHERE u.org_id = ?
       WHERE u.org_id = ?
   `;
 
-  if (!isQualifiedFilter) {
-    countQuery += ` AND l.isPresent = 1 `;
-  }
-
   const countValues = [orgId];
 
   if (search) {
@@ -224,8 +222,14 @@ WHERE u.org_id = ?
   }
 
   if (status) {
-    countQuery += ` AND l.status = ? `;
-    countValues.push(status);
+    if (status === 'Qualified') {
+      countQuery += ` AND l.status = 'Qualified' `;
+    } else {
+      countQuery += ` AND l.status = ? AND l.isPresent = 1 `;
+      countValues.push(status);
+    }
+  } else {
+    countQuery += ` AND (l.isPresent = 1 OR l.status = 'Qualified') `;
   }
 
   const [[count]] = await pool.execute(countQuery, countValues);
@@ -494,13 +498,14 @@ const deleteLead = async (leadId) => {
 };
 //update lead status
 const updateLeadStatus = async (leadId, status) => {
+  const isPresent = status === 'Qualified' ? 0 : 1;
   const [result] = await pool.execute(
     `
     UPDATE leads
-    SET status = ?
+    SET status = ?, isPresent = ?
     WHERE lead_id = ?
     `,
-    [status, leadId]
+    [status, isPresent, leadId]
   );
 
   return result;

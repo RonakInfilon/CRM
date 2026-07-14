@@ -88,12 +88,12 @@ export default function Login() {
           </button>
         </form>
 
-        <p>
+        {/* <p>
           Don't have an account?
           <Link to="/signup">
             Signup
           </Link>
-        </p>
+        </p> */}
 
       </div>
     </div>

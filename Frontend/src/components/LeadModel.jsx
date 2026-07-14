@@ -267,7 +267,6 @@ function LeadModal({ isOpen, onClose, lead, onLeadSaved }) {
               />
             </div>
           </div>
-
           <div className="modal-actions">
             <button type="button" className="btn-cancel" onClick={onClose}>
               Cancel

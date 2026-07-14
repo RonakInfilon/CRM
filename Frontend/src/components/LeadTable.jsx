@@ -34,7 +34,7 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
   const [selectedLead, setSelectedLead] = useState(null);
   const [activePreviewLead, setActivePreviewLead] = useState(null);
 
-  const rowsPerPage = 5;
+  const rowsPerPage = 10;
 
   const fetchLeads = useCallback(async () => {
     try {
@@ -53,6 +53,10 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
   useEffect(() => {
     fetchLeads();
   }, [fetchLeads]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, searchQuery]);
 
   // Expose reset capabilities to parent safely
   useImperativeHandle(ref, () => ({
