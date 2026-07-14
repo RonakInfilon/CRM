@@ -11,7 +11,9 @@ const Pageheader = ({
 }) => {
   return (
     <div className="page-header">
+       <div className="on-left">
       {onSearchChange && (
+       
         <div className="search-input">
           <i className="fas fa-search"></i>
           <input 
@@ -38,6 +40,7 @@ const Pageheader = ({
           </select>
         </div>
       )}
+      </div>
 
       {onAddClick && (
         <button onClick={onAddClick}>

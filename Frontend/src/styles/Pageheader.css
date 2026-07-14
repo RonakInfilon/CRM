@@ -11,7 +11,10 @@
   box-shadow: var(--card-shadow);
   flex-wrap: wrap;
 }
-
+.on-left{
+  display: flex;
+  gap: 30px;
+}
 .search-input {
   display: flex;
   align-items: center;

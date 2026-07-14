@@ -76,9 +76,12 @@
 
 /* Column Container Styling */
 .pipeline-column {
-  min-width: 290px;
-  max-width: 290px;
-  background-color: #f1f5f9; /* Modern light-gray background */
+  /* min-width: 290px; */
+  /* max-width: 290px; */
+  width: 300px;
+  height: 750px;
+  overflow-y: scroll;
+  background-color: #e5e8eb; /* Modern light-gray background */
   border-radius: 14px;
   box-sizing: border-box;
   display: flex;
@@ -95,6 +98,7 @@
 
 /* Column Header Design */
 .column-header {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
