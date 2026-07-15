@@ -27,7 +27,7 @@ const createLead = async (leadData) => {
       status,
       notes,
       assignedToUserId = null,
-      createdByUserId = null, // logged-in user's ID — used to bifurcate by org
+      createdByUserId = null, 
       orgId: userOrgId,       // the CRM user's org_id (NOT the client's org)
       companyId = null,
     } = leadData;
@@ -97,14 +97,14 @@ const createLead = async (leadData) => {
 }
 const getAllLeads = async ({
   orgId,     // the logged-in user's CRM org_id
-  userId,    // the logged-in user's ID
-  role,      // the logged-in user's role
+  userId,    // the logged-in user's ID (used as fallback filter)
   page = 1,
   limit = 10,
   search = "",
   status = ""
 }) => {
   const offset = (page - 1) * limit;
+  const isQualifiedFilter = status === 'Qualified';
 
   // Filter leads by the CRM org: join leads -> created_by_user_id -> users -> org_id
   // This correctly separates leads of Company A from Company B even though
@@ -152,14 +152,6 @@ WHERE u.org_id = ?
 `;
 
   const values = [orgId];
-
-  if (role === 'Manager') {
-    query += ` AND (u.role IN ('Manager', 'Company Employee', 'Employee') OR l.created_by_user_id = ? OR l.assigned_to_user_id = ?) `;
-    values.push(userId, userId);
-  } else if (role === 'Employee' || role === 'Company Employee') {
-    query += ` AND (u.role IN ('Company Employee', 'Employee') OR l.created_by_user_id = ? OR l.assigned_to_user_id = ?) `;
-    values.push(userId, userId);
-  }
 
   if (search) {
     query += `
@@ -216,14 +208,6 @@ WHERE u.org_id = ?
 
   const countValues = [orgId];
 
-  if (role === 'Manager') {
-    countQuery += ` AND (u.role IN ('Manager', 'Company Employee', 'Employee') OR l.created_by_user_id = ? OR l.assigned_to_user_id = ?) `;
-    countValues.push(userId, userId);
-  } else if (role === 'Employee' || role === 'Company Employee') {
-    countQuery += ` AND (u.role IN ('Company Employee', 'Employee') OR l.created_by_user_id = ? OR l.assigned_to_user_id = ?) `;
-    countValues.push(userId, userId);
-  }
-
   if (search) {
     countQuery += `
       AND (
@@ -257,10 +241,10 @@ WHERE u.org_id = ?
     leads: rows,
   };
 }
-
 //get single lead
-const getLeadById = async (leadId, orgId, userId, role) => {
-  let query = `
+const getLeadById = async (leadId) => {
+  const [rows] = await pool.execute(
+    `
     SELECT
 
         l.lead_id as LeadID,
@@ -302,23 +286,11 @@ const getLeadById = async (leadId, orgId, userId, role) => {
     INNER JOIN contacts c
         ON l.contact_id = c.contact_id
 
-    INNER JOIN users u
-        ON l.created_by_user_id = u.id
+    WHERE l.lead_id = ?
+    `,
+    [leadId]
+  );
 
-    WHERE l.lead_id = ? AND u.org_id = ?
-  `;
-
-  const values = [leadId, orgId];
-
-  if (role === 'Manager') {
-    query += ` AND (u.role IN ('Manager', 'Company Employee', 'Employee') OR l.created_by_user_id = ? OR l.assigned_to_user_id = ?) `;
-    values.push(userId, userId);
-  } else if (role === 'Employee' || role === 'Company Employee') {
-    query += ` AND (u.role IN ('Company Employee', 'Employee') OR l.created_by_user_id = ? OR l.assigned_to_user_id = ?) `;
-    values.push(userId, userId);
-  }
-
-  const [rows] = await pool.execute(query, values);
   return rows[0];
 };
 //update lead

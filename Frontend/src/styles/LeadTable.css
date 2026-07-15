@@ -1,12 +1,12 @@
 .table-wrapper {
   width: 100%;
   height: 80%;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--card-shadow);
   margin-bottom: 24px;
-  animation: fadeInTable 0.3s ease-out;
+  animation: fadeInTable 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-x: auto;
   overflow-y: auto;
   position: relative;
@@ -15,7 +15,7 @@
 @keyframes fadeInTable {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -26,50 +26,64 @@
 .crm-table {
   width: 100%;
   min-width: 900px;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
-  font-size: 0.9rem;
-  color: #000000;
+  font-size: 0.875rem;
+  color: var(--text-main);
   table-layout: fixed;
 }
 
 .crm-table th,
 .crm-table td {
-  padding: 14px 16px;
-  border: 1px solid #e2e8f0;
+  font-family:Arial, Helvetica, sans-serif;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
   text-align: left;
+  transition: all 0.2s ease;
 }
 
 .crm-table td {
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Ensure Action cell (last column) does not clip its absolute dropdown menu and fits nicely */
+
+
 .crm-table td:last-child,
 .crm-table th:last-child {
   overflow: visible;
-  width: 80px;
+  width: 150px;
   text-align: right;
 }
 
 .crm-table th {
-  background-color: #111827;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #ffffff;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #f1f5f9;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border: 1px solid #374151;
+  letter-spacing: 0.08em;
+  border-bottom: 2px solid #334155;
+}
+
+.crm-table th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.crm-table th:last-child {
+  border-top-right-radius: 12px;
 }
 
 .crm-table tbody tr {
+  background-color: var(--bg-card);
   transition: background-color 0.2s ease;
 }
 
 .crm-table tbody tr:hover {
-  background-color: #f8fafc;
+  background-color: rgba(79, 70, 229, 0.03); /* Modern soft indigo tint hover */
 }
 
 .crm-table tbody tr:last-child td {
@@ -77,20 +91,18 @@
 }
 
 .action-wrapper {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
+  position: absolute;
+  display:flex;
 }
 
 .menu-btn {
   background: none;
   border: none;
   font-size: 1.25rem;
-  color: #000000;
+  color: var(--text-muted);
   cursor: pointer;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -99,25 +111,24 @@
 }
 
 .menu-btn:hover {
-  color: #4f46e5;
-  background-color: #e0e7ff;
+  color: var(--primary);
+  background-color: var(--primary-light);
 }
 
 .dropdown-menu {
   position: absolute;
-  /* right: 100%; */
   left: auto;
-  /* top: 50%; */
-  transform: translateY(-50%);
-  margin-right: 8px;
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  right: 0; /* Align right to avoid clipping */
+  top: 100%;
+  margin-top: 4px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  /* z-index: 50; */
-  min-width: 130px;
+  box-shadow: var(--hover-shadow);
+  z-index: 50;
+  min-width: 140px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column; /* Column layout is cleaner */
   padding: 4px;
   animation: fadeInDropdown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -125,30 +136,29 @@
 .dropdown-menu button {
   background: none;
   border: none;
-  padding: 6px 12px;
-  text-align: center;
+  padding: 8px 12px;
+  text-align: left;
   font-size: 0.85rem;
-  font-weight: 600;
-  color: #475569;
+  font-weight: 500;
+  color: var(--text-main);
   cursor: pointer;
-  flex: 1;
   border-radius: 8px;
   transition: all 0.15s ease;
   white-space: nowrap;
 }
 
 .dropdown-menu button:hover {
-  background-color: #f1f5f9;
-  color: #0f172a;
+  background-color: var(--bg-primary);
+  color: var(--primary);
 }
 
 .dropdown-menu button:last-child {
-  color: #ef4444; 
+  color: var(--danger-text); 
 }
 
 .dropdown-menu button:last-child:hover {
-  background-color: #fef2f2;
-  color: #dc2626;
+  background-color: var(--danger-light);
+  color: var(--danger-text);
 }
 
 /* Animation */
@@ -168,9 +178,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-  border: 1px solid #f59e0b;
-  border-left: 4px solid #f59e0b;
+  background: linear-gradient(135deg, var(--warning-light) 0%, #fffbeb 100%);
+  border: 1px solid var(--warning);
+  border-left: 4px solid var(--warning);
   border-radius: 12px;
   padding: 14px 18px;
   margin-bottom: 16px;
@@ -191,25 +201,109 @@
 .qualified-banner-text strong {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #92400e;
+  color: var(--warning-text);
 }
 
 .qualified-banner-text span {
   font-size: 0.82rem;
-  color: #b45309;
+  color: var(--warning-text);
 }
 
 /* Color match for Qualified leads table */
 .crm-table.qualified-table th {
-  background-color: #f59e0b;
-  color: #78350f;
-  border: 1px solid #d97706;
+  background: linear-gradient(135deg, #78350f 0%, #451a03 100%);
+  color: #fef3c7;
+  border-bottom: 2px solid #92400e;
 }
 
 .crm-table.qualified-table td {
-  border-color: #fef3c7;
+  border-bottom: 1px solid var(--warning-light);
 }
 
 .crm-table.qualified-table tbody tr:hover {
-  background-color: #fffdf5;
+  background-color: rgba(245, 158, 11, 0.03);
+}
+
+/* Status Select Pill Badges */
+.status-badge-container {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+
+.status-badge-container.new {
+  background-color: var(--info-light);
+  color: var(--info-text);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.status-badge-container.contacted {
+  background-color: var(--warning-light);
+  color: var(--warning-text);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.status-badge-container.qualified {
+  background-color: var(--success-light);
+  color: var(--success-text);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-badge-container.lost {
+  background-color: var(--danger-light);
+  color: var(--danger-text);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.status-select-dropdown {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 22px 4px 10px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Styled inline select chevron */
+.status-badge-container::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.8;
+}
+
+.status-badge-container.new::after {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23155e75' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+}
+.status-badge-container.contacted::after {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2392400e' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+}
+.status-badge-container.qualified::after {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23065f46' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+}
+.status-badge-container.lost::after {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23991b1b' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+}
+
+.status-badge-container:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.97);
 }

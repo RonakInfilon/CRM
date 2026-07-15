@@ -114,9 +114,9 @@ const getDashboardStats = async (req, res) => {
       if (!src) {
         src = "Unknown";
       }
-      
+
       const lowerSrc = src.toLowerCase();
-      
+
       // Normalize common sources to standard display formats
       if (lowerSrc === "website" || lowerSrc === "web" || lowerSrc === "site" || lowerSrc === "website.com") {
         sourceMap["Website"] = (sourceMap["Website"] || 0) + row.count;
@@ -125,9 +125,9 @@ const getDashboardStats = async (req, res) => {
       } else if (lowerSrc === "referral" || lowerSrc === "referrals") {
         sourceMap["Referrals"] = (sourceMap["Referrals"] || 0) + row.count;
       } else if (
-        lowerSrc === "cold outreach" || 
-        lowerSrc === "coldoutreach" || 
-        lowerSrc === "cold call" || 
+        lowerSrc === "cold outreach" ||
+        lowerSrc === "coldoutreach" ||
+        lowerSrc === "cold call" ||
         lowerSrc === "cold email"
       ) {
         sourceMap["Cold outreach"] = (sourceMap["Cold outreach"] || 0) + row.count;
@@ -149,17 +149,17 @@ const getDashboardStats = async (req, res) => {
     // 7. Recent Activities Feed
     const [dealActivitiesRows] = await pool.execute(
       `SELECT
-         'deal' AS type,
-         da.activity_text AS text,
-         d.deal_name AS title,
-         u.name AS user_name,
-         da.created_at AS created_at
-       FROM deal_activities da
-       INNER JOIN deals d ON da.deal_id = d.deal_id
-       INNER JOIN users u ON da.performed_by_user_id = u.id
-       WHERE u.org_id = ?
-       ORDER BY da.created_at DESC
-       LIMIT 5`,
+        'deal' AS type,
+        da.activity_text AS text,
+        d.deal_name AS title,
+        u.name AS user_name,
+        da.created_at AS created_at
+      FROM deal_activities da
+      INNER JOIN deals d ON da.deal_id = d.deal_id
+      INNER JOIN users u ON da.performed_by_user_id = u.id
+      WHERE u.org_id = ?
+      ORDER BY da.created_at DESC
+      LIMIT 5`,
       [orgId]
     );
 

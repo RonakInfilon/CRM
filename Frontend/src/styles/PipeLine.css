@@ -3,12 +3,15 @@
 .pipeline-wrapper {
   padding: 24px;
   background-color: #f8fafc;
-  min-height: calc(100vh - 64px);
+  /* min-height: calc(100vh - 64px); */
+  height: 100%;
   box-sizing: border-box;
+  overflow-y: hidden;
+  overflow: hidden;
   animation: fadeInPipeline 0.4s ease-out;
 }
 
-@keyframes fadeInPipeline {
+/* @keyframes fadeInPipeline {
   from {
     opacity: 0;
     transform: translateY(10px);
@@ -17,23 +20,24 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
+} */
 
 /* Horizontal scrolling pipeline layout */
 .pipeline-container {
   display: flex;
   gap: 20px;
   align-items: flex-start;
-  overflow-x: auto;
+  /* overflow-x: auto; */
+  overflow-y: hidden;
   padding: 8px 4px 20px 4px;
-  scroll-behavior: smooth;
+  /* scroll-behavior: smooth; */
   min-height: calc(100vh - 200px);
 }
 
-/* Custom scrollbars for pipeline grid container */
+/* Custom scrollbars for pipeline grid container
 .pipeline-container::-webkit-scrollbar {
   height: 8px;
-}
+} */
 .pipeline-container::-webkit-scrollbar-track {
   background: #f1f5f9;
   border-radius: 99px;

@@ -12,7 +12,6 @@ const getAllLeads = async (req, res) => {
       search = "",
       status = "",
     } = req.query;
-
     const leads = await Lead.getAllLeads({
       orgId,
       userId,
@@ -22,7 +21,6 @@ const getAllLeads = async (req, res) => {
       search,
       status,
     });
-
     return res.status(200).json({
       success: true,
       message: "Leads fetched successfully",
@@ -30,11 +28,10 @@ const getAllLeads = async (req, res) => {
     });
   } catch (error) {
     console.error("Get Leads Error:", error);
-
     return res.status(500).json({
       success: false,
       message: error.message,
-      
+
     });
   }
 };
@@ -91,7 +88,6 @@ const createLead = async (req, res) => {
     });
   }
 };
-
 //update lead
 const updateLead = async (req, res) => {
   try {
