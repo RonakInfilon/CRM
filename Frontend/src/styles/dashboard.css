@@ -42,11 +42,11 @@
 }
 
 .metric-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 20px 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--card-shadow);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -55,8 +55,8 @@
 
 .metric-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
-  border-color: #cbd5e1;
+  box-shadow: var(--hover-shadow);
+  border-color: rgba(79, 70, 229, 0.2);
 }
 
 .metric-card.clickable {
@@ -65,8 +65,8 @@
 
 .metric-card.clickable:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 20px -3px rgba(99, 102, 241, 0.15);
-  border-color: #6366f1;
+  box-shadow: 0 12px 20px -3px rgba(79, 70, 229, 0.12);
+  border-color: var(--primary);
 }
 
 .metric-card-info h3 {
@@ -115,23 +115,23 @@
 }
 
 .metric-icon-box.leads {
-  background-color: #e0e7ff;
-  color: #4f46e5;
+  background-color: var(--primary-light);
+  color: var(--primary);
 }
 
 .metric-icon-box.pipeline {
-  background-color: #ecfeff;
-  color: #0891b2;
+  background-color: var(--info-light);
+  color: var(--info-text);
 }
 
 .metric-icon-box.winrate {
-  background-color: #d1fae5;
-  color: #059669;
+  background-color: var(--success-light);
+  color: var(--success-text);
 }
 
 .metric-icon-box.companies {
-  background-color: #fef3c7;
-  color: #d97706;
+  background-color: var(--warning-light);
+  color: var(--warning-text);
 }
 
 /* Charts Grid */
@@ -149,11 +149,11 @@
 }
 
 .chart-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--card-shadow);
 }
 
 .chart-card-header {
@@ -193,11 +193,11 @@
 
 .recent-activity-card,
 .quick-stats-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--card-shadow);
 }
 
 .recent-activity-card h2,

@@ -146,12 +146,11 @@ const createCompany = async (orgId, companyData) => {
       INSERT INTO pipeline_stages (org_id, name, sort_order)
       VALUES
         (?, 'Opportunity', 0),
-        (?, 'Proposal Sent', 1),
-        (?, 'Negotiation', 2),
-        (?, 'Won', 3),
-        (?, 'Lost', 4)
+        (?, 'Negotiation', 1),
+        (?, 'Won', 2),
+        (?, 'Lost', 3)
       `,
-      [clientOrgId, clientOrgId, clientOrgId, clientOrgId, clientOrgId]
+      [clientOrgId, clientOrgId, clientOrgId, clientOrgId]
     );
 
     await connection.commit();

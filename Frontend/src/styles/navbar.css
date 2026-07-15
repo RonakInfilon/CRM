@@ -13,19 +13,18 @@
   height: 64px;
   padding: 0 24px;
   
-
-  width: calc(100% - var(--current-sidebar-width, 64px));
-  left: var(--current-sidebar-width, 64px);
+  width: calc(100% - var(--current-sidebar-width, 68px));
+  left: var(--current-sidebar-width, 68px);
   transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
               width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   /* ----------------------------------------------------------- */
   
-  background: #FFFFFF;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.85); /* Modern glassmorphism translucent background */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   
-  border-bottom: 1px solid #E5E7EB;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
   
   position: fixed; /* Keeps header pinned smoothly to top right */
   top: 0;
@@ -45,31 +44,32 @@
 }
 
 .navbar h2.page-title {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  color: #111827; 
-  letter-spacing: -0.01em;
+  font-family: var(--font-sans);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main); 
+  letter-spacing: -0.02em;
 }
 
 .sidebar-toggle-btn {
-  background:#111827;
-  border-left-color: #8B5CF6;
-  font-size: 22px;
-  color: #FFFFFF; 
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: var(--text-main); 
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 8px;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-toggle-btn:hover {
-  background: #f3f4f6;
-  color: #ffffff; 
+  background: var(--bg-primary);
+  color: var(--primary);
+  transform: scale(1.05);
 }
 
 .sidebar-toggle-btn:active {
@@ -85,17 +85,17 @@
 .role-label {
   font-size: 13px;
   font-weight: 600;
-  color: #4b5563;
+  color: var(--text-muted);
 }
 
 .role-select {
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   font-size: 13px;
   font-weight: 600;
-  color: #1f2937;
-  background-color: #ffffff;
+  color: var(--text-main);
+  background-color: var(--bg-card);
   cursor: pointer;
   outline: none;
   transition: all 0.2s ease;
@@ -103,21 +103,21 @@
 }
 
 .role-select:hover {
-  border-color: #9ca3af;
-  background-color: #f9fafb;
+  border-color: #cbd5e1;
+  background-color: var(--bg-primary);
 }
 
 .role-select:focus {
-  border-color: #111827;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
 .logout-btn {
-  background: #fef2f2; 
-  border: 1px solid #fee2e2;
-  color: #dc2626; 
-  font-size: 14px;
-  font-weight: 500;
+  background: var(--danger-light); 
+  border: 1px solid rgba(239, 68, 68, 0.1);
+  color: var(--danger-text); 
+  font-size: 13px;
+  font-weight: 600;
   padding: 8px 16px;
   border-radius: 8px;
   cursor: pointer;
@@ -128,10 +128,10 @@
 }
 
 .logout-btn:hover {
-  background: #dc2626; 
-  border-color: #dc2626;
+  background: var(--danger-text); 
+  border-color: var(--danger-text);
   color: #ffffff; 
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
 }
 
 .logout-btn:active {

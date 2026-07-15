@@ -7,6 +7,8 @@ import {
   getPipeline,
   moveDeal,
   deleteDeal,
+  createStage,
+  deleteStage,
 } from "../services/pipelineService";
 
 
@@ -73,31 +75,36 @@ const Pipeline = () => {
   }, [fetchDeals]);
 
   // Add stage
-  const handleAddStage = (e) => {
+  const handleAddStage = async (e) => {
     e.preventDefault();
     if (!newStageName.trim()) return;
 
-    const newStage = {
-      id: `stg_${Date.now()}`,
-      name: newStageName.trim(),
-    };
-
-    setStages((prev) => [...prev, newStage]);
-    setNewStageName("");
+    try {
+      const res = await createStage({
+        name: newStageName.trim(),
+        sort_order: stages.length
+      });
+      if (res.data?.success) {
+        setNewStageName("");
+        fetchDeals(false);
+      }
+    } catch (err) {
+      console.error("Failed to add stage:", err);
+      alert(err.response?.data?.message || "Failed to add stage.");
+    }
   };
 
   // Delete stage
-  const handleDeleteStage = (stageId) => {
-    const fallbackStageId = stages.find((stage) => stage.id !== stageId)?.id || "";
-    setStages(stages.filter((stage) => stage.id !== stageId));
+  const handleDeleteStage = async (stageId) => {
+    if (!window.confirm("Are you sure you want to delete this stage? Associated deals will be moved to another stage.")) return;
 
-    setDeals((prevDeals) =>
-      prevDeals.map((deal) =>
-        deal.stageId === stageId
-          ? { ...deal, stageId: fallbackStageId }
-          : deal
-      )
-    );
+    try {
+      await deleteStage(stageId);
+      fetchDeals(false);
+    } catch (err) {
+      console.error("Failed to delete stage:", err);
+      alert(err.response?.data?.message || "Failed to delete stage.");
+    }
   };
 
   // Drag & Drop — prompt for lost_reason when dropping on Lost stage

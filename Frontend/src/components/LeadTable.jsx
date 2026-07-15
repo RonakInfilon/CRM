@@ -34,7 +34,7 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
   const [selectedLead, setSelectedLead] = useState(null);
   const [activePreviewLead, setActivePreviewLead] = useState(null);
 
-  const rowsPerPage = 10;
+  const rowsPerPage = 7;
 
   const fetchLeads = useCallback(async () => {
     try {

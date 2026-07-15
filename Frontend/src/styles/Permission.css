@@ -1,7 +1,10 @@
 .permission-page {
-  padding: 24px;
-  max-width: 1200px;
+  padding: 15px;
+  /* max-width: 1200px; */
   margin: 0 auto;
+  overflow-y: hidden;
+  overflow: hidden;
+  
 }
 
 .permission-card-header {
@@ -107,7 +110,7 @@
 .permissions-body {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
 }
 
 .success-banner {

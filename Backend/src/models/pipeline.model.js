@@ -21,7 +21,6 @@ const getPipeline = async (orgId) => {
     if (stages.length === 0) {
       const DEFAULT_STAGES = [
         "Opportunity",
-        "Proposal Sent",
         "Negotiation",
         "Won",
         "Lost",

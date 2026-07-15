@@ -78,12 +78,19 @@
 }
 
 .crm-table tbody tr {
-  background-color: var(--bg-card);
   transition: background-color 0.2s ease;
 }
 
+.crm-table tbody tr:nth-child(even) {
+  background-color: var(--bg-card);
+}
+
+.crm-table tbody tr:nth-child(odd) {
+  background-color: #f8fafc; /* Alternating soft grey background */
+}
+
 .crm-table tbody tr:hover {
-  background-color: rgba(79, 70, 229, 0.03); /* Modern soft indigo tint hover */
+  background-color: rgba(79, 70, 229, 0.04); /* Modern soft indigo tint hover */
 }
 
 .crm-table tbody tr:last-child td {
@@ -220,8 +227,16 @@
   border-bottom: 1px solid var(--warning-light);
 }
 
+.crm-table.qualified-table tbody tr:nth-child(even) {
+  background-color: var(--bg-card);
+}
+
+.crm-table.qualified-table tbody tr:nth-child(odd) {
+  background-color: rgba(245, 158, 11, 0.02); /* Alternating soft amber background */
+}
+
 .crm-table.qualified-table tbody tr:hover {
-  background-color: rgba(245, 158, 11, 0.03);
+  background-color: rgba(245, 158, 11, 0.05);
 }
 
 /* Status Select Pill Badges */

@@ -99,7 +99,7 @@ const getAllLeads = async ({
   orgId,     // the logged-in user's CRM org_id
   userId,    // the logged-in user's ID (used as fallback filter)
   page = 1,
-  limit = 10,
+  limit = 7,
   search = "",
   status = ""
 }) => {
