@@ -31,7 +31,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use(loggerMiddleware);
+// app.use(loggerMiddleware);
 app.get("/", (req, res) => {
   res.send("Express server is responding");
 });

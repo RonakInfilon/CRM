@@ -1,59 +1,60 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const db = require("../config/database");
+const ApiLog = require("../models/logs.schema");
 const {
     userEmail,
     createUser,
     getUsers
 } = require("../models/user.model");
 
-const signup = async (req, res) => {
-    try {
-        const {
-            name,
-            email,
-            password,
-            role,
-            org_id,
-            phone,
-            bio
-        } = req.body;
-        //if user is already existing then it will give error because evey email is unique
-        const existingUser = await userEmail(email);
-        //this will give error
-        if (existingUser) {
-            return res.status(400).json({
-                success: false,
-                message: "User already exists"
-            });
-        }
-        //it will hash the passworf for seacurity
-        const hashedPassword = await bcrypt.hash(password, 10);
-        //it will createUser using query...here create user is present in user.model.js
-        await createUser({
-            name,
-            email,
-            password: hashedPassword,
-            role,
-            org_id,
-            phone,
-            bio
-        });
+// const signup = async (req, res) => {
+//     try {
+//         const {
+//             name,
+//             email,
+//             password,
+//             role,
+//             org_id,
+//             phone,
+//             bio
+//         } = req.body;
+//         //if user is already existing then it will give error because evey email is unique
+//         const existingUser = await userEmail(email);
+//         //this will give error
+//         if (existingUser) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "User already exists"
+//             });
+//         }
+//         //it will hash the passworf for seacurity
+//         const hashedPassword = await bcrypt.hash(password, 10);
+//         //it will createUser using query...here create user is present in user.model.js
+//         await createUser({
+//             name,
+//             email,
+//             password: hashedPassword,
+//             role,
+//             org_id,
+//             phone,
+//             bio
+//         });
 
-        res.status(201).json({
-            success: true,
-            message: "User Created"
-        });
+//         res.status(201).json({
+//             success: true,
+//             message: "User Created"
+//         });
 
-    } catch (err) {
+//     } catch (err) {
 
-        res.status(500).json({
-            success: false,
-            message: err.message
-        });
+//         res.status(500).json({
+//             success: false,
+//             message: err.message
+//         });
 
-    }
-};
+//     }
+// };
 
 const login = async (req, res) => {
 
@@ -64,6 +65,12 @@ const login = async (req, res) => {
         const user = await userEmail(email);
 
         if (!user) {
+            await ApiLog.create({
+                action: "Login failed: User not found",
+                name: "Guest",
+                email: email,
+                org_id: null
+            });
             return res.status(404).json({
                 success: false,
                 message: "User not found"
@@ -73,6 +80,12 @@ const login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
+            await ApiLog.create({
+                action: "Login failed: Invalid password",
+                name: user.name,
+                email: user.email,
+                org_id: user.org_id
+            });
             return res.status(401).json({
                 success: false,
                 message: "Invalid password"
@@ -96,6 +109,13 @@ const login = async (req, res) => {
                 ? "All"
                 : user.company || "";
 
+        await ApiLog.create({
+            action: ` ${user.name} logged in successfully (Role:${user.role})`,
+            name: user.name,
+            email: user.email,
+            org_id: user.org_id
+        });
+
         res.status(200).json({
             success: true,
             message: "Login successful",
@@ -112,6 +132,12 @@ const login = async (req, res) => {
         });
 
     } catch (err) {
+        await ApiLog.create({
+            action: `Login error: ${err.message}`,
+            name: "Guest",
+            email: req.body?.email || "unknown",
+            org_id: null
+        });
 
         res.status(500).json({
             success: false,
@@ -131,12 +157,25 @@ const getUsersList = async (req, res) => {
         const orgIdFilter = currentUserRole === "Super Admin" ? null : currentOrgId;
         const users = await getUsers(orgIdFilter);
 
+        await ApiLog.create({
+            action: `Retrieved users list (Role: ${currentUserRole})`,
+            name: req.user.name,
+            email: req.user.email,
+            org_id: currentOrgId
+        });
+
         return res.status(200).json({
             success: true,
             data: users
         });
     } catch (err) {
         console.error("Get Users List Error:", err);
+        await ApiLog.create({
+            action: `Failed to retrieve users list: ${err.message}`,
+            name: req.user?.name || "Unknown",
+            email: req.user?.email || "unknown",
+            org_id: req.user?.org_id || null
+        });
         return res.status(500).json({
             success: false,
             message: err.message
@@ -155,6 +194,12 @@ const createTenantUser = async (req, res) => {
 
         const existingUser = await userEmail(email);
         if (existingUser) {
+            await ApiLog.create({
+                action: `Failed to create tenant user: User already exists (${email})`,
+                name: req.user.name,
+                email: req.user.email,
+                org_id: currentOrgId
+            });
             return res.status(400).json({
                 success: false,
                 message: "User already exists"
@@ -172,12 +217,25 @@ const createTenantUser = async (req, res) => {
             bio
         });
 
+        await ApiLog.create({
+            action: `Created new tenant user: ${email} with role: ${role}`,
+            name: req.user.name,
+            email: req.user.email,
+            org_id: currentOrgId
+        });
+
         return res.status(201).json({
             success: true,
             message: "User created successfully"
         });
     } catch (err) {
         console.error("Create Tenant User Error:", err);
+        await ApiLog.create({
+            action: `Failed to create tenant user: ${err.message}`,
+            name: req.user?.name || "Unknown",
+            email: req.user?.email || "unknown",
+            org_id: req.user?.org_id || null
+        });
         return res.status(500).json({
             success: false,
             message: err.message
@@ -186,7 +244,7 @@ const createTenantUser = async (req, res) => {
 };
 
 module.exports = {
-  signup,
+//   signup,
   login,
   getUsersList,
   createTenantUser
