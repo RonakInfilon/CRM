@@ -25,15 +25,15 @@ const DragAndDrop = () => {
   const handleDragEnd = (result) => {
     const { source, destination, draggableId } = result;
     
-    // 1. If dropped outside any droppable area, exit early
+    //  If dropped outside any droppable area, exit early
     if (!destination) return;
     
-    // 2. If dropped in the exact same spot, do nothing
+    //  If dropped in the exact same spot, do nothing
     if (source.droppableId === destination.droppableId && source.index === destination.index) {
       return;
     }
 
-    // 3. Clean React State Update: Map over tasks and switch the status of the moved card
+    //  Clean React State Update: Map over tasks and switch the status of the moved card
     const updatedTasks = tasks.map(task => {
       if (task._id === draggableId) {
         return { ...task, status: destination.droppableId }; // destination.droppableId holds the new column name

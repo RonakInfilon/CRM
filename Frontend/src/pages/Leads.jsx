@@ -16,7 +16,6 @@ function Leads() {
       tableRef.current.refreshTable();
     }
   };
-
   return (
     <>
       <Pageheader

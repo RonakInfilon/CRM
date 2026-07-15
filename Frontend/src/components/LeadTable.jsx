@@ -58,6 +58,16 @@ const LeadTable = forwardRef(({ searchQuery, statusFilter, sortBy }, ref) => {
     setCurrentPage(1);
   }, [statusFilter, searchQuery]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".action-wrapper")) {
+        setOpenMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // Expose reset capabilities to parent safely
   useImperativeHandle(ref, () => ({
     refreshTable() {

@@ -168,7 +168,7 @@ function Dashboard() {
       },
       grid: {
         borderColor: "#f1f5f9",
-        strokeDashArray: 4,
+        strokeDashArray: 5,
       },
       xaxis: {
         categories: acquisitionTrend.categories.length ? acquisitionTrend.categories : ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],

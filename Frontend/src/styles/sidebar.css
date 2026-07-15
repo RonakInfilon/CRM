@@ -59,12 +59,11 @@
 
 .sidebar-logo-container {
   height: 64px;
-  
   background-color: #0b0f19; /* Seamless background */
   display: flex;
   align-items: center;
-  gap: 12px;
-  /* padding: 0 20px; */
+  gap: 20px;
+  padding: 0 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   box-sizing: border-box;
   overflow: hidden;
