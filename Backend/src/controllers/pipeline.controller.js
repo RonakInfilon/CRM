@@ -1,5 +1,6 @@
 const Pipeline = require("../models/pipeline.model.js");
-
+const ApiLog = require("../models/logs.schema.js");
+const { userEmail } = require("../models/user.model.js");
 const getPipeline = async (req, res) => {
   try {
     const orgId = req.user.org_id;
@@ -54,9 +55,22 @@ const getDealById = async (req, res) => {
 
 const createDeal = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
     const orgId = req.user.org_id;
     const dealData = { ...req.body, org_id: orgId };
     const result = await Pipeline.createDeal(dealData);
+    console.log(result);
+
+    await ApiLog.create({
+      action: `${user.name} created a new deal: "${req.body.deal_name || req.body.dealName || 'Unnamed Deal'}" (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
+    });
 
     return res.status(201).json({
       success: true,
@@ -77,10 +91,25 @@ const createDeal = async (req, res) => {
 
 const updateDeal = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
     const { id } = req.params;
     const orgId = req.user.org_id;
 
+    const existingDeal = await Pipeline.getDealById(id, orgId);
+    const dealName = existingDeal ? (existingDeal.deal_name || "Unnamed Deal") : "Unknown Deal";
+
     const result = await Pipeline.updateDeal(id, orgId, req.body);
+
+    await ApiLog.create({
+      action: `${user.name} updated deal: "${dealName}" (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
+    });
 
     return res.status(200).json({
       success: true,
@@ -101,12 +130,27 @@ const updateDeal = async (req, res) => {
 
 const moveDeal = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
     const { id } = req.params;
     const orgId = req.user.org_id;
     const userId = req.user.id;
     const { stage_id, lost_reason = null, note_text = null } = req.body;
 
+    const existingDeal = await Pipeline.getDealById(id, orgId);
+    const dealName = existingDeal ? (existingDeal.deal_name || "Unnamed Deal") : "Unknown Deal";
+
     const result = await Pipeline.moveDeal(id, orgId, userId, stage_id, lost_reason, note_text);
+
+    await ApiLog.create({
+      action: `${user.name} moved deal "${dealName}" to "${result.stage}" stage (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
+    });
 
     return res.status(200).json({
       success: true,
@@ -128,10 +172,25 @@ const moveDeal = async (req, res) => {
 
 const deleteDeal = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
     const { id } = req.params;
     const orgId = req.user.org_id;
 
+    const existingDeal = await Pipeline.getDealById(id, orgId);
+    const dealName = existingDeal ? (existingDeal.deal_name || "Unnamed Deal") : "Unknown Deal";
+
     await Pipeline.deleteDeal(id, orgId);
+
+    await ApiLog.create({
+      action: `${user.name} deleted deal: "${dealName}" (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
+    });
 
     return res.status(200).json({
       success: true,
@@ -174,13 +233,28 @@ const getDealNotes = async (req, res) => {
 
 const addDealNote = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
     const { dealId } = req.params;
     const orgId = req.user.org_id;
     const createdByUserId = req.user.id;
 
+    const existingDeal = await Pipeline.getDealById(dealId, orgId);
+    const dealName = existingDeal ? (existingDeal.deal_name || "Unnamed Deal") : "Unknown Deal";
+
     const result = await Pipeline.addDealNote(dealId, orgId, {
       ...req.body,
       created_by_user_id: createdByUserId
+    });
+
+    await ApiLog.create({
+      action: `${user.name} added a note to deal "${dealName}" (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
     });
 
     return res.status(201).json({
@@ -201,11 +275,23 @@ const addDealNote = async (req, res) => {
 
 const deleteDealNote = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
     const { noteId } = req.params;
     const orgId = req.user.org_id;
     console.log(noteId);
     console.log(orgId)
     await Pipeline.deleteDealNote(noteId, orgId);
+
+    await ApiLog.create({
+      action: `${user.name} deleted deal note (ID: ${noteId}) (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
+    });
 
     return res.status(200).json({
       success: true,
@@ -246,13 +332,28 @@ const getDealActivities = async (req, res) => {
 
 const addDealActivity = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
     const { dealId } = req.params;
     const orgId = req.user.org_id;
     const performedByUserId = req.user.id;
 
+    const existingDeal = await Pipeline.getDealById(dealId, orgId);
+    const dealName = existingDeal ? (existingDeal.deal_name || "Unnamed Deal") : "Unknown Deal";
+
     const result = await Pipeline.addDealActivity(dealId, orgId, {
       ...req.body,
       performed_by_user_id: performedByUserId
+    });
+
+    await ApiLog.create({
+      action: `${user.name} logged activity on deal "${dealName}": "${req.body.activity_text || 'New Activity'}" (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
     });
 
     return res.status(201).json({
@@ -274,8 +375,21 @@ const addDealActivity = async (req, res) => {
 
 const createStage = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
     const orgId = req.user.org_id;
     const result = await Pipeline.createStage(orgId, req.body);
+
+    await ApiLog.create({
+      action: `${user.name} created a new pipeline stage: "${req.body.name || 'Unnamed Stage'}" (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
+    });
+
     return res.status(201).json({
       success: true,
       message: "Stage created successfully",
@@ -299,9 +413,22 @@ const createStage = async (req, res) => {
 
 const deleteStage = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
     const { stageId } = req.params;
     const orgId = req.user.org_id;
     await Pipeline.deleteStage(stageId, orgId);
+
+    await ApiLog.create({
+      action: `${user.name} deleted pipeline stage (ID: ${stageId}) (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
+    });
+
     return res.status(200).json({
       success: true,
       message: "Stage deleted successfully"

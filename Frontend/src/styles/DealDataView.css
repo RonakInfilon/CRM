@@ -166,6 +166,13 @@
 }
 
 /* Primary Form Confirmation Action Trigger Buttons */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  width: 100%;
+}
+
 .btn-primary.save-btn {
   background-color: #2563eb;
   color: #ffffff;
@@ -175,13 +182,29 @@
   cursor: pointer;
   font-weight: 500;
   font-size: 14px;
-  margin-top: 24px;
-  width: 100%; /* Spans full column width for standard ERP system looks */
+  flex: 1;
   transition: background-color 0.2s ease;
 }
 
 .btn-primary.save-btn:hover {
   background-color: #1d4ed8;
+}
+
+.btn-danger.delete-btn {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  flex: 1;
+  transition: background-color 0.2s ease;
+}
+
+.btn-danger.delete-btn:hover {
+  background-color: #dc2626;
 }
 
 /* RIGHT COLUMN: Interactive Feed Systems Layout Base */

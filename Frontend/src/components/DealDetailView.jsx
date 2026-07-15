@@ -2,18 +2,21 @@ import { useState, useEffect, useCallback } from "react";
 import {
   updateDeal,
   moveDeal,
+  deleteDeal,
   getDealNotes,
   addDealNote,
   deleteDealNote,
   getDealActivities,
   addDealActivity,
 } from "../services/pipelineService";
+import { useRole } from "../context/RoleContext";
 import "../styles/DealDataView.css";
 import "../styles/NotesSection.css";
 
 
 const DealDetailView = ({ deal, stages, onBack, onRefresh }) => {
   const dealId = deal.deal_id || deal.id;
+  const { canDelete } = useRole();
 
   // Normalize: backend sends snake_case, frontend mapped fields are camelCase
   // Support both so nothing is lost
@@ -117,6 +120,24 @@ const DealDetailView = ({ deal, stages, onBack, onRefresh }) => {
       onBack();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to save deal.");
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this deal? This action cannot be undone.")) {
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      await deleteDeal(dealId);
+      if (onRefresh) onRefresh();
+      onBack();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete deal.");
       console.error(err);
     } finally {
       setSaving(false);
@@ -262,9 +283,21 @@ const DealDetailView = ({ deal, stages, onBack, onRefresh }) => {
             </div>
           )}
 
-          <button type="submit" className="btn-primary save-btn" disabled={saving}>
-            {saving ? "Saving..." : "Commit Changes"}
-          </button>
+          <div className="form-actions">
+            <button type="submit" className="btn-primary save-btn" disabled={saving}>
+              {saving ? "Saving..." : "Commit Changes"}
+            </button>
+            {canDelete && (
+              <button
+                type="button"
+                className="btn-danger delete-btn"
+                onClick={handleDelete}
+                disabled={saving}
+              >
+                {saving ? "Deleting..." : "Delete Deal"}
+              </button>
+            )}
+          </div>
         </form>
 
         {/* ─── RIGHT: Notes + Activity Feed ─────────────────── */}
