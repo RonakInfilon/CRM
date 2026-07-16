@@ -1,11 +1,14 @@
 .pagination {
+  position: fixed;
+  bottom: 16px; 
+  right: 16px;  
+  z-index: 1000; 
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 12px;
-  margin-top: 18px;
-  padding: 0 16px;
 }
+
 
 .pagination button {
   padding: 8px 18px;
