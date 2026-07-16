@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const db = require("../config/database");
+const ApiLog = require("../models/logs.schema");
 
 const {
   userEmail,
@@ -37,6 +38,13 @@ const createUserByAdmin = async (req, res) => {
       org_id,
       phone,
       bio,
+    });
+
+    await ApiLog.create({
+      action: `${req.user.name} created a new user: "${name}" with role "${role}" (Role:${req.user.role})`,
+      name: req.user.name,
+      email: req.user.email,
+      org_id: req.user.org_id
     });
 
     res.status(201).json({
@@ -99,6 +107,13 @@ const updateProfile = async (req, res) => {
         message: "Failed to update user profile",
       });
     }
+
+    await ApiLog.create({
+      action: `${req.user.name} updated their profile (Role:${req.user.role})`,
+      name: req.user.name,
+      email: req.user.email,
+      org_id: req.user.org_id
+    });
 
     res.status(200).json({
       success: true,
@@ -186,6 +201,13 @@ const switchPersona = async (req, res) => {
       process.env.SECRET_KEY,
       { expiresIn: "1d" }
     );
+
+    await ApiLog.create({
+      action: `${req.user.name} switched persona to role "${role}"${company ? ` at "${company}"` : ""} (Role:${req.user.role})`,
+      name: req.user.name,
+      email: req.user.email,
+      org_id: req.user.org_id
+    });
 
     res.status(200).json({
       success: true,

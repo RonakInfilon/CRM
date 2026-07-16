@@ -1,4 +1,6 @@
 const Company = require("../models/company.model");
+const ApiLog = require("../models/logs.schema");
+const { userEmail } = require("../models/user.model");
 
 const getAllCompanies = async (req, res) => {
   try {
@@ -55,8 +57,22 @@ const getCompanyById = async (req, res) => {
 
 const createCompany = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
+
     const orgId = req.user.org_id;
     const result = await Company.createCompany(orgId, req.body);
+
+    const companyName = req.body.organization_name || req.body.name || "Unnamed Company";
+    await ApiLog.create({
+      action: `${user.name} created a new company: "${companyName}" (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
+    });
 
     return res.status(201).json({
       success: true,
@@ -74,10 +90,28 @@ const createCompany = async (req, res) => {
 
 const updateCompany = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
+
     const { id } = req.params;
     const orgId = req.user.org_id;
 
+    const existing = await Company.getCompanyById(id, orgId);
+    const companyName = existing
+      ? existing.organization_name || existing.name || "Unnamed Company"
+      : "Unknown Company";
+
     const result = await Company.updateCompany(id, orgId, req.body);
+
+    await ApiLog.create({
+      action: `${user.name} updated company: "${companyName}" (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
+    });
 
     return res.status(200).json({
       success: true,
@@ -95,10 +129,28 @@ const updateCompany = async (req, res) => {
 
 const deleteCompany = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
+
     const { id } = req.params;
     const orgId = req.user.org_id;
 
+    const existing = await Company.getCompanyById(id, orgId);
+    const companyName = existing
+      ? existing.organization_name || existing.name || "Unnamed Company"
+      : "Unknown Company";
+
     await Company.deleteCompany(id, orgId);
+
+    await ApiLog.create({
+      action: `${user.name} deleted company: "${companyName}" (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
+    });
 
     return res.status(200).json({
       success: true,

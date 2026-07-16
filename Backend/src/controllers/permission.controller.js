@@ -6,6 +6,7 @@ const {
   saveOrganizationPermission,
   saveRolePermission,
 } = require("../models/permission.model");
+const ApiLog = require("../models/logs.schema");
 
 const getPermissions = async (req, res) => {
   try {
@@ -122,6 +123,13 @@ const updatePermissions = async (req, res) => {
         userMgmt
       );
     }
+
+    await ApiLog.create({
+      action: `${req.user.name} updated permissions for "${companyName}" — role: "${role}", modules: [${modules.join(", ")}] (Role:${req.user.role})`,
+      name: req.user.name,
+      email: req.user.email,
+      org_id: req.user.org_id
+    });
 
     res.status(200).json({
       success: true,
