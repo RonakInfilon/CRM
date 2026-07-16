@@ -1,4 +1,6 @@
 const Contact = require("../models/contact.model");
+const ApiLog = require("../models/logs.schema");
+const { userEmail } = require("../models/user.model");
 
 const getAllContacts = async (req, res) => {
   try {
@@ -54,8 +56,22 @@ const getContactById = async (req, res) => {
 
 const createContact = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
+
     const orgId = req.user.org_id;
     const result = await Contact.createContact(orgId, req.body);
+
+    const contactName = `${req.body.first_name || ""} ${req.body.last_name || ""}`.trim() || "Unnamed Contact";
+    await ApiLog.create({
+      action: `${user.name} created a new contact: "${contactName}" (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
+    });
 
     return res.status(201).json({
       success: true,
@@ -73,10 +89,28 @@ const createContact = async (req, res) => {
 
 const updateContact = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
+
     const { id } = req.params;
     const orgId = req.user.org_id;
 
+    const existing = await Contact.getContactById(id, orgId);
+    const contactName = existing
+      ? `${existing.first_name || ""} ${existing.last_name || ""}`.trim() || "Unnamed Contact"
+      : "Unknown Contact";
+
     const result = await Contact.updateContact(id, orgId, req.body);
+
+    await ApiLog.create({
+      action: `${user.name} updated contact: "${contactName}" (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
+    });
 
     return res.status(200).json({
       success: true,
@@ -94,10 +128,28 @@ const updateContact = async (req, res) => {
 
 const deleteContact = async (req, res) => {
   try {
+    const { email } = req.user;
+    const user = await userEmail(email);
+    if (!user) {
+      console.log("User is not found");
+    }
+
     const { id } = req.params;
     const orgId = req.user.org_id;
 
+    const existing = await Contact.getContactById(id, orgId);
+    const contactName = existing
+      ? `${existing.first_name || ""} ${existing.last_name || ""}`.trim() || "Unnamed Contact"
+      : "Unknown Contact";
+
     await Contact.deleteContact(id, orgId);
+
+    await ApiLog.create({
+      action: `${user.name} deleted contact: "${contactName}" (Role:${user.role})`,
+      name: user.name,
+      email: user.email,
+      org_id: user.org_id
+    });
 
     return res.status(200).json({
       success: true,
