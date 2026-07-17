@@ -17,10 +17,10 @@ const getAllContacts = async ({ orgId, search = "", page = 1, limit = 100 }) => 
       cc.name AS Company_name
     FROM contacts c
     LEFT JOIN client_companies cc ON (c.company_id = cc.company_id OR (c.company_id IS NULL AND c.org_id = cc.linked_org_id))
-    WHERE cc.org_id = ? AND c.contact_status = 'Won Contact'
+    WHERE (c.org_id = ? OR cc.org_id = ?)
   `;
   
-  const params = [orgId];
+  const params = [orgId, orgId];
 
   if (search && search.trim() !== "") {
     query += ` AND (c.first_name LIKE ? OR c.last_name LIKE ? OR c.email LIKE ? OR cc.name LIKE ?)`;
@@ -52,9 +52,9 @@ const getContactById = async (contactId, orgId) => {
       cc.name AS Company_name
     FROM contacts c
     LEFT JOIN client_companies cc ON (c.company_id = cc.company_id OR (c.company_id IS NULL AND c.org_id = cc.linked_org_id))
-    WHERE c.contact_id = ? AND cc.org_id = ?
+    WHERE c.contact_id = ? AND (c.org_id = ? OR cc.org_id = ?)
     `,
-    [contactId, orgId]
+    [contactId, orgId, orgId]
   );
   return rows.length ? rows[0] : null;
 };
@@ -141,9 +141,9 @@ const updateContact = async (contactId, orgId, contactData) => {
     SELECT c.contact_id 
     FROM contacts c
     LEFT JOIN client_companies cc ON (c.company_id = cc.company_id OR (c.company_id IS NULL AND c.org_id = cc.linked_org_id))
-    WHERE c.contact_id = ? AND cc.org_id = ?
+    WHERE c.contact_id = ? AND (c.org_id = ? OR cc.org_id = ?)
     `,
-    [contactId, orgId]
+    [contactId, orgId, orgId]
   );
 
   if (!existing) {
@@ -200,14 +200,17 @@ const deleteContact = async (contactId, orgId) => {
     SELECT c.contact_id 
     FROM contacts c
     LEFT JOIN client_companies cc ON (c.company_id = cc.company_id OR (c.company_id IS NULL AND c.org_id = cc.linked_org_id))
-    WHERE c.contact_id = ? AND cc.org_id = ?
+    WHERE c.contact_id = ? AND (c.org_id = ? OR cc.org_id = ?)
     `,
-    [contactId, orgId]
+    [contactId, orgId, orgId]
   );
 
   if (!existing) {
     throw new Error("Contact not found or unauthorized");
   }
+
+  // Delete deals referencing this contact first to avoid RESTRICT constraint failure
+  await pool.execute(`DELETE FROM deals WHERE contact_id = ?`, [contactId]);
 
   await pool.execute(`DELETE FROM contacts WHERE contact_id = ?`, [contactId]);
   return { success: true };

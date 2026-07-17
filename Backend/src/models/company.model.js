@@ -232,6 +232,16 @@ const deleteCompany = async (companyId, orgId) => {
       throw new Error("Company not found or unauthorized");
     }
 
+    // Delete deals referencing the contacts of this company first to avoid RESTRICT constraint failure
+    const params = [companyId];
+    let deleteDealsQuery = `DELETE FROM deals WHERE contact_id IN (SELECT contact_id FROM contacts WHERE company_id = ?`;
+    if (company.linked_org_id) {
+      deleteDealsQuery += ` OR org_id = ?`;
+      params.push(company.linked_org_id);
+    }
+    deleteDealsQuery += `)`;
+    await connection.execute(deleteDealsQuery, params);
+
     // Delete client company
     await connection.execute(
       `DELETE FROM client_companies WHERE company_id = ? AND org_id = ?`,

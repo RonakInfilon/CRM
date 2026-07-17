@@ -179,7 +179,7 @@ const Organization = () => {
       alert("Permission Denied: Only Super Admin can delete records.");
       return;
     }
-
+    
     const confirmed = window.confirm("Are you sure you want to delete this organization?");
     if (!confirmed) return;
     try {
@@ -287,11 +287,13 @@ const Organization = () => {
           )}
         </div>
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        {!modalOpen && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        )}
         
         <CompanyModal
           key={selectedCompany?.org_id || (modalOpen ? 'new' : 'none')}

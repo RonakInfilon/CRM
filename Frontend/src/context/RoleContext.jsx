@@ -1,70 +1,39 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import API from "../api";
-
+//context is used to access data from anywhere
 const RoleContext = createContext();
-
+//this is default companies and there modules for static data
 const defaultCompanyModules = {
-  "Google": ["Dashboard", "Leads", "Pipeline", "Contacts", "Companies", "Activity", "Drag & Drop", "Permission"],
-  "Microsoft": ["Dashboard", "Leads", "Contacts", "Companies", "Permission"],
-  "Apple": ["Dashboard", "Leads", "Pipeline", "Contacts", "Companies", "Activity"],
-  "Amazon": ["Dashboard", "Leads", "Contacts", "Companies"]
+  "Google": ["Dashboard", "Leads", "Pipeline", "Companies", "Activity", "Drag & Drop", "Permission"],
+  "Microsoft": ["Dashboard", "Leads", "Companies", "Permission"],
+  "Apple": ["Dashboard", "Leads", "Pipeline", "Companies", "Activity"],
+  "Amazon": ["Dashboard", "Leads", "Companies"]
 };
 
 const defaultRolePermissions = {
   // Google
-  "Google_Manager": ["Dashboard", "Leads", "Pipeline", "Contacts", "Companies", "Activity", "Drag & Drop"],
-  "Google_Company Employee": ["Dashboard", "Leads", "Contacts", "Companies"],
+  "Google_Manager": ["Dashboard", "Leads", "Pipeline", "Companies", "Activity", "Drag & Drop"],
+  "Google_Company Employee": ["Dashboard", "Leads", "Companies"],
   // Microsoft
-  "Microsoft_Manager": ["Dashboard", "Leads", "Contacts", "Companies"],
-  "Microsoft_Company Employee": ["Dashboard", "Contacts", "Companies"],
+  "Microsoft_Manager": ["Dashboard", "Leads", "Companies"],
+  "Microsoft_Company Employee": ["Dashboard", "Companies"],
   // Apple
-  "Apple_Manager": ["Dashboard", "Leads", "Pipeline", "Contacts", "Companies", "Activity"],
+  "Apple_Manager": ["Dashboard", "Leads", "Pipeline", "Companies", "Activity"],
   "Apple_Company Employee": ["Dashboard", "Leads", "Companies"],
   // Amazon
-  "Amazon_Manager": ["Dashboard", "Leads", "Contacts", "Companies"],
+  "Amazon_Manager": ["Dashboard", "Leads", "Companies"],
   "Amazon_Company Employee": ["Dashboard", "Companies"]
 };
-
+//from here we can share data across all the inputs
 export const RoleProvider = ({ children }) => {
-  // Load and sync permissions
-  const [companyModules, setCompanyModulesState] = useState(() => {
-    const saved = localStorage.getItem("companyModules");
-    if (saved) return JSON.parse(saved);
-    localStorage.setItem("companyModules", JSON.stringify(defaultCompanyModules));
-    return defaultCompanyModules;
-  });
-
-  const [rolePermissions, setRolePermissionsState] = useState(() => {
-    const saved = localStorage.getItem("rolePermissions");
-    if (saved) return JSON.parse(saved);
-    localStorage.setItem("rolePermissions", JSON.stringify(defaultRolePermissions));
-    return defaultRolePermissions;
-  });
-
-  // User details states
-  const [role, setRoleState] = useState(() => {
-    return localStorage.getItem("userRole") || "Super Admin";
-  });
-
-  const [company, setCompanyState] = useState(() => {
-    return localStorage.getItem("userCompany") || "Google";
-  });
-
-  const [profile, setProfileState] = useState(() => {
-    const saved = localStorage.getItem("userProfile");
-    if (saved) return JSON.parse(saved);
-    
-    // Default initial profile
-    const initialProfile = {
-      name: "Master Admin",
-      email: "admin@crm.com",
-      phone: "+1 (555) 019-0000",
-      avatar: "",
-      role: "Super Admin",
-      company: "All"
-    };
-    localStorage.setItem("userProfile", JSON.stringify(initialProfile));
-    return initialProfile;
+  //here we provide degault company module
+  const [companyModules, setCompanyModulesState] = useState(defaultCompanyModules);
+  const [rolePermissions, setRolePermissionsState] = useState(defaultRolePermissions);
+  const [role, setRoleState] = useState("");
+  const [company, setCompanyState] = useState("");
+  const [profile, setProfileState] = useState(null);
+  const [loading, setLoading] = useState(() => {
+    return !!localStorage.getItem("token");
   });
 
   // Sync role and profile updates
@@ -90,46 +59,31 @@ export const RoleProvider = ({ children }) => {
             company: res.data.user.company
           };
           setProfileState(updatedProfile);
-          localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
         }
       }
     } catch (err) {
-      console.error("Failed to sync persona switcher with database:", err);
+      console.error("Failed to sync personal+ switcher with database:", err);
     }
   };
 
-  const fetchProfileFromAPI = async () => {
+  const fetchPermissionsFromAPI = async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const res = await API.get("/users/profile");
+      const res = await API.get("/permissions");
       if (res.data && res.data.success) {
-        const userData = res.data.data;
-        setRoleState(userData.role);
-        setCompanyState(userData.company);
-        const updatedProfile = {
-          name: userData.name,
-          email: userData.email,
-          phone: userData.phone || "",
-          bio: userData.bio || "",
-          avatar: "",
-          role: userData.role,
-          company: userData.company
-        };
-        setProfileState(updatedProfile);
-        localStorage.setItem("userRole", userData.role);
-        localStorage.setItem("userCompany", userData.company);
-        localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+        const { companyModules: apiCompanyModules, rolePermissions: apiRolePermissions } = res.data;
+        setCompanyModulesState(apiCompanyModules);
+        setRolePermissionsState(apiRolePermissions);
       }
     } catch (err) {
-      console.warn("Failed to load profile from API:", err);
+      console.warn("Failed to load permissions from API:", err);
     }
   };
 
   // Sync role and profile updates
   const setRole = async (newRole) => {
     setRoleState(newRole);
-    localStorage.setItem("userRole", newRole);
     
     const updatedProfile = { ...profile, role: newRole };
     if (newRole === "Super Admin") {
@@ -142,7 +96,6 @@ export const RoleProvider = ({ children }) => {
       updatedProfile.email = `${newRole.toLowerCase().replace(" ", ".")}@${company.toLowerCase()}.com`;
     }
     setProfileState(updatedProfile);
-    localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
     
     window.dispatchEvent(new Event("roleChanged"));
     await syncPersonaToDB(newRole, company);
@@ -150,7 +103,6 @@ export const RoleProvider = ({ children }) => {
 
   const setCompany = async (newCompany) => {
     setCompanyState(newCompany);
-    localStorage.setItem("userCompany", newCompany);
     
     if (role !== "Super Admin") {
       const updatedProfile = { 
@@ -160,7 +112,6 @@ export const RoleProvider = ({ children }) => {
         email: `${role.toLowerCase().replace(" ", ".")}@${newCompany.toLowerCase()}.com`
       };
       setProfileState(updatedProfile);
-      localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
     }
     
     window.dispatchEvent(new Event("roleChanged"));
@@ -170,8 +121,6 @@ export const RoleProvider = ({ children }) => {
   const switchPersona = async (newRole, newCompany) => {
     setRoleState(newRole);
     setCompanyState(newCompany);
-    localStorage.setItem("userRole", newRole);
-    localStorage.setItem("userCompany", newCompany);
     
     const updatedProfile = {
       ...profile,
@@ -181,41 +130,69 @@ export const RoleProvider = ({ children }) => {
       email: newRole === "Super Admin" ? "admin@crm.com" : `${newRole.toLowerCase().replace(" ", ".")}@${newCompany.toLowerCase()}.com`
     };
     setProfileState(updatedProfile);
-    localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
     
     window.dispatchEvent(new Event("roleChanged"));
     await syncPersonaToDB(newRole, newCompany);
   };
 
-  const fetchPermissionsFromAPI = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    try {
-      const res = await API.get("/permissions");
-      if (res.data && res.data.success) {
-        const { companyModules: apiCompanyModules, rolePermissions: apiRolePermissions } = res.data;
-        setCompanyModulesState(apiCompanyModules);
-        setRolePermissionsState(apiRolePermissions);
-        localStorage.setItem("companyModules", JSON.stringify(apiCompanyModules));
-        localStorage.setItem("rolePermissions", JSON.stringify(apiRolePermissions));
-      }
-    } catch (err) {
-      console.warn("Failed to load permissions from API:", err);
-    }
-  };
-
+  // Consolidate mount initialization
   useEffect(() => {
-    fetchProfileFromAPI();
+    const initializeAuth = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      try {
+        // Fetch Profile
+        const profileRes = await API.get("/users/profile");
+        if (profileRes.data && profileRes.data.success) {
+          const userData = profileRes.data.data;
+          setRoleState(userData.role);
+          setCompanyState(userData.company || "Google");
+          setProfileState({
+            name: userData.name,
+            email: userData.email,
+            phone: userData.phone || "",
+            bio: userData.bio || "",
+            avatar: "",
+            role: userData.role,
+            company: userData.company || "Google"
+          });
+        }
+        
+        // Fetch Permissions
+        const permissionsRes = await API.get("/permissions");
+        if (permissionsRes.data && permissionsRes.data.success) {
+          const { companyModules: apiCompanyModules, rolePermissions: apiRolePermissions } = permissionsRes.data;
+          setCompanyModulesState(apiCompanyModules);
+          setRolePermissionsState(apiRolePermissions);
+        }
+      } catch (err) {
+        console.error("Initialization failed:", err);
+        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+          localStorage.removeItem("token");
+          window.location.href = "/";
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   useEffect(() => {
-    fetchPermissionsFromAPI();
+    // Re-fetch permissions if role or company switches post-load
+    const token = localStorage.getItem("token");
+    if (token && !loading) {
+      fetchPermissionsFromAPI();
+    }
   }, [role, company]);
 
   const updateProfile = async (updatedDetails) => {
     const updated = { ...profile, ...updatedDetails };
     setProfileState(updated);
-    localStorage.setItem("userProfile", JSON.stringify(updated));
 
     const token = localStorage.getItem("token");
     if (token) {
@@ -234,7 +211,6 @@ export const RoleProvider = ({ children }) => {
   const updateCompanyModules = async (compName, modules) => {
     const updated = { ...companyModules, [compName]: modules };
     setCompanyModulesState(updated);
-    localStorage.setItem("companyModules", JSON.stringify(updated));
     window.dispatchEvent(new Event("roleChanged"));
 
     const token = localStorage.getItem("token");
@@ -255,7 +231,6 @@ export const RoleProvider = ({ children }) => {
     const key = `${compName}_${roleName}`;
     const updated = { ...rolePermissions, [key]: modules };
     setRolePermissionsState(updated);
-    localStorage.setItem("rolePermissions", JSON.stringify(updated));
     window.dispatchEvent(new Event("roleChanged"));
 
     const token = localStorage.getItem("token");
@@ -271,6 +246,58 @@ export const RoleProvider = ({ children }) => {
       }
     }
   };
+
+  // Listen to other components changing role/profile
+  useEffect(() => {
+    const handleRoleChanged = () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      
+      const init = async () => {
+        try {
+          const profileRes = await API.get("/users/profile");
+          if (profileRes.data && profileRes.data.success) {
+            const userData = profileRes.data.data;
+            setRoleState(userData.role);
+            setCompanyState(userData.company || "Google");
+            setProfileState({
+              name: userData.name,
+              email: userData.email,
+              phone: userData.phone || "",
+              bio: userData.bio || "",
+              avatar: "",
+              role: userData.role,
+              company: userData.company || "Google"
+            });
+          }
+          const permissionsRes = await API.get("/permissions");
+          if (permissionsRes.data && permissionsRes.data.success) {
+            setCompanyModulesState(permissionsRes.data.companyModules);
+            setRolePermissionsState(permissionsRes.data.rolePermissions);
+          }
+        } catch (err) {
+          console.warn("Sync on role change failed:", err);
+        }
+      };
+      init();
+    };
+    window.addEventListener("roleChanged", handleRoleChanged);
+    return () => window.removeEventListener("roleChanged", handleRoleChanged);
+  }, [loading]);
+
+  if (loading) {
+    return (
+      <div className="loading-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div className="spinner" style={{ border: '4px solid rgba(0,0,0,0.1)', width: '36px', height: '36px', borderRadius: '50%', borderLeftColor: '#09f', animation: 'spin 1s linear infinite' }}></div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   // Helper flags
   const isSuperAdmin = role === "Super Admin";
@@ -294,6 +321,11 @@ export const RoleProvider = ({ children }) => {
       return true;
     }
 
+    // Audit Logs: only Super Admin (above) and Company Admin
+    if (path.includes("/audit-logs")) {
+      return isCompanyAdmin;
+    }
+
     // Only Super Admin and Company Admin can manage Users
     if (path.includes("/users")) {
       return isCompanyAdmin;
@@ -313,7 +345,6 @@ export const RoleProvider = ({ children }) => {
     if (path.includes("/dashboard")) requiredModule = "Dashboard";
     else if (path.includes("/leads")) requiredModule = "Leads";
     else if (path.includes("/pipeline")) requiredModule = "Pipeline";
-    else if (path.includes("/contacts")) requiredModule = "Contacts";
     else if (path.includes("/companies")) requiredModule = "Companies";
     else if (path.includes("/activity")) requiredModule = "Activity";
     else if (path.includes("/drag")) requiredModule = "Drag & Drop";
@@ -322,45 +353,24 @@ export const RoleProvider = ({ children }) => {
     if (!requiredModule) return true;
 
     // Check 1: Does the Company have this module enabled by Master Admin?
-    const allowedCompanyModules = companyModules[userCompany] || ["Dashboard", "Leads", "Pipeline", "Contacts", "Companies", "Activity", "Drag & Drop", "Permission"];
+    const allowedCompanyModules = companyModules[userCompany] || ["Dashboard", "Leads", "Pipeline", "Companies", "Activity", "Drag & Drop", "Permission"];
     if (!allowedCompanyModules.includes(requiredModule)) {
       return false;
     }
 
-    // Check 2: If Company Admin, they get full access to all company-enabled modules
+    //  If Company Admin, they get full access to all company-enabled modules
     if (isCompanyAdmin) {
       return true;
     }
 
-    // Check 3: For Manager and Employee, check the role-based settings for this company
+    //  For Manager and Employee, check the role-based settings for this company
     const roleKey = `${userCompany}_${role}`;
     const allowedRoleModules = rolePermissions[roleKey] || (role === "Manager" 
-      ? ["Dashboard", "Leads", "Pipeline", "Contacts", "Companies", "Activity", "Drag & Drop"]
-      : ["Dashboard", "Leads", "Contacts", "Companies"]);
+      ? ["Dashboard", "Leads", "Pipeline", "Companies", "Activity", "Drag & Drop"]
+      : ["Dashboard", "Leads", "Companies"]);
     return allowedRoleModules.includes(requiredModule);
   };
 
-  // Listen to other components changing role/profile
-  useEffect(() => {
-    const handleRoleChanged = () => {
-      setRoleState(localStorage.getItem("userRole") || "Super Admin");
-      setCompanyState(localStorage.getItem("userCompany") || "Google");
-      const savedProfile = localStorage.getItem("userProfile");
-      if (savedProfile) {
-        setProfileState(JSON.parse(savedProfile));
-      }
-      const savedCompMods = localStorage.getItem("companyModules");
-      if (savedCompMods) {
-        setCompanyModulesState(JSON.parse(savedCompMods));
-      }
-      const savedRolePerms = localStorage.getItem("rolePermissions");
-      if (savedRolePerms) {
-        setRolePermissionsState(JSON.parse(savedRolePerms));
-      }
-    };
-    window.addEventListener("roleChanged", handleRoleChanged);
-    return () => window.removeEventListener("roleChanged", handleRoleChanged);
-  }, []);
 
   return (
     <RoleContext.Provider

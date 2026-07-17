@@ -20,7 +20,6 @@ const ALL_MODULE_METADATA = [
   { id: "Dashboard", label: "Dashboard", path: "/dashboard" },
   { id: "Leads", label: "Leads", path: "/leads" },
   { id: "Pipeline", label: "Pipeline", path: "/pipeline" },
-  { id: "Contacts", label: "Contacts", path: "/contacts" },
   { id: "Activity", label: "Activity", path: "/activity" },
   { id: "Drag & Drop", label: "Drag & Drop", path: "/drag" },
   { id: "Permission", label: "Permission", path: "/permission" }

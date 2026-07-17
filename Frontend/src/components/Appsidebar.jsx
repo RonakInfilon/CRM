@@ -34,25 +34,10 @@ function AppsideBar({ isOpen, onMouseEnter, onMouseLeave }) {
       icon: <PieChartIcon />,
     },
     {
-      name: "Contacts",
-      path: "/contacts",
-      icon: <UserCircleIcon />,
-    },
-    {
       name: "Companies",
       path: "/companies",
       icon: <GroupIcon />,
     },
-    // {
-    //   name: "Activity",
-    //   path: "/activity",
-    //   icon: <CalenderIcon />,
-    // },
-    // {
-    //   name: "Drag & Drop",
-    //   path: "/drag",
-    //   icon: <TaskIcon />,
-    // },
     {
       name: "Manage Users",
       path: "/users",
@@ -62,6 +47,16 @@ function AppsideBar({ isOpen, onMouseEnter, onMouseLeave }) {
       name: "Permissions",
       path: "/permission",
       icon: <LockIcon />,
+    },
+    {
+      name: "Audit Logs",
+      path: "/audit-logs",
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      ),
     },
     {
       name: "Profile",

@@ -131,7 +131,7 @@ const Pipeline = () => {
       lostReason = window.prompt(
         `Moving "${deal.dealName}" to Lost.\nPlease enter the reason for losing this deal:`
       );
-      if (lostReason === null) return; 
+      if (lostReason === null) return;
       if (!lostReason.trim()) {
         alert("Lost reason cannot be empty.");
         return;
@@ -142,7 +142,6 @@ const Pipeline = () => {
     setDeals((prev) => {
       // Remove the deal from the list
       const newDeals = prev.filter((d) => String(d.id) !== String(draggableId));
-      
       // Update its stage
       const updatedDeal = {
         ...deal,
@@ -245,7 +244,8 @@ const Pipeline = () => {
                   <Droppable droppableId={stage.id}>
                     {(provided, snapshot) => (
                       <div
-                        className={`column-body ${snapshot.isDraggingOver ? "dragging-over" : ""
+                        className={`column-body ${snapshot.
+                          isDraggingOver ? "dragging-over" : ""
                           }`}
                         ref={provided.innerRef}
                         {...provided.droppableProps}
@@ -258,8 +258,7 @@ const Pipeline = () => {
                           >
                             {(provided, snapshot) => (
                               <div
-                                className={`deal-card ${snapshot.isDragging ? "dragging" : ""
-                                  }`}
+                                className={`deal-card ${snapshot.isDragging ? "dragging" : ""}`}
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}

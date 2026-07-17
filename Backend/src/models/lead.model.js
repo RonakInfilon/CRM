@@ -1,10 +1,7 @@
 const pool = require("../config/database");
 
 
-// l.lead_id AS LeadID,
-// c.first_name AS FirstName,
-// c.last_name AS LastName,
-// o.name AS Organization,
+
 // l.status AS Status,
 const createLead = async (leadData) => {
   const connection = await pool.getConnection();

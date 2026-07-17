@@ -6,7 +6,6 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Leads from "./pages/Leads";
 import DashboardLayout from "./components/DashboardLayout";
-import Contacts from "./pages/Contacts";
 import Pipeline from "./pages/Pipeline";
 import Notes from "./pages/Activity";
 import ActivityLog from "./components/ActivityLog";
@@ -15,7 +14,8 @@ import RoleGuard from "./components/RoleGuard";
 import Permission from "./pages/Permission";
 import Profile from "./pages/Profile";
 import Users from "./pages/Users";
-import Company from "./pages/Company"
+import Company from "./pages/Company";
+import AuditLogs from "./pages/AuditLogs";
 function App() {
   return (
     <RoleProvider>
@@ -49,7 +49,6 @@ function App() {
                 </RoleGuard>
               }
             />
-            <Route path="/contacts" element={<Contacts />} />
             <Route
               path="/pipeline"
               element={
@@ -84,6 +83,15 @@ function App() {
               }
             />
             <Route path="/profile" element={<Profile />} />
+
+            <Route
+              path="/audit-logs"
+              element={
+                <RoleGuard>
+                  <AuditLogs />
+                </RoleGuard>
+              }
+            />
 
           </Route>
         </Routes>

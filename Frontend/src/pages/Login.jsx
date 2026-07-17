@@ -39,13 +39,6 @@ export default function Login() {
       // 1. Store auth token
       localStorage.setItem("token", response.data.token);
 
-      // 2. Store profile and role metadata for RoleContext.jsx to pick up
-      if (response.data.user) {
-        localStorage.setItem("userRole", response.data.user.role);
-        localStorage.setItem("userCompany", response.data.user.company);
-        localStorage.setItem("userProfile", JSON.stringify(response.data.user));
-      }
-
       window.location.href = "/dashboard";
 
 
